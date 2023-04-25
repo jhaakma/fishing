@@ -1,0 +1,28 @@
+[package]
+name = "Fishing"
+#description =
+#homepage =
+#repository =
+authors = [ "Merlord",]
+version = "0.0.1"
+
+[dependencies]
+assets = []
+
+[dependencies.mwse]
+buildnumber = 3066
+
+[dependencies.mge-xe]
+version = ">=0.15.0"
+
+[tools.mwse]
+lua-mod = "Fishing"
+
+[dependencies.mods."Skills Module"]
+mwse-module = "OtherSkills"
+url = "https://www.nexusmods.com/morrowind/mods/46034?tab=files"
+
+[dependencies.mods."The Crafting Framework"]
+mwse-module = "CraftingFramework"
+version = "^1.7.4"
+url = "https://www.nexusmods.com/morrowind/mods/51009?tab=files"
