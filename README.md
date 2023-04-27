@@ -28,11 +28,12 @@ A Fishing mod for Morrowind
 | Dwemer Fishing Rod   | With it's dwemer metal fishing line, this rod is capable of fishing in lava pools.                           |
 
 ## Bait/lures
-| Name            | Crafting Components  | Description                                                                                     |
-| --------------  | -------------------- | ----------------------------------------------------------------------------------------------- |
-| Crab bait       | Crab meat            | This bait is especially effective at luring the fish found in the swamps of the Bitter Coast.   |
-| Scaley lure     | Slaughterfish scales | This lure reflects sunlight, making it most effective during the day.                           |
-| Plume lure      | Racer plumes         | This lure spins in the water, mimicking the movement of small fish.                             |
-| Glowing bait    | Glowbugs             | This lure glow in the dark, making it very effective at night time.                             |
-| Jelly bait      | Scrib jelly          | The smell of this bait is particularly attractive to lake and river dwelling fish.              |
-| Iridescent lure | Pearls               | This lure is very shiny, making it most effective during the day.                               |
+| Name            | Crafting Components  | Description                                                                                                     |
+| --------------  | -------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Crab bait       | Crab meat            | This bait is especially effective at luring the fish found in the swamps.                                       |
+| Scaley lure     | Slaughterfish scales | This lure reflects sunlight, making it most effective during the day.                                           |
+| Spinner         | Racer plumes         | This lure spins in the water, making it very effective at attracting freshwater fish in lakes and rivers.       |
+| Glowing bait    | Glowbugs             | This lure glow in the dark, making it very effective at night time.                                             |
+| Jelly bait      | Scrib jelly          | The smell of this bait allows it to attract fish even in the murky, ash-ridden waters of Vvardenfell.           |
+| Iridescent lure | Pearls               | This lure is very shiny, making it most effective during the day.                                               |
+
