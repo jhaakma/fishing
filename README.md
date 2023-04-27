@@ -29,7 +29,7 @@ A Fishing mod for Morrowind
 
 ## Bait/lures
 | Name            | Crafting Components  | Description                                                                                     |
-| --------------  | ---------------------------------------------------------------------------------------------------------------------- |
+| --------------  | -------------------- | ----------------------------------------------------------------------------------------------- |
 | Crab bait       | Crab meat            | This bait is especially effective at luring the fish found in the swamps of the Bitter Coast.   |
 | Scaley lure     | Slaughterfish scales | This lure reflects sunlight, making it most effective during the day.                           |
 | Plume lure      | Racer plumes         | This lure spins in the water, mimicking the movement of small fish.                             |
