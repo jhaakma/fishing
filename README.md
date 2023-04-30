@@ -1,16 +1,14 @@
 # Fishing
 A Fishing mod for Morrowind
 
-## Implemented
-- Casting
-- Fish trail
-
 ## To do
-- Custom ripple animation
-- Fish and meat models
+- Casting - DONE
+- Fish trail - DONE
+- Custom ripple animation - DONE
+- Fish and meat models - DONE
 - Fillet mechanic
 - Animate fishing line
-- Catch preview
+- Catch preview - DONE
 - Fishing rods
 - Fishing lure/bait
 - Fishing skill
