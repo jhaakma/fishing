@@ -14,7 +14,9 @@ A Fishing mod for Morrowind
 - Fishing skill
 - Convert vanilla fishing rods to weapon
 - Fishing "hotspots"
-
+- Niches - depth
+- Integrate fish speed
+- "Quality" fish variants
 
 ## Fishing Rods
 | Name                 | Description                                                                                                  |
