@@ -52,7 +52,7 @@ jobs:
         uses: edgarrc/action-7z@v1
         with:
           args: 7z a  ${{env.ARCHIVE_NAME}}.7z "Data Files"
-
+      
       - name: Create release
          env:
            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
