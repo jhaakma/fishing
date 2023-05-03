@@ -7,6 +7,23 @@ config.fishingRods = {
         quality = 0.25
     }
 }
+---@class Fishing.config.constants
+config.constants = {
+    --How many times to try to find a valid position for a fish startPosition
+    FISH_POSITION_ATTEMPTS = 50,
+    --Minimum distance from lure to fish start position
+    FISH_POSITION_DISTANCE_MIN = 500,
+    --Maximum distance from lure to fish start position
+    FISH_POSITION_DISTANCE_MAX = 1000,
+    --The interval between ripples when a fish is moving
+    FISH_RIPPLE_INTERVAL = 0.05,
+    --Fish Speed
+    FISH_SPEED = 75,
+}
+
+
+
+
 ---@type CraftingFramework.Recipe.data[]
 config.bushcraftingRecipes = {
     {

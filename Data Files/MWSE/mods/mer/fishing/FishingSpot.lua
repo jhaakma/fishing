@@ -3,7 +3,7 @@
     a valid spot for fishing, by performing ray tests to check for
     unobstructed water with an appropriate depth.
 ]]
-local common = require("mer.Fishing.common")
+local common = require("mer.fishing.common")
 local logger = common.createLogger("FishingSpot")
 
 ---@class Fishing.FishingSpot
@@ -68,18 +68,20 @@ local function checkForWater(castStrength)
         ignore = { tes3.player },
     }
     if not result then
-        logger:warn("Hit nothing below player")
+        logger:warn("Hit nothing below")
         return false, "You can not fish here."
     end
     --check that intersection is underwater
     local waterLevel = tes3.player.cell.waterLevel
     if not waterLevel then return false end
+
     if result.intersection.z > waterLevel then
         logger:warn("Hit %s above water", result.reference)
         return false, "You can not fish here."
     end
+    local depth = waterLevel - result.intersection.z
     --check that water is deep enough
-    if result.intersection.z > waterLevel - MINIMUM_DEPTH then
+    if depth < MINIMUM_DEPTH then
         logger:warn("Water is not deep enough")
         return "The water is not deep enough."
     end
@@ -102,6 +104,26 @@ function FishingSpot.check(castStrength)
     return true, nil
 end
 
+function FishingSpot.getDepth(position)
+    logger:debug("Getting depth at %s", position)
+    local INT_MAX = 0x7FFFFFFF
+    local result = tes3.rayTest{
+        position = position,
+        direction = tes3vector3.new(0,0,-1),
+        ignore = { tes3.player },
+    }
+    if not result then
+        logger:warn("Hit nothing below")
+        return INT_MAX
+    end
+    local waterLevel = tes3.player.cell.waterLevel
+    if not waterLevel then
+        logger:warn("No water level")
+        return INT_MAX
+    end
+    return waterLevel - result.intersection.z
+end
+
 function FishingSpot.getLurePosition(castStrength)
     local playerPosition = tes3.getPlayerEyePosition()
     local startPosition = playerPosition + getOrientation() * getDistanceAhead(castStrength)
@@ -112,7 +134,7 @@ function FishingSpot.getLurePosition(castStrength)
         ignore = { tes3.player },
     }
     if (not result) or (not result.intersection) then
-        logger:warn("Hit nothing below player")
+        logger:warn("Hit nothing below")
         return nil
     end
 

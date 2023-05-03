@@ -1,6 +1,6 @@
-local common = require("mer.Fishing.common")
+local common = require("mer.fishing.common")
 local logger = common.createLogger("FishingStateManager")
-local config = require("mer.Fishing.config")
+local config = require("mer.fishing.config")
 
 ---@class Fishing.FishingStateManager
 local FishingStateManager = {}
@@ -20,54 +20,18 @@ local FishingStateManager = {}
 ---| "IDLE" #Idle state, not fishing
 ---| "CASTING" #Casting state
 ---| "WAITING" #Waiting state
----| "BITING" #Biting state
+---| "CHASING" #Chasing state - Fish is spawned and moving towards the lure
+---| "BITING" #Biting state - Fish is biting the lure
 ---| "REELING" #Reeling state
-
----@type table<Fishing.fishingState, table<Fishing.FishingAction.type, Fishing.fishingState>>
-local STATES = {
-    IDLE = {
-        cast = "CASTING",
-    },
-    CASTING = {
-        castFinish = "WAITING",
-        castCancel = "IDLE",
-    },
-    WAITING = {
-        reel = "IDLE",
-        fishBite = "BITING",
-    },
-    BITING = {
-        reel = "REELING",
-        biteFinish = "WAITING",
-    },
-    REELING = {
-        fishEscape = "IDLE",
-        fishCaught = "IDLE",
-    },
-}
-
----Change state based on the current state
----@param action Fishing.FishingAction.type
-function FishingStateManager.performAction(action)
-    local currentState = config.persistent.fishingState or "IDLE"
-    local nextState = STATES[currentState][action]
-    if nextState then
-        config.persistent.fishingState = nextState
-        logger:debug("State changed from %s to %s", currentState, nextState)
-    else
-        logger:debug("No state change for action %s in state %s", action, currentState)
-    end
-end
+---| "CATCHING" #The interval between snagging and showing the caught fish
+---| "BLOCKED" #Blocked state - No action can be taken
 
 --set state
 ---comment
 ---@param state Fishing.fishingState
 function FishingStateManager.setState(state)
+    logger:debug("Setting state: %s", state)
     config.persistent.fishingState = state
-end
-
-function FishingStateManager.resetState()
-    config.persistent.fishingState = "IDLE"
 end
 
 function FishingStateManager.isState(state)

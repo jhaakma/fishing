@@ -1,25 +1,19 @@
 local common = require ("mer.Fishing.common")
 local logger = common.createLogger("fishing")
-local FishingStateManager = require("mer.Fishing.FishingStateManager")
-local FishingRod = require("mer.Fishing.FishingRod")
+local FishingStateManager = require("mer.fishing.FishingStateManager")
+local FishingService = require("mer.fishing.FishingService")
+local FishingRod = require("mer.fishing.FishingRod")
 
-local function getFishingRod()
-    local weaponStack = tes3.getEquippedItem{
-        actor = tes3.player,
-        objectType = tes3.objectType.weapon,
-    }
-    return FishingRod.new(weaponStack)
-end
 
 ---Cast line if player attacks with a fishing rod
 ---@param e attackEventData
-event.register("attack", function(e)
+event.register("attackHit", function(e)
     if e.reference ~= tes3.player then return end
     logger:debug("Swing strength = %s",tes3.player.mobile.actionData.attackSwing)
-    local fishingRod = getFishingRod()
+    local fishingRod = FishingRod.new()
     if fishingRod then
         logger:debug("Player released attack with fishing rod")
-        fishingRod:release()
+        FishingService.release()
     end
 end)
 
@@ -34,14 +28,11 @@ end)
 
 ---Event if activate is mapped to mouse
 ---@param e mouseButtonUpEventData
-event.register("mouseButtonUp", function(e)
+event.register("mouseButtonDown", function(e)
     if not tes3.player then return end
+    if tes3ui.menuMode() then return end
     if e.button == 0 then
-        local fishingRod = getFishingRod()
-        if fishingRod then
-            logger:debug("Player started attack with fishing rod")
-            fishingRod:startSwing()
-        end
+        FishingService.startSwing()
     end
 end)
 
@@ -66,7 +57,7 @@ end, { priority = 500})
 
 
 local function generateBiteInterval()
-    return math.random(4, 10)
+    return math.random(3, 7)
 end
 
 
@@ -81,10 +72,7 @@ event.register("loaded", function()
             iterations = 1,
             callback = function()
                 logger:debug("Fish bite timer finished")
-                local fishingRod = getFishingRod()
-                if fishingRod then
-                    fishingRod:fishBite()
-                end
+                FishingService.triggerFish()
                 startFishBiteTimer(generateBiteInterval())
             end
         }
@@ -96,19 +84,27 @@ event.register("loaded", function()
 
     if state ~= "IDLE" then
         logger:debug("Loaded while fishing - cancel")
-        local fishingRod = getFishingRod()
-        if fishingRod then
-            fishingRod:endFishing()
-        end
+        FishingService.endFishing()
     end
 end)
 
+local blockMove = false
+local function dontMove(e)
+    if blockMove then
+        if e.reference == tes3.player then
+            if not FishingStateManager.isState("IDLE") then
+                e.speed = 1e-5
+            end
+        end
+    end
+end
+event.register(tes3.event.calcMoveSpeed, dontMove, { priority = -10000})
 
--- local function dontMove(e)
---     if e.reference == tes3.player then
---         if not FishingStateManager.isState("IDLE") then
---             e.speed = 1e-5
---         end
---     end
--- end
--- event.register(tes3.event.calcMoveSpeed, dontMove)
+local function dontActivate(e)
+    if e.activator == tes3.player then
+        if not FishingStateManager.isState("IDLE") then
+            return false
+        end
+    end
+end
+--event.register(tes3.event.activate, dontActivate, { priority = 10000})
