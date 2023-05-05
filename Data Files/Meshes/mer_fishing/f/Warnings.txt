@@ -1,0 +1,8 @@
+TES3Stream Warning: Model "C:\games\Morrowind installs\main\Morrowind\Data Files\Meshes\mer_fishing\f\netch_larva.nif" tex not found "tx_creature_netch_betty_01.dds"!
+TES3Stream Warning: Model "C:\games\Morrowind installs\main\Morrowind\Data Files\Meshes\mer_fishing\f\netch_larva.nif" tex not found "textures\mer_fishing\md_netchlarva_g.dds"!
+Texture Load Error!: tx_creature_netch_betty_01.dds
+Texture Load Error!: textures\mer_fishing\md_netchlarva_g.dds
+TES3Stream Warning: Model "C:\games\Morrowind installs\main\Morrowind\Data Files\Meshes\mer_fishing\f\netch_larva_gnd.nif" tex not found "tx_creature_netch_betty_01.dds"!
+TES3Stream Warning: Model "C:\games\Morrowind installs\main\Morrowind\Data Files\Meshes\mer_fishing\f\netch_larva_gnd.nif" tex not found "textures\mer_fishing\md_netchlarva_g.dds"!
+Texture Load Error!: tx_creature_netch_betty_01.dds
+Texture Load Error!: textures\mer_fishing\md_netchlarva_g.dds

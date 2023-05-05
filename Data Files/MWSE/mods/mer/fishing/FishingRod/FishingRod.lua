@@ -2,6 +2,7 @@ local common = require("mer.fishing.common")
 local logger = common.createLogger("FishingRod")
 local config = require("mer.fishing.config")
 
+
 ---@class Fishing.FishingRod
 local FishingRod = {}
 
@@ -28,6 +29,29 @@ function FishingRod.new(weaponStack)
     self.weaponStack = weaponStack
     self.config = config
     return self
+end
+
+function FishingRod.isEquipped()
+    local weaponStack = tes3.getEquippedItem{
+        actor = tes3.player,
+        objectType = tes3.objectType.weapon
+    }
+    return FishingRod.getConfig(weaponStack) ~= nil
+end
+
+function FishingRod.getPoleEndPosition()
+    local ref = tes3.is3rdPerson() and tes3.player or tes3.player1stPerson
+    local attachNode = ref.sceneNode:getObjectByName("AttachFishingLine")--[[@as niNode]]
+    return attachNode.worldTransform.translation
+end
+
+function FishingRod.playCastSound(castStrength)
+    local pitch = math.remap(castStrength, 0, 1, 2.0, 1.0)
+    logger:debug("Playing cast sound with pitch %s", pitch)
+    tes3.playSound{
+        soundPath = "mer_fishing\\fishing line.wav",
+        pitch = pitch
+    }
 end
 
 return FishingRod

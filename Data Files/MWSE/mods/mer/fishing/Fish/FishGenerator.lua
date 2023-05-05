@@ -43,9 +43,6 @@ function FishGenerator.generate(e)
         logger:warn("No valid fish types available")
         return nil
     end
-
-    logger:debug("Fish stats: \n- weight: %s\n- value: %s\n- speed: %s",
-        instance.weight, instance.value, instance.speed)
     return instance
 end
 

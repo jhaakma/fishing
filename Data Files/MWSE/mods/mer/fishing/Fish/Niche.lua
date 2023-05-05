@@ -9,9 +9,9 @@ local logger = common.createLogger("Niche")
 ---| '"night"' #The fish is active during the night
 
 ---@class Fishing.FishType.Niche
----@field regions? string[] The regions where the fish can be found. If undefined, the fish can be found everywhere.
+---@field regions? string[] The regions where the fish can be found. If undefined, the fish can be found everywhere. Not checked when in interior cells
 ---@field times? Fishing.FishType.Niche.Time[] What times of day the fish is active. If undefined, the fish is always active.
----@field interiors? boolean `default: true` Whether the fish can be found in interiors. If undefined, the fish can be found in interiors.
+---@field interiors? boolean `default: false` Whether the fish can be found in interiors. If undefined, the fish can not be found in interiors.
 ---@field exteriors? boolean `default: true` Whether the fish can be found in exteriors. If undefined, the fish can be found in exteriors.
 ---@field minDepth? number `default: 0` The minimum depth the fish can be found at.
 ---@field maxDepth? number The maximum depth the fish can be found at. If undefined, max depth is infinite.
@@ -22,9 +22,20 @@ function Niche.new(o)
     logger:trace("Creating niche: %s", require("inspect").inspect(o))
     local self = setmetatable({}, { __index = Niche })
     if not o then return self end
-    self.regions = o.regions
+    if o.regions then
+        self.regions = {}
+        for _, region in ipairs(o.regions) do
+            logger:trace("Region: %s", region)
+            table.insert(self.regions, region:lower())
+        end
+    end
     self.times = o.times
-    self.interiors = o.interiors ~= false
+    --interiors false by default
+    if o.interiors ~= nil then
+        self.interiors = o.interiors
+    else
+        self.interiors = false
+    end
     self.exteriors = o.exteriors ~= false
     self.minDepth = o.minDepth or 0
     self.maxDepth = o.maxDepth
@@ -32,13 +43,18 @@ function Niche.new(o)
 end
 
 function Niche:isInRegion()
+    local currentRegion = tes3.player.cell.region
     if not self.regions then
         logger:trace("No regions defined, fish are everywhere")
         -- If undefined, fish are everywhere
         return true
     end
+    if not currentRegion then
+        logger:trace("Cell has no region, return true")
+        return true
+    end
 
-    local regionId = tes3.player.cell.region.id:lower()
+    local regionId = currentRegion.id:lower()
     logger:trace("Checking if in region %s", regionId)
     for _, region in ipairs(self.regions) do
         if region == regionId then

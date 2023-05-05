@@ -1,8 +1,9 @@
 local common = require("mer.fishing.common")
 local logger = common.createLogger("LineManager")
 local FishingLine = require("mer.fishing.FishingLine.FishingLine")
-local FishingStateManager = require("mer.fishing.FishingStateManager")
+local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 
+---@class Fishing.LineManager
 local LineManager = {}
 
 function LineManager.attachLines(lure)
