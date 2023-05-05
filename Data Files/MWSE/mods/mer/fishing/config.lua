@@ -12,7 +12,7 @@ config.constants = {
     --How many times to try to find a valid position for a fish startPosition
     FISH_POSITION_ATTEMPTS = 50,
     --Minimum distance from lure to fish start position
-    FISH_POSITION_DISTANCE_MIN = 500,
+    FISH_POSITION_DISTANCE_MIN = 300,
     --Maximum distance from lure to fish start position
     FISH_POSITION_DISTANCE_MAX = 1000,
     --The interval between ripples when a fish is moving
@@ -21,22 +21,6 @@ config.constants = {
     FISH_SPEED = 75,
 }
 
-
-
-
----@type CraftingFramework.Recipe.data[]
-config.bushcraftingRecipes = {
-    {
-        id = "Fishing:mer_fishing_pole_01",
-        craftableId = "mer_fishing_pole_01",
-        description = "A simple wooden fishing pole.",
-        materials = {
-            { material = "wood", count = 2 },
-            { material = "fibre", count = 6 },
-            { material = "resin", count = 1 }
-        }
-    }
-}
 
 ---@class Fishing.config.persistent
 local persistentDefault = {

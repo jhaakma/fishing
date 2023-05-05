@@ -32,7 +32,7 @@ end
 function RippleGenerator.generateRipple(params)
     local ripple = tes3.getObject("mer_ripple") --[[@as tes3activator]]
     local function makeRipple()
-        logger:debug("making ripple at %s", params.position)
+        logger:debug("making ripple at %s, size %s", params.position, params.scale)
         local vfx = tes3.createVisualEffect({
             object = ripple,
             position = tes3vector3.new(

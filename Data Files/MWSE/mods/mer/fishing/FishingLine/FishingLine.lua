@@ -40,20 +40,33 @@ function FishingLine:remove()
     self.curveData = nil
 end
 
-function FishingLine:updateTension(to, duration)
+--[[
+    Gradually change tension over a given duration
+]]
+function FishingLine:lerpTension(to, duration)
+    local interval = 0.01
+    local iterations = math.floor(duration / interval)
+
     local from = self.tension or 0
-    local diff = to - from
-    local step = diff / 100
-    local timer = timer.start{
-        duration = duration / 100,
-        iterations = 100,
-        callback = function()
-            self.tension = self.tension + step
-            mwse.log("new tension : %s", self.tension)
-            self:updateEndPoint(self.sceneNode.children[1].worldTransform.translation)
+    local totalChange = to - from
+    local delta = totalChange / iterations
+    timer.start{
+        duration = interval,
+        iterations = iterations,
+        callback = function(e)
+            if self.sceneNode then
+                self.tension = self.tension + delta
+                self:updateEndPoint(self.sceneNode.children[1].worldTransform.translation)
+            end
         end
     }
 end
+
+function FishingLine:setTension(tension)
+    self.tension = tension
+    self:updateEndPoint(self.sceneNode.children[1].worldTransform.translation)
+end
+
 
 --- Update the fishing line's end point and tension.
 ---

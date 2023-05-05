@@ -1,8 +1,8 @@
 local common = require ("mer.Fishing.common")
 local logger = common.createLogger("fishing")
-local FishingStateManager = require("mer.fishing.FishingStateManager")
-local FishingService = require("mer.fishing.FishingService")
-local FishingRod = require("mer.fishing.FishingRod")
+local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
+local FishingService = require("mer.fishing.Fishing.FishingService")
+local FishingRod = require("mer.fishing.FishingRod.FishingRod")
 
 
 ---Cast line if player attacks with a fishing rod
@@ -100,11 +100,44 @@ local function dontMove(e)
 end
 event.register(tes3.event.calcMoveSpeed, dontMove, { priority = -10000})
 
+local blockActivate = true
 local function dontActivate(e)
-    if e.activator == tes3.player then
-        if not FishingStateManager.isState("IDLE") then
-            return false
+    if blockActivate then
+        if e.activator == tes3.player then
+            if not FishingStateManager.isState("IDLE") then
+                logger:debug("Blocking activate while fishing")
+                return false
+            end
         end
     end
 end
---event.register(tes3.event.activate, dontActivate, { priority = 10000})
+event.register(tes3.event.activate, dontActivate, { priority = 10000})
+
+local cancelInMenu = false
+event.register("menuEnter", function(e)
+    if cancelInMenu then
+        if not FishingStateManager.isState("IDLE") then
+            logger:debug("Menu opened while fishing - cancel")
+            FishingService.endFishing()
+        end
+    end
+end)
+
+event.register("equipped", function(e)
+    if not e.reference == tes3.player then return end
+    if not FishingRod.isEquipped() then
+        if not FishingStateManager.isState("IDLE") then
+            logger:debug("Unequipped fishing rod while fishing - cancel")
+            FishingService.endFishing()
+        end
+    end
+end)
+
+event.register("simulate", function()
+    if tes3.player.mobile.isSwimming then
+        if not FishingStateManager.isState("IDLE") then
+            logger:debug("Player started swimming while fishing - cancel")
+            FishingService.endFishing()
+        end
+    end
+end)

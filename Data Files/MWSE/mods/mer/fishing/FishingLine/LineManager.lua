@@ -1,8 +1,9 @@
 local common = require("mer.fishing.common")
 local logger = common.createLogger("LineManager")
 local FishingLine = require("mer.fishing.FishingLine.FishingLine")
-local FishingStateManager = require("mer.fishing.FishingStateManager")
+local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 
+---@class Fishing.LineManager
 local LineManager = {}
 
 function LineManager.attachLines(lure)
@@ -56,8 +57,8 @@ function LineManager.attachLines(lure)
         if FishingStateManager.isState("WAITING") then
             if not landed then
                 logger:debug("Lure has landed, transitioning tension")
-                fishingLine1st:updateTension(0.3, 0.75)
-                fishingLine3rd:updateTension(0.3, 0.75)
+                fishingLine1st:lerpTension(0.3, 0.75)
+                fishingLine3rd:lerpTension(0.3, 0.75)
                 landed = true
                 return
             end
@@ -67,5 +68,7 @@ function LineManager.attachLines(lure)
     end
     event.register("simulate", updateFishingLine)
 end
+
+
 
 return LineManager
