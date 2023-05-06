@@ -25,11 +25,26 @@ function FishInstance:getInstanceObject()
 end
 
 function FishInstance:getSplashSize()
-    return math.remap(self.fishType.size, 1.0, 5.0, 1.0, 6.0)
+    return math.remap(self.fishType.size, 1.0, 5.0, 1.0, 3.0)
 end
 
 function FishInstance:getRippleSize()
     return self.fishType.size
 end
+
+function FishInstance:getChaseSpeed()
+    local variance = math.random(80, 120) / 100
+    local speed =  self.fishType.speed * variance
+    logger:debug("getSpeed() speed: %s", speed)
+    return speed
+end
+
+function FishInstance:getReelSpeed()
+    local variance = math.random(80, 120) / 100
+    local speed =  self.fishType.speed * variance * 1.5
+    logger:debug("getSpeed() speed: %s", speed)
+    return speed
+end
+
 
 return FishInstance

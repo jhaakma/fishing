@@ -26,8 +26,32 @@ local FishingStateManager = {}
 ---| "CATCHING" #The interval between snagging and showing the caught fish
 ---| "BLOCKED" #Blocked state - No action can be taken
 
---set state
----comment
+---@class Fishing.TempData
+---@field activeFish Fishing.FishType.instance?
+---@field lureSafeRef mwseSafeObjectHandle?
+---@field fishingCastStrength number
+---@field fishingTension number?
+---@field fishingLine FishingLine?
+---@field previousWaveHeight number?
+
+
+---@return Fishing.TempData
+local function tempData()
+    if not tes3.player.tempData.fishing then
+        ---@type Fishing.TempData
+        tes3.player.tempData.fishing = {}
+    end
+    return tes3.player.tempData.fishing
+end
+
+
+--State
+
+---@return Fishing.fishingState
+function FishingStateManager.getCurrentState()
+    return config.persistent.fishingState or "IDLE"
+end
+
 ---@param state Fishing.fishingState
 function FishingStateManager.setState(state)
     logger:debug("Setting state: %s", state)
@@ -38,28 +62,24 @@ function FishingStateManager.isState(state)
     return FishingStateManager.getCurrentState() == state
 end
 
----@return Fishing.fishingState
-function FishingStateManager.getCurrentState()
-    return config.persistent.fishingState or "IDLE"
-end
 
 --Fish
+---@return Fishing.FishType.instance?
+function FishingStateManager.getCurrentFish()
+    return tempData().activeFish
+end
 
 ---@param fish Fishing.FishType.instance?
 function FishingStateManager.setActiveFish(fish)
-    tes3.player.tempData.mer_activeFish = fish
+    tempData().activeFish = fish
 end
 
----@return Fishing.FishType.instance?
-function FishingStateManager.getCurrentFish()
-    return tes3.player.tempData.mer_activeFish
-end
 
 --Lure
 
 ---@return tes3reference?
 function FishingStateManager.getLure()
-    local safeRef = tes3.player.tempData.mer_lureSafeRef
+    local safeRef = tempData().lureSafeRef
     if safeRef and safeRef:valid() then
         return safeRef:getObject()
     else
@@ -69,13 +89,12 @@ function FishingStateManager.getLure()
             return lure
         end
     end
-    logger:warn("Lure not found")
     return nil
 end
 
 ---@param lure tes3reference
 function FishingStateManager.setLure(lure)
-    tes3.player.tempData.mer_lureSafeRef = tes3.makeSafeObjectHandle(lure)
+    tempData().lureSafeRef = tes3.makeSafeObjectHandle(lure)
 end
 
 ---@return boolean did remove
@@ -84,7 +103,7 @@ function FishingStateManager.removeLure()
     local lure = FishingStateManager.getLure()
     if lure then
         lure:delete()
-        tes3.player.tempData.mer_lureSafeRef = nil
+        tempData().lureSafeRef = nil
         return true
     else
         logger:warn("Lure not found")
@@ -93,34 +112,85 @@ function FishingStateManager.removeLure()
 end
 
 --Cast
+
+---@return number
+function FishingStateManager.getCastStrength()
+    return tempData().fishingCastStrength
+end
+
 function FishingStateManager.setCastStrength()
-    tes3.player.tempData.fishingCastStrength = tes3.player.mobile.actionData.attackSwing
+    tempData().fishingCastStrength = tes3.player.mobile.actionData.attackSwing
     logger:debug("Cast strength: %s", tes3.player.mobile.actionData.attackSwing)
 end
 
-function FishingStateManager.getCastStrength()
-    return tes3.player.tempData.fishingCastStrength
+
+--Fishing Line
+---@return FishingLine|nil
+function FishingStateManager.getFishingLine()
+    return tempData().fishingLine
+end
+
+---@param line FishingLine|nil
+function FishingStateManager.setFishingLine(line)
+    tempData().fishingLine = line
 end
 
 
---Tension
-function FishingStateManager.setTension(tension)
-    tes3.player.tempData.mer_fishingTension = tension
+---Particle
+function FishingStateManager.getParticle()
+    return tempData().particle
 end
 
-function FishingStateManager.getTension()
-    return tes3.player.tempData.mer_fishingTension or 0
+function FishingStateManager.setParticle(particle)
+    tempData().particle = particle
+end
+
+---Wave height
+
+---@return number|nil
+function FishingStateManager.getPreviousWaveHeight()
+    return tempData().previousWaveHeight
+end
+
+---@param height number|nil
+function FishingStateManager.setPreviousWaveHeight(height)
+    tempData().previousWaveHeight = height
+end
+
+function FishingStateManager.getIgnoreRefs()
+    return {
+        FishingStateManager.getLure(),
+        tes3.player,
+        FishingStateManager.getParticle()
+    }
 end
 
 --Clear all data
 function FishingStateManager.clearData()
     logger:debug("Clearing fishing data")
-    tes3.player.tempData.mer_activeFish = nil
-    tes3.player.tempData.mer_lureSafeRef = nil
-    tes3.player.tempData.fishingCastStrength = nil
-    tes3.player.tempData.mer_fishingTension = nil
+    tempData().activeFish = nil
+    tempData().lureSafeRef = nil
+    tempData().fishingCastStrength = nil
+    tempData().fishingTension = nil
+    tempData().fishingLine = nil
+    tempData().previousWaveHeight = nil
 end
 
+function FishingStateManager.endFishing()
+    logger:debug("Cancelling fishing")
+    FishingStateManager.removeLure()
+    -- common.enablePlayerControls()
+    event.trigger("Fishing:UnclampWaves")
+    FishingStateManager.clearData()
+    --give time for waves to settle
+    FishingStateManager.setState("BLOCKED")
+    timer.start{
+        duration = 0.5,
+        callback = function()
+            FishingStateManager.setState("IDLE")
+        end
+    }
+end
 
 
 return FishingStateManager

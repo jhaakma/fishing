@@ -1,5 +1,6 @@
 local common = require("mer.fishing.common")
 local logger = common.createLogger("LineManager")
+local config = require("mer.fishing.config")
 local FishingLine = require("mer.fishing.FishingLine.FishingLine")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 
@@ -28,6 +29,7 @@ function LineManager.attachLines(lure)
         logger:debug("Cancelling fishing line")
         event.unregister("simulate", updateFishingLine)
         fishingLine:remove()
+        FishingStateManager.endFishing()
     end
 
     local lureAttachPoint = lure.sceneNode:getObjectByName("LureAttachFishingLine") --[[@as niNode]]
@@ -57,10 +59,15 @@ function LineManager.attachLines(lure)
             cancel()
             return
         end
+        if attachPosition:distance(tes3.player.position) > config.constants.FISHING_LINE_MAX_DISTANCE then
+            logger:debug("Player is too far away, stopping fishing line")
+            cancel()
+            return
+        end
         if FishingStateManager.isState("WAITING") then
             if not landed then
                 logger:debug("Lure has landed, transitioning tension")
-                fishingLine:updateTension(0.3, 0.75)
+                fishingLine:lerpTension(0.3, 0.75)
                 landed = true
                 return
             end
@@ -68,6 +75,7 @@ function LineManager.attachLines(lure)
         fishingLine:updateEndPoint(attachPosition:copy())
     end
     event.register("simulate", updateFishingLine)
+    return fishingLine
 end
 
 return LineManager

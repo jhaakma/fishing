@@ -68,11 +68,11 @@ end
 
 local function getCurrentTimeslot( )
     local hour = tes3.worldController.hour.value
-    if hour >= 5 and hour < 7 then
+    if hour >= 4 and hour < 8 then
         return "dawn"
     elseif hour >= 7 and hour < 17 then
         return "day"
-    elseif hour >= 17 and hour < 19 then
+    elseif hour >= 16 and hour < 20 then
         return "dusk"
     else
         return "night"

@@ -106,7 +106,7 @@ local commonFish = {
         description = "The triggerfish is a small tropical fish commonly found in the waters of Azura's Coast. They are known for their aggressive behavior and sharp teeth.",
         speed = 250,
         size = 1.0,
-        difficulty = 40,
+        difficulty = 30,
         niche = {
             regions = {
                 "Azura's Coast Region",
@@ -126,7 +126,7 @@ local uncommonFish = {
         description = "The tambaqui is a large tropical fish found along the eastern coast of Vvardenfell.",
         speed = 100,
         size = 2.2,
-        difficulty = 10,
+        difficulty = 40,
         niche = {
             regions = {
                 "Grazelands Region",
@@ -148,7 +148,7 @@ local uncommonFish = {
         description = "Arowana, also known as bony tongues, are an uncommon fish found along the coast of the West Gash. They tend to feed only during the day",
         speed = 130,
         size = 1.3,
-        difficulty = 10,
+        difficulty = 40,
         niche = {
             regions = {
                 "West Gash Region",
@@ -171,7 +171,7 @@ local uncommonFish = {
         description = "The Discus is an uncommon, colorful fish found in the warmer regions of Morrowind.",
         speed = 160,
         size = 1.0,
-        difficulty = 10,
+        difficulty = 40,
         niche = {
             regions = {
                 "Ascadian Isles Region",
@@ -195,7 +195,7 @@ local rareFish = {
         description = "The Jelly Netch is the larval form of Netch. They can be found in the deep waters in the Ascadian Isles at night.",
         speed = 60,
         size = 1.2,
-        difficulty = 10,
+        difficulty = 20,
         niche = {
             regions = {
                 "Ascadian Isles Region",
@@ -209,25 +209,18 @@ local rareFish = {
     {
         baseId = "mer_fish_copperscale",
         previewMesh = "mer_fishing\\f\\copper.nif",
-        description = "The Copperscale is very rare, found only in the hottest regions of Vvardenfell, both above and below ground. It's meat is tough and chewy, but its scales can be used to make a powerful potion of fire resistance.",
+        description = "The Copperscale is found only in the Ascadian Isles. It's meat is tough and chewy, but its scales are highly sought after.",
         speed = 180,
         size = 2.2,
-        difficulty = 40,
+        difficulty = 50,
         niche = {
             interiors = true,
             exterios = true,
             regions = {
-                "Molag Mar Region",
-                "Ashlands Region",
-                "Red Mountain Region"
+                "Ascadian Isles Region",
             }
         },
         harvestables = {
-            {
-                id = "mer_meat_copperscale",
-                min = 1,
-                max = 2,
-            },
             {
                 id = "mer_ignred_copperscales",
                 min = 2,
@@ -241,7 +234,7 @@ local rareFish = {
         description = "The Marrowfish is a strange creature with bulging eyes and an oily red body. This rare fish can only be found in caves, and it's meat has powerful alchemical properties.",
         speed = 150,
         size = 1.4,
-        difficulty = 50,
+        difficulty = 60,
         niche = {
             interiors = true,
             exteriors = false,
@@ -257,15 +250,16 @@ local rareFish = {
     {
         baseId = "mer_fish_marlin",
         previewMesh = "mer_fishing\\f\\marlin.nif",
-        description = "To win a battle of will against a blue marlin is a sign of a true angler. They are strong, fast, and determined. You'll need all your strength to catch one. The marlin is most commonly found in warmer waters of the Ascadian Isles. With some live baitfish and a lot of patience, you're sure to encounter one.",
+        description = "To win a battle of will against a blue marlin is a sign of a true angler. They are strong, fast, and determined. You'll need all your strength to catch one. The blue marlin is found in the deepest of seawaters, all over Vvardenfell. You'll need live baitfish to catch one.",
         niche = {
-            regions = {
-                "Ascadian Isles Region",
+            minDepth = 500,
+            lures = {
+                baitfish = 100,
             }
         },
         speed = 240,
         size = 4.4,
-        difficulty = 80,
+        difficulty = 70,
     }
 }
 ---@type Fishing.FishType[]
@@ -273,25 +267,42 @@ local legendaryFish = {
     {
         baseId = "mer_fish_shadowfin",
         previewMesh = "mer_fishing\\f\\shadowfin.nif",
-        description = "The Shadowfin is a dark, elusive fish with a translucent body that blends in with its surroundings. It is found only in the darkest caves in Vvardenfell.",
+        description = "The Shadowfin is a dark, elusive fish with a translucent body that blends in with its surroundings. It is found in the West Gash and feeds only at night.",
         speed = 200,
         size = 1.8,
         difficulty = 60,
         niche = {
-            interiors = true,
-            exteriors = false,
             times = {
                 "night"
+            },
+            regions = {
+                "West Gash Region"
             },
         },
     },
     {
         baseId = "mer_fish_ashclaw",
         previewMesh = "mer_fishing\\f\\ashclaw.nif",
-        description = "The Ashclaw is a large, frightening fish with claw-like fins that it uses to cling to rocks and other underwater surfaces. It is known to feed in the cold Northern waters of Sheogorad. You'll need a lure made of Slaughterfish scales to attract it.",
+        description = "The Ashclaw is a large, frightening fish with claw-like fins that lives in Lake Nabia, in the Molag Amur Region. You'll need a lure made of Slaughterfish scales to attract it.",
         speed = 100,
         size = 3.4,
         difficulty = 70,
+        niche = {
+            regions = {
+                "Molag Mar Region",
+            },
+            lures = {
+                spinner = 100
+            }
+        },
+    },
+    {
+        baseId = "mer_fish_iskal",
+        previewMesh = "mer_fishing\\f\\iskal.nif",
+        description = "Iskal is a large fish with icy blue scales and razor sharp spines running over it's body. It lives in the frigid waters of Sheogorad.",
+        speed = 140,
+        size = 2.8,
+        difficulty = 75,
         niche = {
             regions = {
                 "Sheogorad",
@@ -312,12 +323,16 @@ local legendaryFish = {
             regions = {
                 "Bitter Coast Region",
             },
+            lures = {
+                glowing = 100,
+                iridescent = 80
+            }
         },
     },
     {
         baseId = "mer_fish_mega",
         previewMesh = "mer_fishing\\f\\megamax.nif",
-        description = "The Megamaxilla, or \"Mega Jaw\", is one of the most fearsome beasts in the ocean. It's gigantic, hinge-like jaw allows it to prey even on other large predator fish. It can only be found in the deeper waters in Azura's Coast. A bait made of fresh hound meat is sure to get its attention. ",
+        description = "The Megamaxilla, or \"Mega Jaw\", is one of the most fearsome beasts in the ocean. It's gigantic, hinge-like jaw allows it to prey even on other large predator fish. It feeds during dawn and dusk in Azura's Coast, where the scarlet glow helps it blend in with the water. You'll need live baitfish to catch one.",
         speed = 150,
         size = 4.5,
         difficulty = 90,
@@ -325,7 +340,13 @@ local legendaryFish = {
             regions = {
                 "Azura's Coast Region",
             },
-            minDepth = 800,
+            times = {
+                "dawn",
+                "dusk",
+            },
+            lures = {
+                baitfish = 100,
+            }
         },
     }
 }

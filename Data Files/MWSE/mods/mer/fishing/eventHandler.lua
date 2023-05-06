@@ -82,9 +82,10 @@ event.register("loaded", function()
     --Check any interim states and cancel
     local state = FishingStateManager.getCurrentState()
 
-    if state ~= "IDLE" then
+    local lure = FishingStateManager.getLure()
+    if lure ~= nil or state ~= "IDLE" then
         logger:debug("Loaded while fishing - cancel")
-        FishingService.endFishing()
+        FishingStateManager.endFishing()
     end
 end)
 
@@ -118,26 +119,29 @@ event.register("menuEnter", function(e)
     if cancelInMenu then
         if not FishingStateManager.isState("IDLE") then
             logger:debug("Menu opened while fishing - cancel")
-            FishingService.endFishing()
+            FishingStateManager.endFishing()
         end
     end
 end)
 
-event.register("equipped", function(e)
-    if not e.reference == tes3.player then return end
+local function onChangeWeapon()
     if not FishingRod.isEquipped() then
         if not FishingStateManager.isState("IDLE") then
             logger:debug("Unequipped fishing rod while fishing - cancel")
-            FishingService.endFishing()
+            FishingStateManager.endFishing()
         end
     end
-end)
+end
+event.register("equipped", onChangeWeapon)
+event.register("unequipped", onChangeWeapon)
 
 event.register("simulate", function()
-    if tes3.player.mobile.isSwimming then
+    local swimming = tes3.player.mobile.isSwimming
+    local sheathed = not tes3.mobilePlayer.weaponReady
+    if swimming or sheathed then
         if not FishingStateManager.isState("IDLE") then
             logger:debug("Player started swimming while fishing - cancel")
-            FishingService.endFishing()
+            FishingStateManager.endFishing()
         end
     end
 end)

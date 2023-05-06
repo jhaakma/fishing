@@ -49,8 +49,26 @@ function FishingRod.playCastSound(castStrength)
     local pitch = math.remap(castStrength, 0, 1, 2.0, 1.0)
     logger:debug("Playing cast sound with pitch %s", pitch)
     tes3.playSound{
-        soundPath = "mer_fishing\\fishing line.wav",
+        reference = tes3.player,
+        sound = "mer_fish_cast",
         pitch = pitch
+    }
+end
+
+function FishingRod.playReelSound(e)
+    FishingRod.stopReelSound()
+    tes3.playSound{
+        reference = tes3.player,
+        sound = "mer_fish_reel",
+        loop = e.doLoop,
+        pitch = e.pitch or 1.0
+    }
+end
+
+function FishingRod.stopReelSound()
+    tes3.removeSound{
+        reference = tes3.player,
+        sound = "mer_fish_reel"
     }
 end
 

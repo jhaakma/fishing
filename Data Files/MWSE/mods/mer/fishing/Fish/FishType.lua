@@ -47,7 +47,7 @@ function FishType.new(e)
 end
 
 function FishType:getStartingFatigue()
-    return math.remap(self.difficulty, 0, 100, 50, 100)
+    return math.remap(self.difficulty, 0, 100, 50, 200)
 end
 
 function FishType:getBaseObject()

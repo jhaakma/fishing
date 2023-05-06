@@ -5,9 +5,10 @@ local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 ---@class Fishing.Animations
 local Animations = {}
 
-local function playSplashSound()
+function Animations.playSplashSound()
     logger:debug("Playing splash sound")
-    local sound = (math.random() < 0.5) and "Swim Left" or "Swim Right"
+    local sound = (math.random() < 0.5)
+        and "Swim Left" or "Swim Right"
     tes3.playSound{ sound = sound }
 end
 
@@ -23,13 +24,7 @@ function Animations.splash(position, size)
     })
 end
 
-function Animations.rodSnap()
-    logger:debug("Playing snap animation")
-    local lure = FishingStateManager.getLure()
-    if not lure then
-        logger:debug("No lure found, skipping snap animation")
-        return
-    end
+function Animations.reverseSwing()
     logger:debug("Playing snap animation")
     --cancelling swing animation
     timer.start{
@@ -51,7 +46,7 @@ function Animations.lureLand(lure)
         loopCount = -1,
     }
 
-    playSplashSound()
+    Animations.playSplashSound()
     Animations.splash(lure.position)
     RippleGenerator.generateRipple{
         position = lure.position,
@@ -81,7 +76,7 @@ function Animations.lureNibble(lure)
         -- duration = 1.0,
         -- amount = 20,
     }
-    playSplashSound()
+    Animations.playSplashSound()
 end
 
 function Animations.lureBite(lure)
@@ -105,18 +100,18 @@ function Animations.lureBite(lure)
             -- duration = 1.0,
             -- amount = 20,
         }
-        playSplashSound()
+        Animations.playSplashSound()
 end
 
-
 function Animations.clampWaves()
-    if tes3.player.tempData.mer_previousWaveHeight then return end
+    if FishingStateManager.getPreviousWaveHeight() then return end
     if mge.render.dynamicRipples then
-        tes3.player.tempData.mer_previousWaveHeight = mge.distantLandRenderConfig.waterWaveHeight
+        local height = mge.distantLandRenderConfig.waterWaveHeight
+        FishingStateManager.setPreviousWaveHeight(height)
         local duration = 0.5
         local iterations = duration / 0.01
 
-        local from = tes3.player.tempData.mer_previousWaveHeight
+        local from = height
         local to = 0.0
 
         timer.start{
@@ -136,8 +131,8 @@ function Animations.clampWaves()
 end
 
 function Animations.unclampWaves()
-    if not tes3.player.tempData.mer_previousWaveHeight then return end
-    local previousWaveHeight = tes3.player.tempData.mer_previousWaveHeight
+    local previousWaveHeight = FishingStateManager.getPreviousWaveHeight()
+    if not previousWaveHeight then return end
     local currentWaveHeight = mge.distantLandRenderConfig.waterWaveHeight
     --smooth transition
     local duration = 0.5
@@ -160,9 +155,11 @@ function Animations.unclampWaves()
     timer.start{
         duration = duration,
         callback = function()
-            tes3.player.tempData.mer_previousWaveHeight = nil
+            FishingStateManager.setPreviousWaveHeight(nil)
         end
     }
 end
+event.register("Fishing:UnclampWaves", Animations.unclampWaves)
+
 
 return Animations

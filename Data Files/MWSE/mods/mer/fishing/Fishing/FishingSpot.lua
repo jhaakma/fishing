@@ -104,13 +104,14 @@ function FishingSpot.check(castStrength)
     return true, nil
 end
 
-function FishingSpot.getDepth(position)
+function FishingSpot.getDepth(position, ignoreList)
     logger:debug("Getting depth at %s", position)
     local INT_MAX = 0x7FFFFFFF
     local result = tes3.rayTest{
         position = position,
         direction = tes3vector3.new(0,0,-1),
-        ignore = { tes3.player },
+        ignore = ignoreList,
+        maxDistance = 5000,
     }
     if not result then
         logger:warn("Hit nothing below")
@@ -121,7 +122,9 @@ function FishingSpot.getDepth(position)
         logger:warn("No water level")
         return INT_MAX
     end
-    return waterLevel - result.intersection.z
+    local depth = waterLevel - result.intersection.z
+    logger:debug("Depth = %s", depth)
+    return depth
 end
 
 function FishingSpot.getLurePosition(castStrength)

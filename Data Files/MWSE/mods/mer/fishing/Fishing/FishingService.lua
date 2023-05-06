@@ -28,13 +28,15 @@ local function launchLure(lure, landCallback)
         local particles = mesh:getObjectByName("Particles")
 
         local castStrength = FishingStateManager.getCastStrength()
-        particles.controller.speed = math.remap(castStrength, 0, 1, 100, 700)
+        particles.controller.speed = math.remap(castStrength, 0, 1,
+            config.constants.MIN_CAST_SPEED, config.constants.MAX_CAST_SPEED)
     end
 
     local vfx = tes3.createVisualEffect{
         object = "mer_lure_particle",
         position = lure.position,
     }
+    FishingStateManager.setParticle(vfx.effectNode)
     local effectNode = vfx.effectNode
     local particles = effectNode:getObjectByName("Particles") --[[@as niParticles]]
     local controller = particles.controller --[[@as niParticleSystemController]]
@@ -46,21 +48,27 @@ local function launchLure(lure, landCallback)
     local safeLure = tes3.makeSafeObjectHandle(lure)
     local safeParticle = tes3.makeSafeObjectHandle(vfx)
     local updateLurePosition
-    local function cancel()
+
+    local function finish(success)
         event.unregister("simulate", updateLurePosition)
-        if safeLure and safeLure:valid() then
-            lure:delete()
+        if success then
+            landCallback()
+        else
+            if safeLure and safeLure:valid()  then
+                lure:delete()
+            end
         end
     end
+
     updateLurePosition = function()
         if not (safeLure and safeLure:valid()) then
             logger:debug("Lure is not valid, stopping updateLurePosition")
-            cancel()
+            finish(false)
             return
         end
         if not (safeParticle and safeParticle:valid()) then
             logger:debug("Particle is not valid, stopping updateLurePosition")
-            cancel()
+            finish(false)
             return
         end
         local transform = vfx.effectNode.worldTransform
@@ -79,15 +87,21 @@ local function launchLure(lure, landCallback)
             if hitGround then
                 logger:debug("Lure hit ground, stopping updateLurePosition")
                 FishingStateManager.setState("IDLE")
-                cancel()
+                finish(false)
                 return
             end
         end
         if lure.position.z < lure.cell.waterLevel then
-            logger:debug("Lure is underwater, stopping updateLurePosition")
-            event.unregister("simulate", updateLurePosition)
-            landCallback()
-            return
+            local pos = tes3vector3.new(lure.position.x, lure.position.y, lure.cell.waterLevel)
+
+            if FishingSpot.getDepth(pos, {lure, vfx.effectNode}) < config.constants.MIN_DEPTH then
+                logger:debug("Lure is not deep enough, stopping updateLurePosition")
+                finish(false)
+                tes3.messageBox("Not deep enough.")
+            else
+                logger:debug("Lure is underwater, stopping updateLurePosition")
+                finish(true)
+            end
         end
     end
     event.register("simulate", updateLurePosition)
@@ -138,16 +152,15 @@ local function startCasting()
             callback = function()
                 lure = FishingStateManager.getLure()
                 if lure then
-                    LineManager.attachLines(lure)
+                    FishingStateManager.setFishingLine(LineManager.attachLines(lure))
                 end
             end
         }
     else
         logger:error("Could not spawn lure")
-        FishingService.endFishing()
+        FishingStateManager.endFishing()
     end
 end
-
 
 ---Calculate the chance a bite is real or just a nibble
 local function calculateRealBiteChance()
@@ -198,9 +211,14 @@ local function startFish()
 
 
     local to = lure.position
-    local from = SwimService.findTargetPosition(to)
+    local from = SwimService.findTargetPosition{
+        origin = to,
+        ignoreList = { lure },
+    }
     if from then
+        FishingStateManager.setState("CHASING")
         SwimService.startSwimming{
+            speed = fish:getChaseSpeed(),
             from = from,
             to = to,
             callback = function()
@@ -212,7 +230,6 @@ local function startFish()
         }
     else
         logger:warn("Unable to find start position")
-        FishingService.endFishing()
     end
 end
 
@@ -232,21 +249,6 @@ function FishingService.triggerFish()
     end
 end
 
-function FishingService.endFishing()
-    logger:debug("Cancelling fishing")
-    FishingStateManager.removeLure()
-    -- common.enablePlayerControls()
-    Animations.unclampWaves()
-    FishingStateManager.clearData()
-    --give time for waves to settle
-    FishingStateManager.setState("BLOCKED")
-    timer.start{
-        duration = 0.5,
-        callback = function()
-            FishingStateManager.setState("IDLE")
-        end
-    }
-end
 
 function FishingService.release()
     logger:debug("Releasing Swing")
@@ -272,13 +274,16 @@ local function catchFish()
         return
     end
     local fishObj = fish:getInstanceObject()
+
     local lure = FishingStateManager.getLure()
     if not lure then
         logger:warn("No lure found")
         return
     end
+
+    Animations.playSplashSound()
     Animations.splash(lure.position, fish:getSplashSize())
-    Animations.rodSnap()
+    Animations.reverseSwing()
     timer.start{
         duration = 0.75,
         callback = function()
@@ -288,7 +293,7 @@ local function catchFish()
                     item = fishObj,
                     count = 1,
                 }
-                FishingService.endFishing()
+                FishingStateManager.endFishing()
             end)
         end
     }
@@ -301,9 +306,22 @@ local function startFight()
         logger:warn("No fish to fight")
         return
     end
+    local lure = FishingStateManager.getLure()
+    if not lure then
+        logger:warn("No lure found")
+        return
+    end
+    Animations.splash(lure.position, fish:getSplashSize())
     FightManager.new{
         fish = fish,
-        callback = catchFish
+        callback = function(_fightManager, success, failMessage)
+            if success then
+                catchFish()
+            else
+                tes3.messageBox(failMessage or "It got away...")
+                FishingStateManager.endFishing()
+            end
+        end
     }:start()
 end
 
@@ -312,7 +330,7 @@ function FishingService.startSwing()
     if (state == "WAITING") or (state == "CHASING") then
         logger:debug("CHASING - cancel fishing")
         tes3.messageBox("You fail to catch anything.")
-        FishingService.endFishing()
+        FishingStateManager.endFishing()
         local lure = FishingStateManager.getLure()
         if not lure then
             logger:warn("No lure found")
@@ -324,7 +342,7 @@ function FishingService.startSwing()
             return
         end
         Animations.splash(lure.position, fish:getSplashSize())
-        Animations.rodSnap()
+        Animations.reverseSwing()
     elseif state == "BITING" then
         logger:debug("BITING - catch a fish")
         startFight()
