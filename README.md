@@ -2,26 +2,26 @@
 A Fishing mod for Morrowind
 
 ## To do
-- Casting - DONE
-- Fish trail - DONE
-- Custom ripple animation - DONE
-- Fish and meat models - DONE
 - Fillet mechanic
-- Animate fishing line
-- Catch preview - DONE
 - Fishing rods
 - Fishing lure/bait
 - Fishing skill
 - Convert vanilla fishing rods to weapon
 - Fishing "hotspots"
+- Reeling Animations
+- Casting - DONE
+- Fish trail - DONE
+- Custom ripple animation - DONE
+- Fish and meat models - DONE
+- Animate fishing line - DONE
+- Catch preview - DONE
 - Niches 
   - region - DONE
   - time of day - DONE
   - interior/exteriors - DONE
   - depth - DONE
   - weather?
-- Integrate fish speed
-- "Quality" fish variants
+- Integrate fish speed - DONE
 
 ## Fishing Rods
 | Name                 | Description                                                                                                  |
