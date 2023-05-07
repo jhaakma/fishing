@@ -1,6 +1,7 @@
 local common = require("mer.fishing.common")
 local logger = common.createLogger("FishingStateManager")
 local config = require("mer.fishing.config")
+local FishingRod = require("mer.fishing.FishingRod.FishingRod")
 
 ---@class Fishing.FishingStateManager
 local FishingStateManager = {}
@@ -33,6 +34,7 @@ local FishingStateManager = {}
 ---@field fishingTension number?
 ---@field fishingLine FishingLine?
 ---@field previousWaveHeight number?
+---@field particle niNode?
 
 
 ---@return Fishing.TempData
@@ -58,6 +60,7 @@ function FishingStateManager.setState(state)
     config.persistent.fishingState = state
 end
 
+---@param state Fishing.fishingState
 function FishingStateManager.isState(state)
     return FishingStateManager.getCurrentState() == state
 end
@@ -177,6 +180,9 @@ function FishingStateManager.clearData()
 end
 
 function FishingStateManager.endFishing()
+    local rod = FishingRod:getEquipped()
+    if rod then rod:useBait() end
+
     logger:debug("Cancelling fishing")
     FishingStateManager.removeLure()
     -- common.enablePlayerControls()

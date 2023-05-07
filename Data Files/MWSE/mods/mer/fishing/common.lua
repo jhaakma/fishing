@@ -2,7 +2,7 @@
 ---@class Fishing.common
 local common = {}
 
-local config = require("mer.Fishing.config")
+local config = require("mer.fishing.config")
 local MWSELogger = require("logging.logger")
 
 ---@type table<string, mwseLogger>

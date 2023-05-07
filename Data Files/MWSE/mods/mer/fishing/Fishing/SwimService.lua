@@ -5,7 +5,7 @@ local SwimService = {}
 local common = require("mer.fishing.common")
 local logger = common.createLogger("SwimService")
 local config = require("mer.fishing.config")
-local RippleGenerator = require("mer.fishing.Fish.RippleGenerator")
+local RippleGenerator = require("mer.fishing.Fishing.RippleGenerator")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 
 function SwimService.deepEnough(location)

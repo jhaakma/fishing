@@ -4,12 +4,13 @@ local config = require("mer.fishing.config")
 local FishingSpot = require("mer.fishing.Fishing.FishingSpot")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 local FishingRod = require("mer.fishing.FishingRod.FishingRod")
-local SwimService = require("mer.fishing.Fish.SwimService")
+local SwimService = require("mer.fishing.Fishing.SwimService")
 local FishGenerator = require("mer.fishing.Fish.FishGenerator")
 local TrophyMenu = require("mer.fishing.ui.TrophyMenu")
 local LineManager = require("mer.fishing.FishingLine.LineManager")
 local Animations = require("mer.fishing.Fish.Animations")
 local FightManager = require("mer.fishing.Fishing.FightManager")
+local Bait = require("mer.fishing.Bait.Bait")
 
 ---@class Fishing.FishingService
 local FishingService = {}
@@ -113,33 +114,41 @@ local function spawnLure(lurePosition)
         logger:error("Could not get lure position")
         return
     end
+    local fishingRod = FishingRod.getEquipped()
+    if not fishingRod then
+        logger:error("Could not get fishing rod")
+        return
+    end
+    logger:debug("Attaching bait mesh")
+    local bait = fishingRod:getEquippedBait()
+    if not bait then
+        logger:debug("No bait equipped, spawning default lure bait")
+        bait = Bait.get("mer_lure_01")
+        if not bait then
+            logger:error("Could not get default lure bait")
+            return
+        end
+    end
     local lure = tes3.createReference({
-        object = "mer_lure_01",
+        object = "mer_lure_anim",
         position = lurePosition,
         cell = tes3.player.cell,
     })
+    bait:attachToAnim(lure)
     FishingStateManager.setLure(lure)
     return lure
 end
 
 ---Cast a line if player attacks with a fishing rod
---- and there is valid water in front of them
 local function startCasting()
     logger:debug("Casting fishing rod")
-    local state = FishingStateManager.getCurrentState()
-    if not state == "IDLE" then
-        logger:debug("Not Idle, can't cast")
-        return
-    end
-    FishingStateManager.setCastStrength()
-
     local lurePosition = FishingRod.getPoleEndPosition()
-    local castStrength = FishingStateManager.getCastStrength()
-    FishingRod.playCastSound(castStrength)
-    Animations.clampWaves()
-
     local lure = spawnLure(lurePosition)
     if lure then
+        FishingStateManager.setCastStrength()
+        local castStrength = FishingStateManager.getCastStrength()
+        FishingRod.playCastSound(castStrength)
+        Animations.clampWaves()
         -- common.disablePlayerControls()
         FishingStateManager.setState("CASTING")
         launchLure(lure, function()
@@ -254,6 +263,11 @@ function FishingService.release()
     logger:debug("Releasing Swing")
     local state = FishingStateManager.getCurrentState()
     if state == "IDLE" then
+        local fishingRod = FishingRod.getEquipped()
+        if not (fishingRod and fishingRod:hasBait()) then
+            tes3.messageBox("You are out of bait.")
+            return
+        end
         timer.start{
             duration = 0.020,
             callback = function()

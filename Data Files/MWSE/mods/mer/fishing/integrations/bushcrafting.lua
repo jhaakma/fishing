@@ -8,7 +8,8 @@ local bushcraftingRecipes = {
             { material = "wood", count = 2 },
             { material = "fibre", count = 6 },
             { material = "resin", count = 1 }
-        }
+        },
+        category = "Fishing"
     }
 }
 local function registerAshfallRecipes(e)

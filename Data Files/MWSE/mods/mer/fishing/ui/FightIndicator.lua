@@ -39,7 +39,7 @@ function FightIndicator:getMenu()
     end
     local menu = menuMulti:findChild(self.uiids.menu)
     if not menu then
-        logger:error("Could not find FightIndicatorMenu")
+        logger:trace("Could not find FightIndicatorMenu")
         return
     end
     return menu

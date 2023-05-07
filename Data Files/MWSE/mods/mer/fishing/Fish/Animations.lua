@@ -1,6 +1,6 @@
 local common = require("mer.fishing.common")
 local logger = common.createLogger("Animations")
-local RippleGenerator = require("mer.fishing.Fish.RippleGenerator")
+local RippleGenerator = require("mer.fishing.Fishing.RippleGenerator")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 ---@class Fishing.Animations
 local Animations = {}

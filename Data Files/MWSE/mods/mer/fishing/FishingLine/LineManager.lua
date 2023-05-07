@@ -32,9 +32,9 @@ function LineManager.attachLines(lure)
         FishingStateManager.endFishing()
     end
 
-    local lureAttachPoint = lure.sceneNode:getObjectByName("LureAttachFishingLine") --[[@as niNode]]
+    local lureAttachPoint = lure.sceneNode:getObjectByName("AttachAnimLure") --[[@as niNode]]
     if not lureAttachPoint then
-        logger:error("Could not find LureAttachFishingLine node on lure")
+        logger:error("Could not find AttachAnimLure node on lure")
         cancel()
         return
     end

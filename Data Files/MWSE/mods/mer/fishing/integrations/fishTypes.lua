@@ -12,7 +12,8 @@ local commonFish = {
         description = "The largemouth bass is a carnivourous fish found in the rivers and lakes of Morrowind. They can put up a good fight when hooked, but are prized for their delicious meat.",
         speed = 80,
         size = 2.0,
-        difficulty = 40,
+        difficulty = 50,
+        class = "medium",
         niche = {},
         harvestables = {
             {
@@ -28,7 +29,8 @@ local commonFish = {
         description = "The Goby is a small fish found all throughout Morrowind.",
         speed = 150,
         size = 1.1,
-        difficulty = 10,
+        difficulty = 30,
+        class = "small",
         niche = {},
         harvestables = {
             {
@@ -43,8 +45,9 @@ local commonFish = {
         previewMesh = "mer_fishing\\f\\salmon.nif",
         description = "Salmon can be found in the lakes and rivers of the Ascadian Isles. Their meat is delicious eaten raw or cooked.",
         speed = 180,
-        size = 0.8,
-        difficulty = 10,
+        size = 1.4,
+        difficulty = 40,
+        class = "medium",
         niche = {
             regions = {
                 "Ascadian Isles Region",
@@ -62,9 +65,10 @@ local commonFish = {
         baseId = "mer_fish_slaughter_l",
         previewMesh = "mer_fishing\\f\\sfish_l.nif",
         description = "A large, aggressive fish with sharp teeth and a dorsal fin that runs the length of its body. The Slaughterfish is found throughout Tamriel and is known to attack anything that enters its territory. Slaughterfish meat tastes awful, but their scales are considered a delicacy.",
-        speed = 180,
+        speed = 200,
         size = 3.0,
-        difficulty = 40,
+        difficulty = 60,
+        class = "large",
         niche = {},
         harvestables = {
             {
@@ -84,8 +88,9 @@ local commonFish = {
         previewMesh = "mer_fishing\\f\\sfish_sm.nif",
         description = "Juvenile Slaughterfish may be small, but they can still put up a fight.",
         speed = 200,
-        size = 1.0,
-        difficulty = 20,
+        size = 1.1,
+        difficulty = 30,
+        class = "small",
         niche = {},
         harvestables = {
             {
@@ -106,7 +111,8 @@ local commonFish = {
         description = "The triggerfish is a small tropical fish commonly found in the waters of Azura's Coast. They are known for their aggressive behavior and sharp teeth.",
         speed = 250,
         size = 1.0,
-        difficulty = 30,
+        difficulty = 50,
+        class = "small",
         niche = {
             regions = {
                 "Azura's Coast Region",
@@ -125,8 +131,9 @@ local uncommonFish = {
         previewMesh = "mer_fishing\\f\\tambaqui.nif",
         description = "The tambaqui is a large tropical fish found along the eastern coast of Vvardenfell.",
         speed = 100,
-        size = 2.2,
-        difficulty = 40,
+        size = 2.4,
+        difficulty = 50,
+        class = "medium",
         niche = {
             regions = {
                 "Grazelands Region",
@@ -146,9 +153,10 @@ local uncommonFish = {
         baseId = "mer_fish_arowana",
         previewMesh = "mer_fishing\\f\\arowana.nif",
         description = "Arowana, also known as bony tongues, are an uncommon fish found along the coast of the West Gash. They tend to feed only during the day",
-        speed = 130,
-        size = 1.3,
+        speed = 140,
+        size = 1.1,
         difficulty = 40,
+        class = "small",
         niche = {
             regions = {
                 "West Gash Region",
@@ -172,6 +180,7 @@ local uncommonFish = {
         speed = 160,
         size = 1.0,
         difficulty = 40,
+        class = "small",
         niche = {
             regions = {
                 "Ascadian Isles Region",
@@ -192,14 +201,13 @@ local rareFish = {
     {
         baseId = "mer_fish_jelly",
         previewMesh = "mer_fishing\\f\\jellyfish.nif",
-        description = "The Jelly Netch is the larval form of Netch. They can be found in the deep waters in the Ascadian Isles at night.",
-        speed = 60,
+        description = "The Jelly Netch is the larval form of Netch. They can be found in the deep waters at night.",
+        speed = 50,
         size = 1.2,
         difficulty = 20,
+        class = "medium",
         niche = {
-            regions = {
-                "Ascadian Isles Region",
-            },
+            minDepth = 400,
             times = {
                 "night"
             }
@@ -212,7 +220,8 @@ local rareFish = {
         description = "The Copperscale is found only in the Ascadian Isles. It's meat is tough and chewy, but its scales are highly sought after.",
         speed = 180,
         size = 2.2,
-        difficulty = 50,
+        difficulty = 65,
+        class = "medium",
         niche = {
             interiors = true,
             exterios = true,
@@ -232,9 +241,10 @@ local rareFish = {
         baseId = "mer_fish_marrow",
         previewMesh = "mer_fishing\\f\\marrow.nif",
         description = "The Marrowfish is a strange creature with bulging eyes and an oily red body. This rare fish can only be found in caves, and it's meat has powerful alchemical properties.",
-        speed = 150,
-        size = 1.4,
-        difficulty = 60,
+        speed = 120,
+        size = 1.8,
+        difficulty = 70,
+        class = "medium",
         niche = {
             interiors = true,
             exteriors = false,
@@ -259,7 +269,8 @@ local rareFish = {
         },
         speed = 240,
         size = 4.4,
-        difficulty = 70,
+        difficulty = 75,
+        class = "large",
     }
 }
 ---@type Fishing.FishType[]
@@ -270,7 +281,8 @@ local legendaryFish = {
         description = "The Shadowfin is a dark, elusive fish with a translucent body that blends in with its surroundings. It is found in the West Gash and feeds only at night.",
         speed = 200,
         size = 1.8,
-        difficulty = 60,
+        difficulty = 80,
+        class = "large",
         niche = {
             times = {
                 "night"
@@ -283,10 +295,11 @@ local legendaryFish = {
     {
         baseId = "mer_fish_ashclaw",
         previewMesh = "mer_fishing\\f\\ashclaw.nif",
-        description = "The Ashclaw is a large, frightening fish with claw-like fins that lives in Lake Nabia, in the Molag Amur Region. You'll need a lure made of Slaughterfish scales to attract it.",
+        description = "The Ashclaw is a large, frightening fish with claw-like fins that lives in Lake Nabia, in the Molag Amur Region.",
         speed = 100,
         size = 3.4,
-        difficulty = 70,
+        difficulty = 80,
+        class = "large",
         niche = {
             regions = {
                 "Molag Mar Region",
@@ -303,6 +316,7 @@ local legendaryFish = {
         speed = 140,
         size = 2.8,
         difficulty = 75,
+        class = "large",
         niche = {
             regions = {
                 "Sheogorad",
@@ -312,10 +326,11 @@ local legendaryFish = {
     {
         baseId = "mer_fish_swampmaw",
         previewMesh = "mer_fishing\\f\\swampmaw.nif",
-        description = "The Swampmaw is a massive eel that lives in the swamps of the Bitter Coast, with sharp teeth and a voracious appetite. It is known to prey on smaller fish and unwary travelers who venture too close to the water's edge. It only feeds at night, and you'll need a glowing bait such as Glowbugs or Netch Larva to summon it.",
-        speed = 60,
+        description = "The Swampmaw is a massive eel that lives in the swamps of the Bitter Coast, with sharp teeth and a voracious appetite. It is known to prey on smaller fish and unwary travelers who venture too close to the water's edge at night.",
+        speed = 80,
         size = 3.7,
-        difficulty = 80,
+        difficulty = 90,
+        class = "large",
         niche = {
             times = {
                 "night"
@@ -332,10 +347,11 @@ local legendaryFish = {
     {
         baseId = "mer_fish_mega",
         previewMesh = "mer_fishing\\f\\megamax.nif",
-        description = "The Megamaxilla, or \"Mega Jaw\", is one of the most fearsome beasts in the ocean. It's gigantic, hinge-like jaw allows it to prey even on other large predator fish. It feeds during dawn and dusk in Azura's Coast, where the scarlet glow helps it blend in with the water. You'll need live baitfish to catch one.",
+        description = "The Megamaxilla, or \"Mega Jaw\", is one of the most fearsome beasts in the ocean. It's gigantic, hinge-like jaw allows it to prey even on other large predator fish. It feeds during dawn and dusk in Azura's Coast, where the scarlet glow helps it blend in with the water.",
         speed = 150,
         size = 4.5,
-        difficulty = 90,
+        difficulty = 100,
+        class = "large",
         niche = {
             regions = {
                 "Azura's Coast Region",
@@ -350,10 +366,6 @@ local legendaryFish = {
         },
     }
 }
-
-
-
-
 
 local FishType = require("mer.fishing.Fish.FishType")
 for _, fish in ipairs(commonFish) do

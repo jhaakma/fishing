@@ -1,7 +1,7 @@
 local common = require("mer.fishing.common")
 local logger = common.createLogger("FightManager")
 local config = require("mer.fishing.config")
-local SwimService = require("mer.fishing.Fish.SwimService")
+local SwimService = require("mer.fishing.Fishing.SwimService")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 local FishingRod = require("mer.fishing.FishingRod.FishingRod")
 local Animations = require("mer.fishing.Fish.Animations")
@@ -48,6 +48,7 @@ function FightManager:fail(reason)
 end
 
 function FightManager:success()
+    logger:debug("Fight succeeded")
     self:endFight()
     self:callback(true)
 end
@@ -292,13 +293,16 @@ function FightManager:fightSimulate(e)
     local fishingLine = FishingStateManager.getFishingLine()
     if fishingLine and fishingLine:getTension() >= config.constants.FIGHT_TENSION_UPPER_LIMIT then
         self:fail("Line Snapped!")
+        return
     end
     if fishingLine and fishingLine:getTension() <= config.constants.FIGHT_TENSION_LOWER_LIMIT then
         self:fail("Fish Escaped!")
+        return
     end
 
     if self.fish.fatigue <= 0 then
         self:success()
+        return
     end
 
     if tes3.player.mobile.fatigue.current <= 0 then
@@ -311,7 +315,6 @@ function FightManager:fightSimulate(e)
         self:fail("You are exhausted!")
     end
 end
-
 
 
 function FightManager:start()
@@ -351,6 +354,13 @@ function FightManager:start()
     event.register("simulate", simulateFight)
     self.fightIndicator:createMenu()
     common.disablePlayerControls()
+
+    local doCancel
+    doCancel = function()
+        self:fail("Cancelled")
+        event.unregister("Fishing:Cancel", doCancel)
+    end
+    event.register("Fishing:Cancel", doCancel)
 end
 
 

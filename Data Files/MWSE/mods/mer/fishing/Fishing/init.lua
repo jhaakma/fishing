@@ -10,7 +10,7 @@ local FishingRod = require("mer.fishing.FishingRod.FishingRod")
 event.register("attackHit", function(e)
     if e.reference ~= tes3.player then return end
     logger:debug("Swing strength = %s",tes3.player.mobile.actionData.attackSwing)
-    local fishingRod = FishingRod.new()
+    local fishingRod = FishingRod.getEquipped()
     if fishingRod then
         logger:debug("Player released attack with fishing rod")
         FishingService.release()
@@ -140,8 +140,9 @@ event.register("simulate", function()
     local sheathed = not tes3.mobilePlayer.weaponReady
     if swimming or sheathed then
         if not FishingStateManager.isState("IDLE") then
-            logger:debug("Player started swimming while fishing - cancel")
+            logger:debug("- CANCEL")
             FishingStateManager.endFishing()
+            event.trigger("Fishing:Cancel")
         end
     end
 end)

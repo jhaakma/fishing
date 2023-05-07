@@ -2,11 +2,6 @@
 local config = {}
 config.configPath = "Fishing"
 config.metadata = toml.loadFile("Data Files\\Fishing-metadata.toml")
-config.fishingRods = {
-    mer_fishing_pole_01 = {
-        quality = 0.25
-    }
-}
 ---@class Fishing.config.constants
 config.constants = {
     --How many times to try to find a valid position for a fish startPosition
@@ -40,6 +35,13 @@ config.constants = {
     FIGHT_FATIGUE_DRAIN_PER_SECOND = 3,
     FIGHT_PLAYER_FATIGUE_REELING_DRAIN_PER_SECOND = 15,
     FIGHT_PLAYER_FATIGUE_RELAX_DRAIN_PER_SECOND = 5,
+
+    --Tooltips
+    TOOLTIP_COLOR_BAIT = {
+        147 / 255,
+        181 / 255,
+        189 / 255,
+    },
 }
 
 
