@@ -44,8 +44,23 @@ A Fishing mod for Morrowind
 | Sinker | Scrap Metal | Increases chance of catching random loot. |
 
 ## Fish
-| Name                 | Location      | Description                                                                                                    |
-| -------------------- | ------------- | -------------------------------------------------------------------------------------------------------------- |
-| Slaughterfish        | Everywhere    | The most common fish in Vvardehfell. Their shiny scales can be crafted into an effective lure.                 |
-| Ashclaw              | Volcanic      | A fish with long, claw-like fins that it uses to cling to rocks and other underwater surfaces.                 |
-| Marrowfish           | West Gash     | A bony fish with glowing red eyes and a spine that runs along its back.                                       |
+| Name         | Rarity      | Class   | Region                   | Times             |
+|--------------|-------------|---------|--------------------------|-------------------|
+| Largemouth Bass      | Common  | Medium  | -                          | -                     |
+| Goby        | Common  | Small    | -                          | -                     |
+| Salmon      | Common  | Medium  | Ascadian Isles Region | -                     |
+| Slaughterfish (Large)   | Common  | Large    | -                          | -                     |
+| Slaughterfish (Small)   | Common  | Small    | -                          | -                     |
+| Triggerfish  | Common  | Small    | Azura's Coast, Grazelands | -                     |
+| Tambaqui    | Uncommon    | Medium  | Grazelands, Azura's Coast, Molag Mar | -                     |
+| Arowana     | Uncommon    | Small    | West Gash                  | Day                |
+| Discus      | Uncommon    | Small    | Ascadian Isles, Azura's Coast | -                     |
+| Jelly Netch  | Rare        | Medium  | Deep Waters                | Night              |
+| Copperscale  | Rare        | Medium  | Ascadian Isles             | -                     |
+| Marrowfish   | Rare        | Medium  | Caves                      | -                     |
+| Blue Marlin  | Rare        | Large    | Deep Waters                | -                     |
+| Shadowfin    | Legendary   | Large    | West Gash                  | Night              |
+| Ashclaw      | Legendary   | Large    | Molag Mar                  | -                     |
+| Iskal        | Legendary   | Large    | Sheogorad                  | -                     |
+| Swampmaw     | Legendary   | Large    | Bitter Coast               | Night              |
+| Megamaxilla  | Legendary   | Large    | Azura's Coast              | Dawn, Dusk   |
