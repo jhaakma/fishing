@@ -57,7 +57,8 @@ end, { priority = 500})
 
 
 local function generateBiteInterval()
-    return math.random(3, 7)
+    -- return math.random(3, 7)
+    return 2
 end
 
 

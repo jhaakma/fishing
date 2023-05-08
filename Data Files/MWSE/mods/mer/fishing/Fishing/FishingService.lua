@@ -16,7 +16,8 @@ local Bait = require("mer.fishing.Bait.Bait")
 local FishingService = {}
 
 local function getBiteDuration()
-    local min = 0.1
+    -- local min = 0.1
+    local min = 1.0
     local max = 1.0
     return math.random(min*100, max*100)/100
 end
@@ -174,7 +175,8 @@ end
 ---Calculate the chance a bite is real or just a nibble
 local function calculateRealBiteChance()
     --TODO: base on skill etc
-    return math.random() < 0.50
+    -- return math.random() < 0.50
+    return true
 end
 
 local function endBite()
