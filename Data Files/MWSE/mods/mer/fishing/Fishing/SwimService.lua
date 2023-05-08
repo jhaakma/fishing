@@ -120,45 +120,50 @@ function SwimService.startSwimming(e)
     if e.lure then
         safeLure = tes3.makeSafeObjectHandle(e.lure)
     end
-    fishTimer = timer.start{
-        duration = config.constants.FISH_RIPPLE_INTERVAL,
-        type = timer.simulate,
-        iterations = -1,
-        callback = function()
-            logger:trace("targetPosition: %s", e.to)
-            if not FishingStateManager.isState(currentState) then
-                logger:trace("State changed, cancelling fish timer")
-                fishTimer:cancel()
-                return
-            end
-            local distance = currentPosition:distance(e.to)
-            if distance < 20 then
-                logger:trace("Reached target position")
-                fishTimer:cancel()
-                e.callback()
-                return
-            end
-            local direction = (e.to - currentPosition):normalized()
-            ---@type tes3vector3
-            local delta = direction * (e.speed * config.constants.FISH_RIPPLE_INTERVAL)
-            logger:trace("delta: %s", delta)
-            local distanceTravelled = delta:length()
-            logger:trace("distanceTravelled: %s", distanceTravelled)
-            local newPosition = currentPosition + delta
-            logger:trace("new position: %s", newPosition, distanceTravelled)
+
+    local movementSimulate
+    local timePassed = 0
+    movementSimulate = function(e2)
+        logger:trace("targetPosition: %s", e.to)
+        if not FishingStateManager.isState(currentState) then
+            logger:trace("State changed, cancelling")
+            event.unregister("simulate", movementSimulate)
+            return
+        end
+        local distance = currentPosition:distance(e.to)
+        if distance < 20 then
+            logger:trace("Reached target position")
+            event.unregister("simulate", movementSimulate)
+            e.callback()
+            return
+        end
+        local direction = (e.to - currentPosition):normalized()
+        ---@type tes3vector3
+        local delta = direction *  e.speed * e2.delta
+        logger:trace("delta: %s", delta)
+        local distanceTravelled = delta:length()
+        logger:trace("distanceTravelled: %s", distanceTravelled)
+        local newPosition = currentPosition + delta
+        logger:trace("new position: %s", newPosition, distanceTravelled)
+        currentPosition = newPosition
+        if safeLure and safeLure:valid() then
+            logger:trace("Updating lure position")
+            safeLure.position = newPosition
+        end
+
+        --check if rime to generate ripple
+        timePassed = timePassed + e2.delta
+        if timePassed > config.constants.FISH_RIPPLE_INTERVAL then
             RippleGenerator.generateRipple{
                 position = newPosition,
                 scale = SwimService.rippleScale(),
                 -- duration = 1.0,
                 -- amount = 20,
             }
-            currentPosition = newPosition
-            if safeLure and safeLure:valid() then
-                logger:trace("Updating lure position")
-                safeLure.position = newPosition
-            end
+            timePassed = 0
         end
-    }
+    end
+    event.register("simulate", movementSimulate)
 end
 
 function SwimService.rippleScale()
