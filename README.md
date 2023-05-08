@@ -46,21 +46,21 @@ A Fishing mod for Morrowind
 ## Fish
 | Name         | Rarity      | Class   | Region                   | Times             |
 |--------------|-------------|---------|--------------------------|-------------------|
-| Largemouth Bass      | Common  | Medium  | -                          | -                     |
-| Goby        | Common  | Small    | -                          | -                     |
-| Salmon      | Common  | Medium  | Ascadian Isles Region | -                     |
-| Slaughterfish (Large)   | Common  | Large    | -                          | -                     |
-| Slaughterfish (Small)   | Common  | Small    | -                          | -                     |
-| Triggerfish  | Common  | Small    | Azura's Coast, Grazelands | -                     |
-| Tambaqui    | Uncommon    | Medium  | Grazelands, Azura's Coast, Molag Mar | -                     |
+| Largemouth Bass      | Common  | Medium  | Everywhere               | All times          |
+| Goby        | Common  | Small    | Everywhere               | All times          |
+| Salmon      | Common  | Medium  | Ascadian Isles Region | All times          |
+| Slaughterfish (Large)   | Common  | Large    | Everywhere               | All times          |
+| Slaughterfish (Small)   | Common  | Small    | Everywhere               | All times          |
+| Triggerfish  | Common  | Small    | Azura's Coast, Grazelands | All times          |
+| Tambaqui    | Uncommon    | Medium  | Grazelands, Azura's Coast, Molag Mar | All times          |
 | Arowana     | Uncommon    | Small    | West Gash                  | Day                |
-| Discus      | Uncommon    | Small    | Ascadian Isles, Azura's Coast | -                     |
+| Discus      | Uncommon    | Small    | Ascadian Isles, Azura's Coast | All times          |
 | Jelly Netch  | Rare        | Medium  | Deep Waters                | Night              |
-| Copperscale  | Rare        | Medium  | Ascadian Isles             | -                     |
-| Marrowfish   | Rare        | Medium  | Caves                      | -                     |
-| Blue Marlin  | Rare        | Large    | Deep Waters                | -                     |
+| Copperscale  | Rare        | Medium  | Ascadian Isles             | All times          |
+| Marrowfish   | Rare        | Medium  | Caves                      | All times          |
+| Blue Marlin  | Rare        | Large    | Deep Waters                | All times          |
 | Shadowfin    | Legendary   | Large    | West Gash                  | Night              |
-| Ashclaw      | Legendary   | Large    | Molag Mar                  | -                     |
-| Iskal        | Legendary   | Large    | Sheogorad                  | -                     |
+| Ashclaw      | Legendary   | Large    | Molag Mar                  | All times          |
+| Iskal        | Legendary   | Large    | Sheogorad                  | All times          |
 | Swampmaw     | Legendary   | Large    | Bitter Coast               | Night              |
 | Megamaxilla  | Legendary   | Large    | Azura's Coast              | Dawn, Dusk   |
