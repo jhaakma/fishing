@@ -299,7 +299,6 @@ local function catchFish()
 
     Animations.playSplashSound()
     Animations.splash(lure.position, fish:getSplashSize())
-    Animations.reverseSwing()
     timer.start{
         duration = 0.75,
         callback = function()
@@ -358,7 +357,6 @@ function FishingService.startSwing()
             return
         end
         Animations.splash(lure.position, fish:getSplashSize())
-        Animations.reverseSwing()
     elseif state == "BITING" then
         logger:debug("BITING - catch a fish")
         startFight()

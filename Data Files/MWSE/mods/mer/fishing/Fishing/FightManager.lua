@@ -4,7 +4,6 @@ local config = require("mer.fishing.config")
 local SwimService = require("mer.fishing.Fishing.SwimService")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 local FishingRod = require("mer.fishing.FishingRod.FishingRod")
-local Animations = require("mer.fishing.Fish.Animations")
 local FightIndicator = require("mer.fishing.ui.FightIndicator")
 
 
@@ -272,7 +271,6 @@ function FightManager:fightSimulate(e)
             doLoop = true,
             pitch = 1.5
         }
-        Animations.reverseSwing()
     elseif self.reeling and not leftMouseDown then
         logger:debug("Stopped Reeling")
         self.reeling = false
