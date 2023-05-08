@@ -5,6 +5,7 @@ event.register("initialized", function()
     local common = require("mer.fishing.common")
     local logger = common.createLogger("main")
     ---event handlers
+    require("mer.fishing.PlayerAnimations")
     require("mer.fishing.Fishing")
     require("mer.fishing.Bait")
 
