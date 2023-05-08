@@ -9,6 +9,7 @@ A Fishing mod for Morrowind
 - Convert vanilla fishing rods to weapon
 - Fishing "hotspots"
 - Reeling Animations
+- Fishing Rod quality affects tension limit
 - location line of sight
 - Casting - DONE
 - Fish trail - DONE
