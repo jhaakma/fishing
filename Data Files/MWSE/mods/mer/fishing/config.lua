@@ -29,12 +29,22 @@ config.constants = {
     TENSION_MAXIMUM = 1.5,
     FIGHT_TENSION_UPPER_LIMIT = 1.2,
     FIGHT_TENSION_LOWER_LIMIT = 0.2,
-    REEL_DISTANCE_PER_SECOND = 250,
-    RELAX_DISTANCE_PER_SECOND = 150,
-    FIGHT_MAX_DISTANCE = 500, --the distance at which tension will reach breaking point
-    FIGHT_FATIGUE_DRAIN_PER_SECOND = 3,
+    REEL_DISTANCE_PER_SECOND = 300,
+    RELAX_DISTANCE_PER_SECOND = 200,
+    --the distance at which tension will reach breaking point
+    FIGHT_MAX_DISTANCE = 300,
+    FIGHT_FATIGUE_DRAIN_PER_SECOND = 5,
+
+    --player fatigue
+    --the amount of fatigue drained per second when the player is reeling
     FIGHT_PLAYER_FATIGUE_REELING_DRAIN_PER_SECOND = 15,
-    FIGHT_PLAYER_FATIGUE_RELAX_DRAIN_PER_SECOND = 5,
+    --the amount of fatigue drained per second when the player is relaxing
+    FIGHT_PLAYER_FATIGUE_RELAX_DRAIN_PER_SECOND = 3,
+
+    --The a multiplier on the distance towards the player the fish will pull based on tension
+    FIGHT_TENSION_DISTANCE_EFFECT_MAXIMUM = 0.5,
+
+    FIGHT_REELING_DISTANCE_EFFECT = 200,
 
     --Tooltips
     TOOLTIP_COLOR_BAIT = {
@@ -57,6 +67,7 @@ local persistentDefault = {
 ---@class Fishing.config.MCM
 local mcmDefault = {
     enabled = true,
+    cheatMode = false,
     logLevel = "INFO"
 }
 ---@type Fishing.config.MCM

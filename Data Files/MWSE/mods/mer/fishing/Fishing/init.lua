@@ -1,9 +1,9 @@
 local common = require ("mer.Fishing.common")
 local logger = common.createLogger("fishing")
+local config = require("mer.fishing.config")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 local FishingService = require("mer.fishing.Fishing.FishingService")
 local FishingRod = require("mer.fishing.FishingRod.FishingRod")
-
 
 ---Cast line if player attacks with a fishing rod
 ---@param e attackEventData
@@ -57,8 +57,10 @@ end, { priority = 500})
 
 
 local function generateBiteInterval()
-    -- return math.random(3, 7)
-    return 2
+    if config.mcm.cheatMode then
+        return 1
+    end
+    return math.random(3, 7)
 end
 
 
@@ -86,6 +88,7 @@ event.register("loaded", function()
     local lure = FishingStateManager.getLure()
     if lure ~= nil or state ~= "IDLE" then
         logger:debug("Loaded while fishing - cancel")
+        common.enablePlayerControls()
         FishingStateManager.endFishing()
     end
 end)
@@ -140,7 +143,11 @@ event.register("simulate", function()
     local swimming = tes3.player.mobile.isSwimming
     local sheathed = not tes3.mobilePlayer.weaponReady
     if swimming or sheathed then
-        if not FishingStateManager.isState("IDLE") then
+        local idleStates = {
+            IDLE = true,
+            BLOCKED = true
+        }
+        if not idleStates[FishingStateManager.getCurrentState()] then
             logger:debug("- CANCEL")
             FishingStateManager.endFishing()
             event.trigger("Fishing:Cancel")

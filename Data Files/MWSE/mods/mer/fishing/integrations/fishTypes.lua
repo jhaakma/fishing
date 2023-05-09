@@ -4,7 +4,7 @@
 local common = require("mer.fishing.common")
 local logger = common.createLogger("Integrations - fishTypes")
 
----@type Fishing.FishType[]
+---@type Fishing.FishType.new.params[]
 local commonFish = {
     {
         baseId = "mer_fish_bass",
@@ -20,6 +20,7 @@ local commonFish = {
                 id = "mer_meat_bass",
                 min = 1,
                 max = 4,
+                isMeat = true,
             }
         }
     },
@@ -31,14 +32,8 @@ local commonFish = {
         size = 1.1,
         difficulty = 30,
         class = "small",
+        isBaitFish = true,
         niche = {},
-        harvestables = {
-            {
-                id = "mer_meat_goby",
-                min = 1,
-                max = 3,
-            }
-        }
     },
     {
         baseId = "mer_fish_salmon",
@@ -58,6 +53,7 @@ local commonFish = {
                 id = "mer_meat_salmon",
                 min = 1,
                 max = 3,
+                isMeat = true,
             }
         }
     },
@@ -91,19 +87,8 @@ local commonFish = {
         size = 1.1,
         difficulty = 30,
         class = "small",
+        isBaitFish = true,
         niche = {},
-        harvestables = {
-            {
-                id = "mer_meat_sfish_sm",
-                min = 1,
-                max = 2,
-            },
-            {
-                id = "ingred_scales_01",
-                min = 1,
-                max = 2,
-            }
-        }
     },
     {
         baseId = "mer_fish_trigger",
@@ -113,6 +98,7 @@ local commonFish = {
         size = 1.0,
         difficulty = 50,
         class = "small",
+        isBaitFish = true,
         niche = {
             regions = {
                 "Azura's Coast Region",
@@ -146,6 +132,7 @@ local uncommonFish = {
                 id = "mer_meat_tambaqui",
                 min = 2,
                 max = 5,
+                isMeat = true,
             }
         }
     },
@@ -157,6 +144,7 @@ local uncommonFish = {
         size = 1.1,
         difficulty = 40,
         class = "small",
+        isBaitFish = true,
         niche = {
             regions = {
                 "West Gash Region",
@@ -165,13 +153,6 @@ local uncommonFish = {
                 "day"
             }
         },
-        harvestables = {
-            {
-                id = "mer_meat_arowana",
-                min = 1,
-                max = 4,
-            }
-        }
     },
     {
         baseId = "mer_fish_discus",
@@ -181,19 +162,13 @@ local uncommonFish = {
         size = 1.0,
         difficulty = 40,
         class = "small",
+        isBaitFish = true,
         niche = {
             regions = {
                 "Ascadian Isles Region",
                 "Azura's Coast Region",
             }
         },
-        harvestables = {
-            {
-                id = "mer_meat_discus",
-                min = 1,
-                max = 3,
-            }
-        }
     },
 }
 ---@type Fishing.FishType[]
@@ -231,7 +206,7 @@ local rareFish = {
         },
         harvestables = {
             {
-                id = "mer_ignred_copperscales",
+                id = "mer_ingred_copperscales",
                 min = 2,
                 max = 4,
             }
@@ -254,6 +229,7 @@ local rareFish = {
                 id = "mer_meat_marrow",
                 min = 2,
                 max = 4,
+                isMeat = true,
             },
         }
     },
@@ -367,27 +343,47 @@ local legendaryFish = {
     }
 }
 
+
+
+local Ashfall = include("mer.ashfall.interop")
+---@param fish Fishing.FishType
+local function registerFood(fish)
+    if Ashfall then
+       local obj = fish:getBaseObject()
+       if obj.objectType == tes3.objectType.ingredient then
+            logger:debug("Registering %s as meat", obj.id)
+            Ashfall.registerFoods{
+                [obj.id] = "meat"
+            }
+       end
+    end
+end
+
 local FishType = require("mer.fishing.Fish.FishType")
 for _, fish in ipairs(commonFish) do
     fish.rarity = "common"
     logger:debug("Registering common fish %s", fish.baseId)
-    FishType.register(fish)
+    fish = FishType.register(fish)
+    registerFood(fish)
 end
 
 for _, fish in ipairs(uncommonFish) do
     fish.rarity = "uncommon"
     logger:debug("Registering uncommon fish %s", fish.baseId)
-    FishType.register(fish)
+    fish = FishType.register(fish)
+    registerFood(fish)
 end
 
 for _, fish in ipairs(rareFish) do
     fish.rarity = "rare"
     logger:debug("Registering rare fish %s", fish.baseId)
-    FishType.register(fish)
+    fish = FishType.register(fish)
+    registerFood(fish)
 end
 
 for _, fish in ipairs(legendaryFish) do
     fish.rarity = "legendary"
     logger:debug("Registering legendary fish %s", fish.baseId)
-    FishType.register(fish)
+    fish = FishType.register(fish)
+    registerFood(fish)
 end

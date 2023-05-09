@@ -86,7 +86,21 @@ end
 --- Update controllers using the current pull/direction values.
 ---
 local function updateControllers()
-    if FishingStateManager.isState("IDLE") then
+    ---@type table<Fishing.fishingState, boolean>
+    local animStates = {
+        IDLE = false,
+        CASTING = false,
+        WAITING = false,
+        CHASING = false,
+        BITING = false,
+        REELING = true,
+        CATCHING = true,
+        BLOCKED = false,
+    }
+
+
+    local currentState = FishingStateManager.getCurrentState()
+    if not animStates[currentState] then
         this.disable()
         return
     end

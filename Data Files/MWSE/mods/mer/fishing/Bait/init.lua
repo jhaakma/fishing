@@ -4,10 +4,8 @@
 
 local common = require("mer.fishing.common")
 local logger = common.createLogger("BaitEventHandler")
-local config = require("mer.fishing.config")
 local Bait = require("mer.fishing.Bait.Bait")
 local FishingRod = require("mer.fishing.FishingRod.FishingRod")
-local UI = require("mer.fishing.ui")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 
 ---comment
@@ -20,58 +18,40 @@ local function onEquip(e)
     local itemId = e.item.id:lower()
     local bait = Bait.get(itemId)
     if bait then
+        local baitObject = tes3.getObject(itemId)
         local currentBait = fishingRod:getEquippedBait()
-        local message = currentBait
-            and string.format("Replace %s with %s?", currentBait:getName(), bait:getName())
-            or string.format("Equip %s?", bait:getName())
+        local message = string.format("%s - %s", bait:getName(), bait:getTypeName())
+        local equipMessage = currentBait
+            and string.format("Replace %s", currentBait:getName())
+            or string.format("Attach %s", bait:getName())
         tes3ui.showMessageMenu{
             message = message,
-            cancels = true,
             buttons = {
                 {
-                    text = "Yes",
+                    text = equipMessage,
                     callback = function()
                         logger:debug("Equipping bait %s", itemId)
                         fishingRod:equipBait(bait)
                     end
                 },
-            }
+                {
+                    text = "Eat",
+                    showRequirements = function()
+                        return baitObject.objectType == tes3.objectType.ingredient
+                    end,
+                    callback = function()
+                        tes3.player.mobile:equip{ ---@diagnostic disable-line
+                            item = e.item,--[[@as tes3ingredient]]
+                            itemData = e.itemData,
+                            playSound = false
+                        }
+                    end
+                },
+            },
+            cancels = true,
         }
         --block event
         return false
     end
 end
 event.register("equip", onEquip, { priority = 500})
-
-
----@param e uiObjectTooltipEventData
-event.register("uiObjectTooltip", function(e)
-    local bait = Bait.get(e.object.id:lower())
-    if bait then
-        UI.addLabelToTooltip(
-            e.tooltip,
-            bait:getTypeName(),
-            config.constants.TOOLTIP_COLOR_BAIT
-        )
-        return
-    end
-
-    local fishingRod = FishingRod.new{
-        item = e.object,
-        itemData = e.itemData
-    }
-    if fishingRod then
-        local equippedBait = fishingRod:getEquippedBait()
-        if equippedBait then
-
-            local labelText = string.format("%s - %s",
-                equippedBait:getTypeName(),
-                equippedBait:getName()
-            )
-            if equippedBait.uses then
-                labelText = string.format("%s (%d uses)", labelText, equippedBait.uses)
-            end
-            UI.addLabelToTooltip( e.tooltip,  labelText, config.constants.TOOLTIP_COLOR_BAIT )
-        end
-    end
-end)

@@ -16,8 +16,11 @@ local Bait = require("mer.fishing.Bait.Bait")
 local FishingService = {}
 
 local function getBiteDuration()
-    -- local min = 0.1
-    local min = 1.0
+    if config.mcm.cheatMode then
+        return 2.0
+    end
+    --TODO: base on fishing skill
+    local min = 0.1
     local max = 1.0
     return math.random(min*100, max*100)/100
 end
@@ -56,9 +59,7 @@ local function launchLure(lure, landCallback)
         if success then
             landCallback()
         else
-            if safeLure and safeLure:valid()  then
-                lure:delete()
-            end
+            FishingStateManager.endFishing()
         end
     end
 
@@ -88,7 +89,6 @@ local function launchLure(lure, landCallback)
                 and result.distance < 10
             if hitGround then
                 logger:debug("Lure hit ground, stopping updateLurePosition")
-                FishingStateManager.setState("IDLE")
                 finish(false)
                 return
             end
@@ -174,9 +174,11 @@ end
 
 ---Calculate the chance a bite is real or just a nibble
 local function calculateRealBiteChance()
+    if config.mcm.cheatMode then
+        return true
+    end
     --TODO: base on skill etc
-    -- return math.random() < 0.50
-    return true
+    return math.random() < 0.50
 end
 
 local function endBite()
@@ -224,7 +226,6 @@ local function startFish()
     local to = lure.position
     local from = SwimService.findTargetPosition{
         origin = to,
-        ignoreList = { lure },
     }
     if from then
         FishingStateManager.setState("CHASING")
@@ -342,23 +343,22 @@ end
 
 function FishingService.startSwing()
     local state = FishingStateManager.getCurrentState()
+
+    local rod = FishingRod:getEquipped()
     if (state == "WAITING") or (state == "CHASING") then
-        logger:debug("CHASING - cancel fishing")
+        logger:debug("%s cancel fishing", state)
         tes3.messageBox("You fail to catch anything.")
-        FishingStateManager.endFishing()
         local lure = FishingStateManager.getLure()
         if not lure then
             logger:warn("No lure found")
             return
         end
-        local fish = FishingStateManager.getCurrentFish()
-        if not fish then
-            logger:warn("No fish found")
-            return
-        end
-        Animations.splash(lure.position, fish:getSplashSize())
+        Animations.splash(lure.position, 1.5)
+        if rod then rod:useBait() end
+        FishingStateManager.endFishing()
     elseif state == "BITING" then
         logger:debug("BITING - catch a fish")
+        if rod then rod:useBait() end
         startFight()
     else
         logger:debug("Activate blocked by state - %s", state)

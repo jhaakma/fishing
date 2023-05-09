@@ -68,6 +68,12 @@ local function registerMCM()
         end
     }
 
+    page:createYesNoButton{
+        label = "Enable cheat mode",
+        description = "Makes fish strike instantly, for testing/debugging purposes only.",
+        variable = mwse.mcm.createTableVariable{ id = "cheatMode", table = config.mcm },
+    }
+
     page:createDropdown{
         label = "Log Level",
         description = "Set the logging level for all Fishing Loggers.",
@@ -85,6 +91,8 @@ local function registerMCM()
             end
         end
     }
+
+
 
 end
 event.register("modConfigReady", registerMCM)

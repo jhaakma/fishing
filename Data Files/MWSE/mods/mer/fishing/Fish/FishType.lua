@@ -3,6 +3,8 @@ local Niche = require("mer.fishing.Fish.Niche")
 local common = require("mer.fishing.common")
 local logger = common.createLogger("FishType")
 local Bait = require("mer.fishing.Bait.Bait")
+local Ashfall = include("mer.ashfall.interop")
+local Harvest = require("mer.fishing.Harvest")
 
 ---@alias Fishing.FishType.rarity
 ---| '"common"'
@@ -18,10 +20,11 @@ local Bait = require("mer.fishing.Bait.Bait")
 
 ---@class Fishing.FishType.Harvestable
 ---@field id string The id of the object that is harvested
----@field min number The minimum amount of the object that can be harvested
----@field max number The maximum amount of the object that can be harvested
+---@field min number The minimum amount of the object that is harvested
+---@field max number The maximum amount of the object that is harvested
+---@field isMeat boolean If true, the object is treated as meat for Ashfall cooking purposes
 
----@class Fishing.FishType
+---@class Fishing.FishType.new.params
 ---@field baseId string The id of the base object representation of the fish
 ---@field previewMesh? string The mesh to be displayed in the trophy menu
 ---@field description string The description to be displayed when the fish is caught
@@ -31,7 +34,10 @@ local Bait = require("mer.fishing.Bait.Bait")
 ---@field class Fishing.FishType.class The class of the fish. Default "medium"
 ---@field rarity Fishing.FishType.rarity The rarity of the fish. Default "common"
 ---@field niche? Fishing.FishType.Niche The niche where the fish can be found
----@field harvestables? Fishing.FishType.Harvestable[] The harvestables that can be obtained from the fish
+---@field harvestables? Fishing.FishType.Harvestable[] The item that can be harvested from the fish
+---@field isBaitFish? boolean If true, this fish can be used as live bait
+
+---@class Fishing.FishType : Fishing.FishType.new.params
 local FishType = {
     --- A list of all registered fish types
     ---@type table<string, Fishing.FishType>
@@ -66,7 +72,49 @@ function FishType.new(e)
     self.rarity = e.rarity or "common"
     self.niche = Niche.new(e.niche)
     self.harvestables = e.harvestables
+    self.isBaitFish = e.isBaitFish
+
+    Harvest.registerFish(self)
+    if Ashfall then
+        local obj = self:getBaseObject()
+        if obj.objectType == tes3.objectType.ingredient then
+             logger:debug("Registering %s as meat", obj.id)
+             Ashfall.registerFoods{
+                 [obj.id] = "meat"
+             }
+        end
+        --register isMeat harvestables
+        if self.harvestables then
+            for _, harvestable in ipairs(self.harvestables) do
+                if harvestable.isMeat then
+                    logger:debug("Registering %s as meat", harvestable.id)
+                    Ashfall.registerFoods{
+                        [harvestable.id] = "meat"
+                    }
+                end
+            end
+        end
+    end
     return self
+end
+
+function FishType.get(id)
+    return FishType.registeredFishTypes[id:lower()]
+end
+
+---Register a new type of fish
+function FishType.register(e)
+    local fish = FishType.new(e)
+    FishType.registeredFishTypes[fish.baseId] = fish
+
+    if fish.isBaitFish then
+        Bait.register{
+            id = fish.baseId,
+            type = "baitfish",
+            uses = 10,
+        }
+    end
+    return fish
 end
 
 function FishType:getStartingFatigue()
@@ -77,20 +125,9 @@ function FishType:getBaseObject()
     return tes3.getObject(self.baseId) --[[@as tes3misc]]
 end
 
----Register a new type of fish
-function FishType.register(e)
-    local fish = FishType.new(e)
-    FishType.registeredFishTypes[fish.baseId] = fish
-    local isSmall = fish.class == "small"
-    local lowQuality = fish.rarity == "common" or fish.rarity == "uncommon"
-    if isSmall and lowQuality then
-        Bait.register{
-            id = fish.baseId,
-            type = "baitfish",
-            uses = 10,
-        }
-    end
-    return fish
+function FishType:canHarvest()
+    return self.harvestables
+        and #self.harvestables > 0
 end
 
 ---Create an instance of a fish

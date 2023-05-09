@@ -7,16 +7,47 @@ local logger = common.createLogger("SwimService")
 local config = require("mer.fishing.config")
 local RippleGenerator = require("mer.fishing.Fishing.RippleGenerator")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
+local FishingRod = require("mer.fishing.FishingRod.FishingRod")
 
 function SwimService.deepEnough(location)
     local ray = tes3.rayTest{
         position = location,
         direction = tes3vector3.new(0,0,-1),
         maxDistance = config.constants.MIN_DEPTH,
-        ignore = FishingStateManager.getIgnoreRefs()
+        ignore = FishingStateManager.getIgnoreRefs(),
     }
     if ray then
         logger:debug("Depth %s too shallow. Hit: %s", ray.distance, ray.reference)
+        return false
+    end
+    return true
+end
+
+local function hasLineOfSight(startPosition, targetPosition)
+    local direction = (targetPosition - startPosition):normalized()
+    local maxDistance = startPosition:distance(targetPosition)
+    logger:trace([[
+        Class: SwimService
+        Method: hasLineOfSight
+        Params:
+            startPosition: %s
+            targetPosition: %s
+            direction: %s
+            maxDistance: %s
+    ]], startPosition, targetPosition, direction, maxDistance)
+
+    local ray = tes3.rayTest{
+        position = startPosition,
+        direction = direction,
+        maxDistance = maxDistance,
+        ignore = FishingStateManager.getIgnoreRefs()
+    }
+    if ray then
+        logger:debug("Line of sight blocked by %s", ray.object)
+        -- tes3.createReference{
+        --     object = "gold_001",
+        --     position = ray.intersection
+        -- }
         return false
     end
     return true
@@ -29,12 +60,20 @@ local function getTargetPosition(startPosition, direction, distance)
         position = startPosition,
         direction = direction,
         maxDistance = distance,
-        useBackTriangles = true,
+        --useBackTriangles = true,
         ignore = ignoreList,
     }
     local hitSomething = ray ~= nil
     if not hitSomething then
         local targetPosition = startPosition + (direction * distance)
+        --local rodEnd = FishingRod.getPoleEndPosition()
+
+        local rodEnd = tes3.getCameraPosition()
+        if rodEnd and not hasLineOfSight(targetPosition, rodEnd) then
+            logger:debug("Line of sight to rod is blocked")
+            return nil
+        end
+
         if not SwimService.deepEnough(targetPosition) then
             logger:debug("Too shallow")
             return nil
@@ -97,6 +136,25 @@ function SwimService.findTargetPosition(e)
     end
 end
 
+---@param startPosition tes3vector3
+---@param distance number
+function SwimService.findPositionTowardsPlayer(startPosition, distance)
+    --find the position along the water plane towards the player by given distance,
+    -- or shorter if there is a collision
+    local playerPos = tes3vector3.new(
+        tes3.player.position.x,
+        tes3.player.position.y,
+        startPosition.z
+    )
+    local direction = (playerPos - startPosition):normalized()
+    logger:debug("Direction: %s", direction)
+
+    local targetPosition = getTargetPosition(startPosition, direction, distance)
+    if targetPosition then
+        return targetPosition
+    end
+end
+
 ---@class Fishing.SwimService.startSwimming.params
 ---@field from tes3vector3
 ---@field to tes3vector3
@@ -113,7 +171,7 @@ end
 ---@param e Fishing.SwimService.startSwimming.params
 function SwimService.startSwimming(e)
     logger:debug("Starting to swim")
-    local currentPosition = e.from
+    local currentPosition = e.from:copy()
     local fishTimer
     local currentState = FishingStateManager.getCurrentState()
     local safeLure

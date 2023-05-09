@@ -1,39 +1,49 @@
---[[
-    Common UI functions
-]]
+--event handler for UI tooltips etc
 
-local UI = {}
-function UI.addLabelToTooltip(tooltip, labelText, color)
-    local function setupOuterBlock(e)
-        e.flowDirection = 'left_to_right'
-        e.paddingTop = 0
-        e.paddingBottom = 2
-        e.paddingLeft = 6
-        e.paddingRight = 6
-        e.autoWidth = true
-        e.autoHeight = true
-        e.childAlignX = 0.5
+local UI = require("mer.fishing.ui.Helper")
+local FishType = require("mer.fishing.Fish.FishType")
+local config = require("mer.fishing.config")
+local FishingRod = require("mer.fishing.FishingRod.FishingRod")
+local Bait = require("mer.fishing.Bait.Bait")
+
+---@param e uiObjectTooltipEventData
+event.register("uiObjectTooltip", function(e)
+    local bait = Bait.get(e.object.id:lower())
+    if bait then
+        UI.addLabelToTooltip(
+            e.tooltip,
+            bait:getTypeName(),
+            config.constants.TOOLTIP_COLOR_BAIT
+        )
+        return
     end
-    --Get main block inside tooltip
-    local partmenuID = tes3ui.registerID('PartHelpMenu_main')
-    local mainBlock = tooltip:findChild(partmenuID)
-        and tooltip:findChild(partmenuID):findChild(partmenuID):findChild(partmenuID)
-        or tooltip
 
-    local outerBlock = mainBlock:createBlock()
-    setupOuterBlock(outerBlock)
-
-    mainBlock:reorderChildren(1, -1, 1)
-    mainBlock:updateLayout()
-    if labelText then
-        local label = outerBlock:createLabel({text = labelText})
-        label.autoHeight = true
-        label.autoWidth = true
-        label.widthProportional = 1.0
-        if color then label.color = color end
-        return label
+    local fishType = FishType.get(e.object.id)
+    if fishType and fishType:canHarvest() then
+        UI.addLabelToTooltip(
+            e.tooltip,
+            "Harvestable",
+            config.constants.TOOLTIP_COLOR_BAIT
+        )
+        return
     end
-    return outerBlock
-end
 
-return UI
+    local fishingRod = FishingRod.new{
+        item = e.object,
+        itemData = e.itemData
+    }
+    if fishingRod then
+        local equippedBait = fishingRod:getEquippedBait()
+        if equippedBait then
+
+            local labelText = string.format("%s - %s",
+                equippedBait:getTypeName(),
+                equippedBait:getName()
+            )
+            if equippedBait.uses then
+                labelText = string.format("%s (%d uses)", labelText, equippedBait.uses)
+            end
+            UI.addLabelToTooltip( e.tooltip,  labelText, config.constants.TOOLTIP_COLOR_BAIT )
+        end
+    end
+end, { priority = -50 })

@@ -20,6 +20,10 @@ function FishInstance.new(fishType)
     return self
 end
 
+function FishInstance:getName()
+    return self.fishType:getBaseObject().name
+end
+
 function FishInstance:getInstanceObject()
     return tes3.getObject(self.fishType.baseId) --[[@as tes3misc]]
 end
@@ -46,5 +50,22 @@ function FishInstance:getReelSpeed()
     return speed
 end
 
+function FishInstance:getDistanceModifier()
+    local currentFatigue = self.fatigue
+    local maxFatigue = self.fishType:getStartingFatigue()
+    local difficulty = self.fishType.difficulty
+    local difficultyModifier = math.remap(difficulty,
+        0, 100,
+        50, 150
+    )
+    local fatigueEffect = math.remap(currentFatigue,
+        0, maxFatigue,
+        0, 1.0
+    )
+    local distance = difficultyModifier * fatigueEffect
+    logger:debug("%s getDistanceModifier() distance: %s",
+        self:getName(), distance)
+    return distance
+end
 
 return FishInstance

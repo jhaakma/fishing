@@ -8,10 +8,11 @@ event.register("initialized", function()
     require("mer.fishing.PlayerAnimations")
     require("mer.fishing.Fishing")
     require("mer.fishing.Bait")
+    require("mer.fishing.ui")
 
     --Integrations
     require("mer.fishing.integrations.bait")
-    require("mer.fishing.integrations.bushcrafting")
+    require("mer.fishing.integrations.ashfall")
     require("mer.fishing.integrations.fishTypes")
     require("mer.fishing.integrations.fishingRods")
 
