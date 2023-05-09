@@ -59,7 +59,7 @@ local BaitTypes = {
         description = "Most effective at catching medium sized fish.",
         getFishEffect = function(self, fish)
             local classes = {
-                small = 0.2,
+                small = 0.4,
                 medium = 1.0,
                 large = 0.1,
             }
@@ -119,6 +119,11 @@ local baits = {
 
     {
         id = "ingred_pearl_01",
+        type = "shiny",
+        uses = 10,
+    },
+    {
+        id = "ingred_scales_01",
         type = "shiny",
         uses = 10,
     },

@@ -134,7 +134,7 @@ local function createCloseButton(parent, okCallback)
     block.autoHeight = true
     block.childAlignX = 1.0
 
-    local closeButton = block:createButton{ text = "Close" }
+    local closeButton = block:createButton{ text = "Take" }
     closeButton:register("mouseClick", function()
         local menu = getMenu()
         if menu then

@@ -1,7 +1,6 @@
 local common = require("mer.fishing.common")
 local logger = common.createLogger("FishingStateManager")
 local config = require("mer.fishing.config")
-local FishingRod = require("mer.fishing.FishingRod.FishingRod")
 
 ---@class Fishing.FishingStateManager
 local FishingStateManager = {}
@@ -161,11 +160,35 @@ function FishingStateManager.setPreviousWaveHeight(height)
 end
 
 function FishingStateManager.getIgnoreRefs()
-    return {
-        FishingStateManager.getLure(),
-        tes3.player,
-        FishingStateManager.getParticle()
+    local ignoreNodes = {
+        tes3.player.sceneNode,
+        ---@diagnostic disable-next-line: undefined-field
+        tes3.dataHandler.waterController.waterPlane
     }
+
+    local lure = FishingStateManager.getLure()
+    if lure then
+        table.insert(ignoreNodes, lure.sceneNode)
+    end
+    local fishingLine = FishingStateManager.getFishingLine()
+    if fishingLine then
+        table.insert(ignoreNodes, fishingLine.sceneNode)
+    end
+
+    local particle = FishingStateManager.getParticle()
+    if particle then
+        table.insert(ignoreNodes, particle)
+    end
+
+    for _, cell in pairs(tes3.getActiveCells()) do
+        for ref in cell:iterateReferences() do
+            if ref.sceneNode and ref.mobile then
+                table.insert(ignoreNodes, ref.sceneNode)
+            end
+        end
+    end
+
+    return ignoreNodes
 end
 
 --Clear all data
@@ -180,19 +203,25 @@ function FishingStateManager.clearData()
 end
 
 function FishingStateManager.endFishing()
-    local rod = FishingRod:getEquipped()
-    if rod then rod:useBait() end
 
     logger:debug("Cancelling fishing")
     FishingStateManager.removeLure()
-    -- common.enablePlayerControls()
+
     event.trigger("Fishing:UnclampWaves")
     FishingStateManager.clearData()
     --give time for waves to settle
+
+
+    local alreadyEnded = FishingStateManager.isState("IDLE")
+    if alreadyEnded then
+        logger:debug("already ended")
+        return
+    end
     FishingStateManager.setState("BLOCKED")
     timer.start{
         duration = 0.5,
         callback = function()
+            common.enablePlayerControls()
             FishingStateManager.setState("IDLE")
         end
     }

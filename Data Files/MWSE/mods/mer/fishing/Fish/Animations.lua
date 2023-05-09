@@ -24,21 +24,6 @@ function Animations.splash(position, size)
     })
 end
 
-function Animations.reverseSwing()
-    logger:debug("Playing snap animation")
-    --cancelling swing animation
-    timer.start{
-        duration = 0.2,
-        callback = function()
-            tes3.mobilePlayer.animationController.weaponSpeed = -tes3.mobilePlayer.animationController.weaponSpeed
-            timer.start{duration = 0.2, callback = function()
-                tes3.mobilePlayer.actionData.animationAttackState = tes3.animationState.idle
-                tes3.mobilePlayer.animationController.weaponSpeed = 1
-            end}
-        end
-    }
-end
-
 function Animations.lureLand(lure)
     tes3.playAnimation{
         reference = lure,

@@ -4,7 +4,6 @@ local config = require("mer.fishing.config")
 local SwimService = require("mer.fishing.Fishing.SwimService")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 local FishingRod = require("mer.fishing.FishingRod.FishingRod")
-local Animations = require("mer.fishing.Fish.Animations")
 local FightIndicator = require("mer.fishing.ui.FightIndicator")
 
 
@@ -35,15 +34,23 @@ function FightManager:endFight()
     FishingRod.stopReelSound()
     event.unregister("simulate", simulateFight)
     self.reeling = nil
-    self.fightIndicator:destroy()
-    self.fightIndicator = nil
-    common.enablePlayerControls()
+    if self.fightIndicator then
+        self.fightIndicator:destroy()
+        self.fightIndicator = nil
+    end
 end
 
-function FightManager:fail(reason)
+function FightManager:fail(reason, playSound)
     logger:debug("Fight failed: %s", reason)
+    if playSound then
+        tes3.playSound{
+            reference = tes3.player,
+            sound = "mer_fish_snap",
+        }
+    end
     self:endFight()
     self:callback(false, reason)
+
     self.reeling = nil
 end
 
@@ -53,13 +60,49 @@ function FightManager:success()
     self:callback(true)
 end
 
+local function getPlayerStrengthEffect()
+    local strength = tes3.mobilePlayer.strength.current
+    local effect = math.remap(strength, 0, 100, 0.5, 1.5)
+    logger:debug("Strength effect: %s", effect)
+    return effect
+end
+
+function FightManager:getDistanceModifier()
+    local fish = FishingStateManager.getCurrentFish()
+    if not fish then
+        logger:warn("Fish not found")
+        return 0
+    end
+
+    --When tension is high, reduce fish's pull
+    local tensionEffect = math.remap(self:getTension(),
+        config.constants.TENSION_MINIMUM,
+        config.constants.TENSION_MAXIMUM,
+        1.0,
+        config.constants.FIGHT_TENSION_DISTANCE_EFFECT_MAXIMUM
+    )
+
+    local distanceTowardsPlayer = -(fish:getDistanceModifier() * tensionEffect)
+
+    --When reeling, pull towards player
+    local reelingEffect = (self.reeling == true)
+        and (config.constants.FIGHT_REELING_DISTANCE_EFFECT * getPlayerStrengthEffect())
+        or 0
+
+
+    distanceTowardsPlayer = (distanceTowardsPlayer + reelingEffect)
+    return distanceTowardsPlayer
+end
+
 function FightManager:pickTargetPosition()
-    logger:trace("Picking target position")
+    logger:debug("Picking target position")
     local lure = FishingStateManager.getLure()
     if not lure then
         logger:warn("Lure not found")
         return
     end
+
+
     local targetPosition = SwimService.findTargetPosition{
         origin = lure.position,
         minDistance = 50,
@@ -68,6 +111,15 @@ function FightManager:pickTargetPosition()
     if not targetPosition then
         logger:debug("No target position found")
         return
+    end
+
+    local distanceTowardsPlayer = self:getDistanceModifier()
+    local positionTowardsPlayer = SwimService.findPositionTowardsPlayer(targetPosition:copy(), distanceTowardsPlayer)
+    if positionTowardsPlayer then
+       logger:warn("Moving position %s unites towards the player from fatigue", distanceTowardsPlayer)
+       targetPosition = positionTowardsPlayer
+    else
+       logger:error("No position found towards the player")
     end
     logger:debug("Target position: %s", targetPosition)
     self.targetPosition = targetPosition
@@ -147,7 +199,7 @@ function FightManager:updateTension()
     if fishingLine then
         fishingLine:setTension(tension)
     end
-    logger:debug([[
+    logger:trace([[
         lineLength: %s
         actualLineLength: %s
         difference: %s
@@ -159,6 +211,7 @@ function FightManager:updateTension()
 end
 
 
+
 function FightManager:startSwim()
     local lure = FishingStateManager.getLure()
     if not lure then
@@ -168,6 +221,11 @@ function FightManager:startSwim()
     end
     if not self.targetPosition then
         self:pickTargetPosition()
+        if not self.targetPosition then
+            logger:error("No target position found")
+            self:fail("Line Snapped!", true)
+            return
+        end
         SwimService.startSwimming{
             speed = self.fish:getReelSpeed(),
             from = lure.position,
@@ -209,7 +267,7 @@ function FightManager:tireFish(delta)
     local tensionEffect = math.remap(tension, minTension, maxTension, 0.0, 2.0)
 
     local strength = tes3.player.mobile.strength.current
-    local strengthEffect = math.remap(strength, 0, 100, 0.0, 1.5)
+    local strengthEffect = math.remap(strength, 0, 100, 0.75, 1.25)
 
     local fatigueDrain = config.constants.FIGHT_FATIGUE_DRAIN_PER_SECOND
 
@@ -227,15 +285,23 @@ function FightManager:tirePlayer(delta)
     else
         local fishStrength = self.fish.fishType.difficulty
         local fishStrengthEffect = math.remap(fishStrength, 0, 100, 0.5, 1.5)
+
+        local tension = self:getTension()
+        local maxTension = config.constants.FIGHT_TENSION_UPPER_LIMIT
+        local minTension = config.constants.FIGHT_TENSION_LOWER_LIMIT
+        local tensionEffect  = math.remap(tension, minTension, maxTension, 0.0, 2.0)
+
         change = config.constants.FIGHT_PLAYER_FATIGUE_REELING_DRAIN_PER_SECOND
-            * fishStrengthEffect * delta
+            * tensionEffect * fishStrengthEffect * delta
         logger:trace([[
             Fish strength: %s
             Fish strength effect: %s
+            Tension effect: %s
             Change: %s
             Player fatigue: %s
         ]], fishStrength,
             fishStrengthEffect,
+            tensionEffect,
             change,
             self.playerFatigue
         )
@@ -272,7 +338,6 @@ function FightManager:fightSimulate(e)
             doLoop = true,
             pitch = 1.5
         }
-        Animations.reverseSwing()
     elseif self.reeling and not leftMouseDown then
         logger:debug("Stopped Reeling")
         self.reeling = false
@@ -285,14 +350,10 @@ function FightManager:fightSimulate(e)
     self:tirePlayer(e.delta)
     self:updateLineLength(e.delta)
     self:updateTension()
-    -- tes3.messageBox("Tension: %s\nFatigue: %s",
-    --     FishingStateManager.getFishingLine():getTension(),
-    --     self.fish.fatigue
-    -- )
 
     local fishingLine = FishingStateManager.getFishingLine()
     if fishingLine and fishingLine:getTension() >= config.constants.FIGHT_TENSION_UPPER_LIMIT then
-        self:fail("Line Snapped!")
+        self:fail("Line Snapped!", true)
         return
     end
     if fishingLine and fishingLine:getTension() <= config.constants.FIGHT_TENSION_LOWER_LIMIT then
@@ -357,7 +418,9 @@ function FightManager:start()
 
     local doCancel
     doCancel = function()
-        self:fail("Cancelled")
+        if FishingStateManager.isState("REELING") then
+            self:fail("Cancelled")
+        end
         event.unregister("Fishing:Cancel", doCancel)
     end
     event.register("Fishing:Cancel", doCancel)
