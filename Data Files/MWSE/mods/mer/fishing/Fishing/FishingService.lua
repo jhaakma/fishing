@@ -231,6 +231,7 @@ local function startFish()
         FishingStateManager.setState("CHASING")
         SwimService.startSwimming{
             speed = fish:getChaseSpeed(),
+			turnSpeed = 5.0,
             from = from,
             to = to,
             callback = function()
