@@ -9,31 +9,42 @@ config.constants = {
     --Minimum distance from lure to fish start position
     FISH_POSITION_DISTANCE_MIN = 300,
     --Maximum distance from lure to fish start position
-    FISH_POSITION_DISTANCE_MAX = 700,
+    FISH_POSITION_DISTANCE_MAX = 600,
     --The interval between ripples when a fish is moving
     FISH_RIPPLE_INTERVAL = 0.05,
     --Fish Speed
     FISH_SPEED = 75,
+    --The minimum distance the fish must be away from the shore
+    WATER_POSITION_PADDING = 200,
 
     --Fishing line
-    MIN_CAST_SPEED = 100,
-    MAX_CAST_SPEED = 450,
+    MIN_CAST_SPEED = 150,
+    MAX_CAST_SPEED = 600,
 
     --The max distance the lure can be from the player before the line breaks
     FISHING_LINE_MAX_DISTANCE = 5000,
     MIN_DEPTH = 40,
 
     TENSION_NEUTRAL = 0.7,
-
     TENSION_MINIMUM = -0.1,
     TENSION_MAXIMUM = 1.5,
     FIGHT_TENSION_UPPER_LIMIT = 1.2,
     FIGHT_TENSION_LOWER_LIMIT = 0.2,
-    REEL_DISTANCE_PER_SECOND = 300,
-    RELAX_DISTANCE_PER_SECOND = 200,
+
+    --The effect of distance while reeling in
+    FIGHT_REELING_DISTANCE_EFFECT = 150,
+    --How fast tension increases while reeling in
+    REEL_LENGTH_PER_SECOND = 300,
+    --How fast the tension relaxes when not reeling
+    RELAX_LENGTH_PER_SECOND = 150,
     --the distance at which tension will reach breaking point
     FIGHT_MAX_DISTANCE = 300,
+    --Base level of fatigue drain for a fish during a fight
     FIGHT_FATIGUE_DRAIN_PER_SECOND = 5,
+    ---Minimum distance to next target during fight
+    FIGHT_POSITION_MIN_DISTANCE = 50,
+    ---Maximum distance to next target during fight
+    FIGHT_POSITION_MAX_DISTANCE = 150,
 
     --player fatigue
     --the amount of fatigue drained per second when the player is reeling
@@ -44,7 +55,7 @@ config.constants = {
     --The a multiplier on the distance towards the player the fish will pull based on tension
     FIGHT_TENSION_DISTANCE_EFFECT_MAXIMUM = 0.5,
 
-    FIGHT_REELING_DISTANCE_EFFECT = 200,
+
 
     --Tooltips
     TOOLTIP_COLOR_BAIT = {

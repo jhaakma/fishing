@@ -15,8 +15,11 @@ local FightIndicator = require("mer.fishing.ui.FightIndicator")
 ---@field lineLength number how mich fishing line is out
 ---@field fightIndicator Fishing.FightIndicator
 ---@field playerFatigue number accululation of fatigue drain, when it reaches one, subtract it from the player
+---@field fishPhysics table<number, Fishing.FishPhysics> physics for each fish
+---@field ended boolean
 local FightManager = {}
 local simulateFight
+
 
 ---@param e Fishing.FightManager
 function FightManager.new(e)
@@ -27,7 +30,8 @@ function FightManager.new(e)
     }
     self.callback = e.callback
     self.playerFatigue = 0
-	self.fishPhysics = {}
+    self.fishPhysics = {}
+    self.ended = false
     return self
 end
 
@@ -39,23 +43,31 @@ function FightManager:endFight()
         self.fightIndicator:destroy()
         self.fightIndicator = nil
     end
+    self.ended = true
 end
 
-function FightManager:fail(reason, playSound)
+function FightManager:fail(reason, didSnap)
+    if self.ended then return end
     logger:debug("Fight failed: %s", reason)
-    if playSound then
+
+    self:endFight()
+    self:callback(false, reason)
+    self.reeling = nil
+    if didSnap then
         tes3.playSound{
             reference = tes3.player,
             sound = "mer_fish_snap",
         }
+        tes3.playVoiceover({ actor = tes3.player, voiceover = tes3.voiceover.hit })
+        tes3.playAnimation({
+            reference = tes3.player,
+            group = math.random(tes3.animationGroup.hit1, tes3.animationGroup.hit5),
+        })
     end
-    self:endFight()
-    self:callback(false, reason)
-
-    self.reeling = nil
 end
 
 function FightManager:success()
+    if self.ended then return end
     logger:debug("Fight succeeded")
     self:endFight()
     self:callback(true)
@@ -107,8 +119,8 @@ function FightManager:pickTargetPosition()
 
     local targetPosition = SwimService.findTargetPosition{
         origin = lure.position,
-        minDistance = 50,
-        maxDistance = 200,
+        minDistance = config.constants.FIGHT_POSITION_MIN_DISTANCE,
+        maxDistance = config.constants.FIGHT_POSITION_MAX_DISTANCE,
     }
     if not targetPosition then
         logger:debug("No target position found")
@@ -230,8 +242,8 @@ function FightManager:startSwim()
         end
         SwimService.startSwimming{
             speed = self.fish:getReelSpeed(),
-			turnSpeed = 5.0,
-			physics = self.fishPhysics,
+            turnSpeed = math.random(3, 6),
+            physics = self.fishPhysics,
             from = lure.position,
             to = self.targetPosition,
             lure = lure,
@@ -249,11 +261,11 @@ end
 
 function FightManager:updateLineLength(delta)
     if self.reeling then
-        local change = delta * -config.constants.REEL_DISTANCE_PER_SECOND
+        local change = delta * -config.constants.REEL_LENGTH_PER_SECOND
         logger:trace("Reeling: %s", change)
         self:changeLineLength(change)
     else
-        local change = delta * config.constants.RELAX_DISTANCE_PER_SECOND
+        local change = delta * config.constants.RELAX_LENGTH_PER_SECOND
         logger:trace("Relaxing: %s", change)
         self:changeLineLength(change)
     end

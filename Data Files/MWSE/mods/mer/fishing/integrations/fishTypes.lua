@@ -117,7 +117,7 @@ local uncommonFish = {
         previewMesh = "mer_fishing\\f\\tambaqui.nif",
         description = "The tambaqui is a large tropical fish found along the eastern coast of Vvardenfell.",
         speed = 100,
-        size = 2.4,
+        size = 2.0,
         difficulty = 50,
         class = "medium",
         niche = {
@@ -170,6 +170,26 @@ local uncommonFish = {
             }
         },
     },
+    {
+        baseId = "mer_fish_angelshark",
+        previewMesh = "mer_fishing\\f\\angel.nif",
+        description = "The Angelshark is small for a shark, but still formidable. They are found all throughout the waters of Vvardenfell.",
+        speed = 150,
+        size = 1.3,
+        class = "medium",
+        difficulty = 50,
+        niche = {
+            minDepth = 200,
+        },
+        harvestables = {
+            {
+                id = "mer_meat_angelshark",
+                min = 1,
+                max = 1,
+                isMeat = true,
+            }
+        }
+    }
 }
 ---@type Fishing.FishType[]
 local rareFish = {
@@ -284,6 +304,19 @@ local legendaryFish = {
                 spinner = 100
             }
         },
+        harvestables = {
+            {
+                id = "mer_meat_ashclaw",
+                min = 1,
+                max = 1,
+                isMeat = true,
+            },
+            {
+                id = "mer_ingred_ashlegs",
+                min = 1,
+                max = 1,
+            }
+        }
     },
     {
         baseId = "mer_fish_iskal",

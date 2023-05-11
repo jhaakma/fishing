@@ -102,15 +102,18 @@ CraftingFramework.Tool:new{
     end,
 }
 
+local requiresKnifeEquipped = false
 ---@param e equipEventData
 event.register("equip", function(e)
     logger:debug("Equip event: %s", e.item.id)
     if Harvest.harvestableFish[e.item.id:lower()] then
-        if CraftingFramework.Tool.getTool("knife"):hasInInventory(true) then
+        logger:debug("Equipping harvestable fish")
+        local hasKnife = CraftingFramework.Tool.getTool("knife"):hasInInventory(true)
+        if requiresKnifeEquipped and not hasKnife then
+            tes3.messageBox("Equip a knife to harvest.")
+        else
             logger:debug("Equipping harvestable fish")
             event.trigger(Harvest.menuActivator.id)
-        else
-            tes3.messageBox("Equip a knife to harvest.")
         end
     end
 end)

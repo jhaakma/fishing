@@ -1,0 +1,1 @@
+TES3Stream Warning: Model "C:\games\Morrowind installs\main\Morrowind\Data Files\Meshes\mer_fishing\f\angelshark_gnd.nif" tex not found "textures\mer_fishing\angelshark.dds"!

@@ -1,0 +1,2 @@
+TES3Stream Warning: Model "C:\games\Morrowind installs\main\Morrowind\Data Files\Meshes\mer_fishing\ingred_ashclaw.nif" tex not found "textures\mer_fishing\md_bugfish.dds"!
+Texture Load Error!: textures\mer_fishing\md_bugfish.dds

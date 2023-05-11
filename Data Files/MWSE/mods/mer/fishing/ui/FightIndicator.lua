@@ -20,8 +20,8 @@ local FightIndicator = {
         fatigueBar = "Fishing:FightIndicatorFatigue",
 
     },
-    width = 200,
-    barHeight = 16,
+    width = 360,
+    barHeight = 12,
 }
 
 ---@param e Fishing.FightIndicator.new.params
@@ -88,47 +88,52 @@ function FightIndicator:createTensionBar(parent)
     label.color = tes3ui.getPalette("header_color")
 
     local border = parent:createThinBorder()
-    border.autoHeight = true
     border.autoWidth = true
+    border.autoHeight = true
+    border.widthProportional = 1
+    border.borderTop = 5
+    border.borderBottom = 5
     border.paddingAllSides = 4
-    --create block with 200 width
+    --create block with auto width
     local tensionBar = border:createBlock{
         id = self.uiids.tensionBar,
     }
-    tensionBar.width = self.width
+    tensionBar.widthProportional = 1
     tensionBar.autoHeight = true
 
-    --Add Red bar to the left
+    --Add red bar to the left
+    local red = tes3vector3.new(0.75,0.1,0.1)
+    local extraOverlapZone = 10
     local leftBlock = tensionBar:createRect{
-        color = tes3vector3.new(1,0,0),
+        color = red,
     }
-    leftBlock.width = self.width * getLeftBlockProportion() + 8
+    leftBlock.width = self.width * getLeftBlockProportion() + extraOverlapZone
     leftBlock.height = self.barHeight
     leftBlock.absolutePosAlignX = 0.0
 
-    --Add Red bar to the right
+    --Add red bar to the right
     local rightBlock = tensionBar:createRect{
-        color = tes3vector3.new(1,0,0),
+        color = red,
     }
-    rightBlock.width = self.width * getRightBlockProportion() + 8
+    rightBlock.width = self.width * getRightBlockProportion() + extraOverlapZone
     rightBlock.height = self.barHeight
     rightBlock.absolutePosAlignX = 1.0
 
-
-    --Create tension indicator image
-    local tensionImage = tensionBar:createBlock{
+    --Create tension indicator image, overlapping other UI elements via ignoreLayout
+    local tensionImage = parent:createBlock{
         id = self.uiids.tensionIndicator,
     }
+    tensionImage.ignoreLayoutY = true
+    tensionImage.positionY = -26
     tensionImage.autoHeight = true
     tensionImage.autoWidth = true
-    tensionImage.childAlignX = 1.0
 
     local image = tensionImage:createImage{
         path = "textures\\mer_fishing\\tension_indicator.dds",
     }
-    image.width = 32
-    image.height = 16
-
+    image.width = 64
+    image.height = 32
+    image.scaleMode = true
 end
 
 ---@param parent tes3uiElement
@@ -139,17 +144,19 @@ function FightIndicator:createFatigueBar(parent)
     label.absolutePosAlignX = 0.5
     label.color = tes3ui.getPalette("header_color")
 
-    --create block with 200 width
+    --create block with auto width
     local border = parent:createThinBorder()
+    border.widthProportional = 1
+    border.autoWidth = false
     border.autoHeight = true
-    border.autoWidth = true
+
     local fatigueBar = border:createFillBar{
         id = self.uiids.fatigueBar,
         current = self.fightManager.fish.fatigue,
         max = self.fightManager.fish.fatigue,
     } --[[@as tes3uiFillBar]]
-    fatigueBar.width = self.width
-    fatigueBar.height = self.barHeight
+    fatigueBar.widthProportional = 1
+    fatigueBar.height = 20
 
 end
 
@@ -195,7 +202,8 @@ function FightIndicator:createMenu()
 
     --Add border
     local border = background:createThinBorder{}
-    border.autoWidth = true
+    border.width = self.width
+    border.autoWidth = false
     border.autoHeight = true
     border.paddingAllSides = 10
     border.flowDirection = "top_to_bottom"

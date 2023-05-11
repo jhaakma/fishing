@@ -55,7 +55,7 @@ local function getTargetPosition(startPosition, direction, distance)
     local ray = tes3.rayTest{
         position = startPosition,
         direction = direction,
-        maxDistance = distance,
+        maxDistance = distance + config.constants.WATER_POSITION_PADDING,
         --useBackTriangles = true,
         ignore = ignoreList,
     }
@@ -151,12 +151,19 @@ function SwimService.findPositionTowardsPlayer(startPosition, distance)
     end
 end
 
+---@class Fishing.FishPhysics
+---@field heading number
+---@field velocity tes3vector3
+
+
 ---@class Fishing.SwimService.startSwimming.params
 ---@field from tes3vector3
 ---@field to tes3vector3
 ---@field callback function
 ---@field lure? tes3reference
 ---@field speed number
+---@field physics? Fishing.FishPhysics
+---@field turnSpeed number
 
 --[[
     Beginning at start position, move towards target position,
@@ -177,10 +184,12 @@ function SwimService.startSwimming(e)
 
     local movementSimulate
     local timePassed = 0
-	local two_pi = 2 * math.pi
-	local physics = e.physics or {}
-	if not physics.heading then physics.heading = math.atan2(e.to.y - currentPosition.y, e.to.x - currentPosition.x) end
-	if not physics.velocity then physics.velocity = tes3vector3.new() end
+    local two_pi = 2 * math.pi
+    local physics = e.physics or {}
+    if not physics.heading then
+        physics.heading = math.atan2(e.to.y - currentPosition.y, e.to.x - currentPosition.x)
+    end
+    if not physics.velocity then physics.velocity = tes3vector3.new() end
 
     movementSimulate = function(e2)
         logger:trace("targetPosition: %s", e.to)
@@ -197,45 +206,46 @@ function SwimService.startSwimming(e)
             return
         end
 
-		--Simulate limited turning rate
-        ---@type tes3vector3
-		local targetHeading = math.atan2(e.to.y - currentPosition.y, e.to.x - currentPosition.x)
-		local turnLeft = targetHeading - physics.heading
-		local turnRight = -turnLeft
-		if turnLeft < 0 then turnLeft = turnLeft + two_pi end
-		if turnRight < 0 then turnRight = turnRight + two_pi end
-		--Increase turn rate when near the destination, to avoid getting stuck circling the destination point
-		local turn = e.turnSpeed * (1 + math.max(0, 0.02 * (200 - distance))) * e2.delta
-		if turnLeft < turnRight then
-			--Turn left
-			local newHeading = physics.heading + turn
-			if newHeading > math.pi then
-				newHeading = newHeading - two_pi
-			end
-			--Clamp angle to prevent turning past target
-			if newHeading > targetHeading and physics.heading <= targetHeading then
-				physics.heading = targetHeading
-			else
-				physics.heading = newHeading
-			end
-		else
-			--Turn right
-			local newHeading = physics.heading - turn
-			if newHeading < -math.pi then
-				newHeading = newHeading + two_pi
-			end
-			--Clamp angle to prevent turning past target
-			if newHeading < targetHeading and physics.heading >= targetHeading then
-				physics.heading = targetHeading
-			else
-				physics.heading = newHeading
-			end
-		end
-		--Update velocity
-		physics.velocity.x = math.cos(physics.heading) * e.speed
-		physics.velocity.y = math.sin(physics.heading) * e.speed
-		physics.velocity.z = 0
-		--Update position
+        --Simulate limited turning rate
+        local targetHeading = math.atan2(e.to.y - currentPosition.y, e.to.x - currentPosition.x)
+        local turnLeft = targetHeading - physics.heading
+        local turnRight = -turnLeft
+        if turnLeft < 0 then turnLeft = turnLeft + two_pi end
+        if turnRight < 0 then turnRight = turnRight + two_pi end
+        --Increase turn rate when near the destination, to avoid getting stuck circling the destination point
+        local turn = e.turnSpeed * (1 + math.max(0, 0.02 * (200 - distance))) * e2.delta
+        if turnLeft < turnRight then
+            --Turn left
+            local newHeading = physics.heading + turn
+            if newHeading > math.pi then
+                newHeading = newHeading - two_pi
+            end
+            --Clamp angle to prevent turning past target
+            if newHeading > targetHeading and physics.heading <= targetHeading then
+                physics.heading = targetHeading
+            else
+                physics.heading = newHeading
+            end
+        else
+            --Turn right
+            local newHeading = physics.heading - turn
+            if newHeading < -math.pi then
+                newHeading = newHeading + two_pi
+            end
+            --Clamp angle to prevent turning past target
+            if newHeading < targetHeading and physics.heading >= targetHeading then
+                physics.heading = targetHeading
+            else
+                physics.heading = newHeading
+            end
+        end
+        --Update velocity
+        ---@diagnostic disable
+        physics.velocity.x = math.cos(physics.heading) * e.speed
+        physics.velocity.y = math.sin(physics.heading) * e.speed
+        ---@diagnostic enable
+        physics.velocity.z = 0
+        --Update position
         ---@type tes3vector3
         local deltaPos = physics.velocity * e2.delta
         logger:trace("delta: %s", deltaPos)
