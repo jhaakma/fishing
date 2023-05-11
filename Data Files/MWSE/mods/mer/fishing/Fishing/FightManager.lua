@@ -27,6 +27,7 @@ function FightManager.new(e)
     }
     self.callback = e.callback
     self.playerFatigue = 0
+	self.fishPhysics = {}
     return self
 end
 
@@ -229,6 +230,8 @@ function FightManager:startSwim()
         end
         SwimService.startSwimming{
             speed = self.fish:getReelSpeed(),
+			turnSpeed = 5.0,
+			physics = self.fishPhysics,
             from = lure.position,
             to = self.targetPosition,
             lure = lure,
