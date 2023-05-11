@@ -62,7 +62,7 @@ end
 
 local function getPlayerStrengthEffect()
     local strength = tes3.mobilePlayer.strength.current
-    local effect = math.remap(strength, 0, 100, 0.5, 1.5)
+    local effect = math.remap(strength, 0, 100, 0.75, 1.25)
     logger:debug("Strength effect: %s", effect)
     return effect
 end
@@ -74,6 +74,9 @@ function FightManager:getDistanceModifier()
         return 0
     end
 
+    --Distance based on fish strength and fatigue
+    local fishDistanceModifier = fish:getDistanceModifier()
+
     --When tension is high, reduce fish's pull
     local tensionEffect = math.remap(self:getTension(),
         config.constants.TENSION_MINIMUM,
@@ -81,16 +84,14 @@ function FightManager:getDistanceModifier()
         1.0,
         config.constants.FIGHT_TENSION_DISTANCE_EFFECT_MAXIMUM
     )
-
-    local distanceTowardsPlayer = -(fish:getDistanceModifier() * tensionEffect)
+    local fishPullDistance = -(fishDistanceModifier * tensionEffect)
 
     --When reeling, pull towards player
-    local reelingEffect = (self.reeling == true)
+    local reelingDistance = (self.reeling == true)
         and (config.constants.FIGHT_REELING_DISTANCE_EFFECT * getPlayerStrengthEffect())
         or 0
 
-
-    distanceTowardsPlayer = (distanceTowardsPlayer + reelingEffect)
+    local distanceTowardsPlayer = fishPullDistance + reelingDistance
     return distanceTowardsPlayer
 end
 
@@ -116,7 +117,7 @@ function FightManager:pickTargetPosition()
     local distanceTowardsPlayer = self:getDistanceModifier()
     local positionTowardsPlayer = SwimService.findPositionTowardsPlayer(targetPosition:copy(), distanceTowardsPlayer)
     if positionTowardsPlayer then
-       logger:warn("Moving position %s unites towards the player from fatigue", distanceTowardsPlayer)
+       logger:warn("Moving position %s units towards the player", distanceTowardsPlayer)
        targetPosition = positionTowardsPlayer
     else
        logger:error("No position found towards the player")
@@ -319,6 +320,14 @@ function FightManager:tirePlayer(delta)
 
 end
 
+function FightManager:getFishFatigueLimit()
+    if tes3.player.object.inventory:contains("mer_fishing_net") then
+        return 10
+    else
+        return 0
+    end
+end
+
 ---@param e simulateEventData
 function FightManager:fightSimulate(e)
     self:startSwim()
@@ -361,7 +370,7 @@ function FightManager:fightSimulate(e)
         return
     end
 
-    if self.fish.fatigue <= 0 then
+    if self.fish.fatigue <= self:getFishFatigueLimit() then
         self:success()
         return
     end

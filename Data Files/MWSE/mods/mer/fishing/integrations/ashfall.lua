@@ -10,6 +10,17 @@ local bushcraftingRecipes = {
             { material = "resin", count = 1 }
         },
         category = "Fishing"
+    },
+    {
+        id = "Fishing:mer_fishing_net",
+        craftableId = "mer_fishing_net",
+        description = "A fishing net allows you to catch a fish before its fatigue has completely run out.",
+        materials = {
+            { material = "wood", count = 3 },
+            { material = "netting", count = 1 },
+            { material = "rope", count = 1 },
+        },
+        category = "Fishing"
     }
 }
 local function registerAshfallRecipes(e)

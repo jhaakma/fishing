@@ -44,10 +44,6 @@ local function hasLineOfSight(startPosition, targetPosition)
     }
     if ray then
         logger:debug("Line of sight blocked by %s", ray.object)
-        -- tes3.createReference{
-        --     object = "gold_001",
-        --     position = ray.intersection
-        -- }
         return false
     end
     return true
