@@ -2,7 +2,6 @@
 A Fishing mod for Morrowind
 
 ## To do
-- Fillet mechanic - DONE
 - Fishing rods
 - Lure effect snag chance
 - Fishing skill
@@ -12,6 +11,7 @@ A Fishing mod for Morrowind
 - Fishing Rod quality affects tension limit
 
 ### DONE
+- Fillet mechanic
 - Reeling Animations
 - location line of sight
 - Casting
