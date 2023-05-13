@@ -5,9 +5,7 @@ A Fishing mod for Morrowind
 - Fishing rods
 - Lure effect snag chance
 - Fishing skill
-- Convert vanilla fishing rods to weapon
 - Fishing "hotspots"
-- Merchant Manager
 - Fishing Rod quality affects tension limit
 
 ### DONE
@@ -27,6 +25,8 @@ A Fishing mod for Morrowind
   - depth
 - Integrate fish speed
 - Lures
+- Convert vanilla fishing rods to weapon
+- Merchant Manager
 
 ## Fishing Rods
 | Name                 | Description                                                                                                  |
