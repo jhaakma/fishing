@@ -5,6 +5,7 @@ local logger = common.createLogger("FishType")
 local Bait = require("mer.fishing.Bait.Bait")
 local Ashfall = include("mer.ashfall.interop")
 local Harvest = require("mer.fishing.Harvest")
+local FishingSkill = require("mer.fishing.FishingSkill")
 
 ---@alias Fishing.FishType.rarity
 ---| '"common"'
@@ -46,13 +47,13 @@ local FishType = {
     ---@type table<Fishing.FishType.rarity, number>
     rarityValues = {
         common = 1.0,
-        uncommon = 0.5,
-        rare = 0.25,
-        legendary = 0.1
+        uncommon = 0.20,
+        rare = 0.10,
+        legendary = 0.05
     }
 }
 
----@param e Fishing.FishType
+---@param e Fishing.FishType.new.params
 function FishType.new(e)
     logger:assert(type(e.baseId) == "string", "FishType must have a baseId")
     logger:assert(type(e.description) == "string", "FishType must have a description")
@@ -91,6 +92,11 @@ function FishType.new(e)
                     Ashfall.registerFoods{
                         [harvestable.id] = "meat"
                     }
+                    Bait.register{
+                        id = harvestable.id,
+                        type = "bait",
+                        uses = 10
+                    }
                 end
             end
         end
@@ -103,6 +109,7 @@ function FishType.get(id)
 end
 
 ---Register a new type of fish
+---@param e Fishing.FishType.new.params
 function FishType.register(e)
     local fish = FishType.new(e)
     FishType.registeredFishTypes[fish.baseId] = fish
@@ -138,7 +145,14 @@ end
 
 --Return a catch multiplier based on rarity
 function FishType:getRarityEffect()
-    return FishType.rarityValues[self.rarity] or 1.0
+    local rarityEffect = FishType.rarityValues[self.rarity] or 1.0
+    local skillEffect = math.remap(FishingSkill.getCurrent(),
+        0, 100,
+        1.0, 2.0
+    )
+    rarityEffect = math.clamp(rarityEffect * skillEffect, 0, 1.0)
+
+    return rarityEffect
 end
 
 return FishType

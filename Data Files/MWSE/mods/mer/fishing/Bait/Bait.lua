@@ -5,14 +5,16 @@ local BaitType = require("mer.fishing.Bait.BaitType")
 
 --[[
     The object representing a configred lure or bait item.
-
 ]]
----@class Fishing.Bait
+---@class Fishing.Bait.config
 ---@field id string The id of the item that represents this bait
 ---@field type Fishing.Bait.type
 ---@field uses? number How many times this bait can be used before it is destroyed. If not set, bait is infinite and can be recovered after attaching
 ---@field floatMesh string path to the mesh override for the floater. If not set, the default float will be used.
+
+---@class Fishing.Bait : Fishing.Bait.config
 local Bait = {
+    ---@type table<string, Fishing.Bait>
     registeredBait = {}
 }
 
@@ -22,6 +24,8 @@ function Bait.get(itemId)
     return Bait.registeredBait[itemId:lower()]
 end
 
+--Register a new Bait item
+---@param o Fishing.Bait.config
 function Bait.register(o)
     Bait.registeredBait[o.id:lower()] = Bait:new(o)
 end
@@ -52,8 +56,8 @@ function Bait:getName()
     return obj.name or "[unknown]"
 end
 
-function Bait:isLure()
-    return self.uses ~= nil
+function Bait:reusable()
+    return self.uses == nil
 end
 
 function Bait:getFloaterMesh()

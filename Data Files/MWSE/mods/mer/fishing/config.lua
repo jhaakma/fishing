@@ -55,14 +55,15 @@ config.constants = {
     --The a multiplier on the distance towards the player the fish will pull based on tension
     FIGHT_TENSION_DISTANCE_EFFECT_MAXIMUM = 0.5,
 
-
-
     --Tooltips
     TOOLTIP_COLOR_BAIT = {
         147 / 255,
         181 / 255,
         189 / 255,
     },
+
+    MIN_BITE_CHANCE = 0.25,
+    MAX_BITE_CHANCE = 0.75,
 }
 
 
@@ -79,7 +80,10 @@ local persistentDefault = {
 local mcmDefault = {
     enabled = true,
     cheatMode = false,
-    logLevel = "INFO"
+    logLevel = "INFO",
+    fishingMerchants = {
+        ["arrille"] = true
+    },
 }
 ---@type Fishing.config.MCM
 config.mcm = mwse.loadConfig(config.configPath, mcmDefault)

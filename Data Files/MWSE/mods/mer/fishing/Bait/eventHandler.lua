@@ -61,10 +61,11 @@ local function onEquip(e)
                     callback = function()
                         logger:debug("Eating bait %s", itemId)
                         skipEquip = true
+                        ---@diagnostic disable
                         mwscript.equip{
                             reference = tes3.player,
                             item = baitObject,
-                        }
+                        }---@diagnostic enable
                     end
                 },
             },

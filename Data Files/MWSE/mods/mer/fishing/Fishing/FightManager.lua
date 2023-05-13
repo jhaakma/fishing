@@ -5,7 +5,7 @@ local SwimService = require("mer.fishing.Fishing.SwimService")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 local FishingRod = require("mer.fishing.FishingRod.FishingRod")
 local FightIndicator = require("mer.fishing.ui.FightIndicator")
-
+local FishingSkill = require("mer.fishing.FishingSkill")
 
 ---@class Fishing.FightManager
 ---@field fish Fishing.FishType.instance The fish to fight
@@ -201,9 +201,17 @@ function FightManager:updateTension()
     local lineLength = self.lineLength
     local actualLineLength = self:getLineDistance()
     local difference = actualLineLength - lineLength
-    --At 500 units, tension is increased by 0.5
 
+    --At 500 units, tension is increased by 0.5
     local maxDistance = config.constants.FIGHT_MAX_DISTANCE
+    --Higher skill, higher distance allowance
+    local skill = FishingSkill.getCurrent()
+    local skillDistanceEffect = math.remap(skill,
+        0, 100,
+        0.75, 1.25
+    )
+    maxDistance = maxDistance * skillDistanceEffect
+
     local neutralMaxDiff = config.constants.FIGHT_TENSION_UPPER_LIMIT
         - config.constants.TENSION_NEUTRAL
 
@@ -337,7 +345,7 @@ end
 
 function FightManager:getFishFatigueLimit()
     if tes3.player.object.inventory:contains("mer_fishing_net") then
-        return 10
+        return self.fish.fishType:getStartingFatigue() / 10
     else
         return 0
     end

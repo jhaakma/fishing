@@ -6,7 +6,7 @@
 ]]
 local common = require("mer.fishing.common")
 local logger = common.createLogger("FishGenerator")
-local SkillService = require("mer.fishing.SkillsService")
+local FishingSkill = require("mer.fishing.FishingSkill")
 local FishType = require("mer.fishing.Fish.FishType")
 local FishingRod = require("mer.fishing.FishingRod.FishingRod")
 
@@ -63,11 +63,16 @@ local function attemptSnag(fish, frequencyMultipler, proportionEffect)
     end
 
     local rarityEffect = fish:getRarityEffect()
+
     local baitEffect = bait:getType():getFishEffect(fish)
 
-    logger:trace("- Bait effect: %s\n- Rarity effect: %s\n- FrequencyMultipler: %s",
+    logger:trace("\n- Bait effect: %s\n- Rarity effect: %s\n- FrequencyMultipler: %s",
         baitEffect, rarityEffect, frequencyMultipler)
-    local needed = 0.5 * baitEffect * rarityEffect * frequencyMultipler * proportionEffect
+    local needed = 0.5
+    * baitEffect
+    * rarityEffect
+    * frequencyMultipler
+    * proportionEffect
     local roll = math.random()
 
     logger:trace("- Roll: %s, needed: %s", roll, needed)

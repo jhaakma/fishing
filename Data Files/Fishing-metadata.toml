@@ -1,5 +1,5 @@
 [package]
-name = "Fishing"
+name = "Ultimate Fishing"
 authors = [ "Merlord",]
 version = "0.0.10"
 
@@ -13,7 +13,7 @@ buildnumber = 3066
 version = ">=0.15.0"
 
 [tools.mwse]
-lua-mod = "Fishing"
+lua-mod = "mer.fishing"
 
 [dependencies.mods."Skills Module"]
 mwse-module = "OtherSkills"

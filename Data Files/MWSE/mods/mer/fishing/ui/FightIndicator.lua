@@ -158,6 +158,15 @@ function FightIndicator:createFatigueBar(parent)
     fatigueBar.widthProportional = 1
     fatigueBar.height = 20
 
+    if tes3.player.object.inventory:contains("mer_fishing_net") then
+        local netIcon = border:createImage{
+            path = "textures\\mer_fishing\\neticon.dds",
+        }
+        netIcon.width = 18
+        netIcon.height = 18
+        netIcon.scaleMode = true
+        netIcon.absolutePosAlignX = 0.075
+    end
 end
 
 local simulateUpdate
@@ -179,12 +188,8 @@ function FightIndicator:updateMenu()
     fatigueBar.widget.current = self.fightManager.fish.fatigue
 end
 
-function FightIndicator:createMenu()
-    local menuMulti = tes3ui.findMenu("MenuMulti")
-    if not menuMulti then
-        logger:error("Could not find MenuMulti")
-        return
-    end
+
+function FightIndicator:createMenuBlock(menuMulti)
     local menu = menuMulti:createBlock{
         id = self.uiids.menu,
     }
@@ -207,15 +212,19 @@ function FightIndicator:createMenu()
     border.autoHeight = true
     border.paddingAllSides = 10
     border.flowDirection = "top_to_bottom"
+    return menu, border
+end
 
-    --Add tension bar
+function FightIndicator:createMenu()
+    local menuMulti = tes3ui.findMenu("MenuMulti")
+    if not menuMulti then
+        logger:error("Could not find MenuMulti")
+        return
+    end
+    local menu, border = self:createMenuBlock(menuMulti)
     self:createTensionBar(border)
-
-    --Add fatigue bar
     self:createFatigueBar(border)
-
     menu:updateLayout()
-
     simulateUpdate = function()
         self:updateMenu()
     end

@@ -93,6 +93,37 @@ local function registerMCM()
     }
 
 
+    template:createExclusionsPage{
+        label = "Fishing Merchants",
+        description = "Select which merchants sell fishing gear.",
+        leftListLabel = "Fishing Merchants",
+        rightListLabel = "Excluded Merchants",
+        filters = {
+            {
+                label = "",
+                callback = function()
+                    local npcs = {}
+                    for obj in tes3.iterateObjects(tes3.objectType.npc) do
+                        ---@cast obj tes3npc
+                        if obj.class and obj.class.bartersMiscItems then
+                            local id = obj.id:lower()
+                            npcs[id] = true
+                        end
+                    end
+                    local npcsList = {}
+                    for npc, _ in pairs(npcs) do
+                        table.insert(npcsList, npc)
+                    end
+                    table.sort(npcsList)
+                    return npcsList
+                end
+            }
+        },
+        variable = mwse.mcm.createTableVariable{
+            id = "fishingMerchants",
+            table = config.mcm,
+        },
+    }
 
 end
 event.register("modConfigReady", registerMCM)

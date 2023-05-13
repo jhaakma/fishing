@@ -1,3 +1,6 @@
+local Interop = require("mer.fishing")
+
+---@type Fishing.FishingRod.config[]
 local fishingRods = {
     {
         id = "mer_fishing_pole_01",
@@ -5,7 +8,6 @@ local fishingRods = {
     }
 }
 
-local FishingRod = require("mer.fishing.FishingRod.FishingRod")
 for _, data in ipairs(fishingRods) do
-    FishingRod.register(data)
+    Interop.registerFishingRod(data)
 end

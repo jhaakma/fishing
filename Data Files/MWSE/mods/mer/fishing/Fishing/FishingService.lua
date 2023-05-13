@@ -11,6 +11,7 @@ local LineManager = require("mer.fishing.FishingLine.LineManager")
 local Animations = require("mer.fishing.Fish.Animations")
 local FightManager = require("mer.fishing.Fishing.FightManager")
 local Bait = require("mer.fishing.Bait.Bait")
+local FishingSkill = require("mer.fishing.FishingSkill")
 
 ---@class Fishing.FishingService
 local FishingService = {}
@@ -19,10 +20,21 @@ local function getBiteDuration()
     if config.mcm.cheatMode then
         return 2.0
     end
+
+    local min = 0.15
     --TODO: base on fishing skill
-    local min = 0.1
-    local max = 1.0
-    return math.random(min*100, max*100)/100
+    local skill = FishingSkill.getCurrent()
+    local max = math.remap(skill,
+        0, 100,
+        0.3, 0.6
+    )
+    local biteDuration = math.random(
+        math.floor(min*100),
+        math.floor(max*100)
+    )/100
+
+    logger:debug("Bite duration: %s", biteDuration)
+    return biteDuration
 end
 
 ---@param lure tes3reference
@@ -156,6 +168,7 @@ local function startCasting()
             Animations.lureLand(lure)
             logger:debug("Finished casting")
             FishingStateManager.setState("WAITING")
+            FishingSkill.landLure()
         end)
         timer.start{
             duration = 0.1,
@@ -177,8 +190,26 @@ local function calculateRealBiteChance()
     if config.mcm.cheatMode then
         return true
     end
-    --TODO: base on skill etc
-    return math.random() < 0.50
+
+    --Roll based on bait hook chance
+    local roll = math.random()
+    local fishingRod = FishingRod.getEquipped()
+    local bait = fishingRod and fishingRod:getEquippedBait()
+    if bait then
+        local baitMultiplier = 1 / bait:getType():getHookChance()
+        logger:debug("Bait hook multiplier: %s", baitMultiplier)
+        roll = roll * baitMultiplier
+    end
+
+    --Skill determines chance needed
+    local skill = FishingSkill.getCurrent()
+    local chanceNeeded = math.remap(skill,
+        0, 100,
+        config.constants.MIN_BITE_CHANCE, config.constants.MAX_BITE_CHANCE
+    )
+
+    logger:debug("Real bite chance: %s, needed: %s", roll, chanceNeeded)
+    return roll < chanceNeeded
 end
 
 local function endBite()
@@ -304,6 +335,7 @@ local function catchFish()
     timer.start{
         duration = 0.75,
         callback = function()
+
             TrophyMenu.createMenu(fish.fishType, function()
                 tes3.addItem{
                     reference = tes3.player,
@@ -311,6 +343,7 @@ local function catchFish()
                     count = 1,
                 }
                 FishingStateManager.endFishing()
+                FishingSkill.catchFish(fish.fishType)
             end)
         end
     }

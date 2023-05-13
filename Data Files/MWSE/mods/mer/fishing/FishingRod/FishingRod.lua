@@ -11,8 +11,21 @@ local Bait = require("mer.fishing.Bait.Bait")
 ---@field config table @The config for this fishing rod
 ---@field data table<string, any> @The fishing data
 local FishingRod = {
+    ---@type table<string, Fishing.FishingRod.config>
     registeredFishingRods = {}
 }
+
+---@class Fishing.FishingRod.config
+---@field id string
+---@field quality number
+
+--Register an item as a fishing rod
+---@param e Fishing.FishingRod.config
+function FishingRod.register(e)
+    logger:assert(type(e.id) == "string", "Fishing rod must have an id")
+    logger:assert(type(e.quality) == "number", "Fishing rod must have a quality")
+    FishingRod.registeredFishingRods[e.id:lower()] = e
+end
 
 ---@return Fishing.FishingRod|nil
 function FishingRod.new(e)
@@ -82,6 +95,25 @@ end
 
 ---@param bait Fishing.Bait
 function FishingRod:equipBait(bait)
+    logger:debug("Equipping bait %s", bait:getName())
+    --get existing bait
+    local existingBait = self:getEquippedBait()
+    if existingBait then
+        logger:debug("Existing Bait: %s", existingBait:getName())
+        if existingBait:reusable() then
+            logger:debug("Adding currently equipped %s to inventory", existingBait:getName())
+            tes3.addItem{
+                reference = tes3.player,
+                item = existingBait.id,
+                playSound = false
+            }
+        else
+            logger:debug("not reusable")
+        end
+    else
+        logger:debug("No existing bait")
+    end
+
     self.data.equippedBait = {
         id = bait.id,
         uses = bait.uses
@@ -114,6 +146,11 @@ function FishingRod:useBait()
         logger:debug("- No bait equipped")
         return
     end
+    if bait:reusable() then
+        logger:debug("- Bait is reusable")
+        return
+    end
+
     bait.uses = bait.uses - 1
     if bait.uses <= 0 then
         tes3.messageBox("%s is used up", bait:getName())
@@ -136,11 +173,7 @@ function FishingRod:getName()
     return self.item.name
 end
 
-function FishingRod.register(e)
-    logger:assert(type(e.id) == "string", "Fishing rod must have an id")
-    logger:assert(type(e.quality) == "number", "Fishing rod must have a quality")
-    FishingRod.registeredFishingRods[e.id:lower()] = e
-end
+
 
 ---@param id string
 function FishingRod.getConfig(id)

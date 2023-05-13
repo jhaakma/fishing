@@ -4,6 +4,7 @@ local config = require("mer.fishing.config")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 local FishingService = require("mer.fishing.Fishing.FishingService")
 local FishingRod = require("mer.fishing.FishingRod.FishingRod")
+local FishingSkill = require("mer.fishing.FishingSkill")
 
 ---Cast line if player attacks with a fishing rod
 ---@param e attackEventData
@@ -56,11 +57,29 @@ event.register("addSound", function(e)
 end, { priority = 500})
 
 
+--[[
+    Bite interval determined by:
+    - LUCK attribute
+    - Fishing skill
+]]
 local function generateBiteInterval()
     if config.mcm.cheatMode then
+        logger:trace("Cheat mode enabled, bite interval set to 1 second")
         return 1
     end
-    return math.random(3, 7)
+    local defaultInterval = 5
+    local skill = FishingSkill.getCurrent()
+    local skillEffect = math.remap(skill,
+        0, 100,
+        1.0, 0.70)
+    local luck = math.clamp(0, 100, tes3.mobilePlayer.luck.current)
+    local luckEffect = math.remap(luck,
+        0, 100,
+        1.0, 0.5)
+    local random = math.random(5)
+    local interval = defaultInterval * skillEffect * luckEffect + random
+    logger:trace("Bite interval: %s", interval)
+    return interval
 end
 
 
@@ -74,7 +93,7 @@ event.register("loaded", function()
             duration = interval,
             iterations = 1,
             callback = function()
-                logger:debug("Fish bite timer finished")
+                logger:trace("Fish bite timer finished")
                 FishingService.triggerFish()
                 startFishBiteTimer(generateBiteInterval())
             end

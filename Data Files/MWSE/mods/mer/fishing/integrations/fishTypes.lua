@@ -3,16 +3,17 @@
 ]]
 local common = require("mer.fishing.common")
 local logger = common.createLogger("Integrations - fishTypes")
+local Interop = require("mer.fishing")
 
 ---@type Fishing.FishType.new.params[]
 local commonFish = {
     {
         baseId = "mer_fish_bass",
         previewMesh = "mer_fishing\\f\\bass.nif",
-        description = "The largemouth bass is a carnivourous fish found in the rivers and lakes of Morrowind. They can put up a good fight when hooked, but are prized for their delicious meat.",
-        speed = 80,
+        description = "The largemouth bass is a medium sized, carnivourous fish found all throughout Morrowind. They can put up a good fight when hooked, but are prized for their delicious meat.",
+        speed = 170,
         size = 2.0,
-        difficulty = 50,
+        difficulty = 55,
         class = "medium",
         niche = {},
         harvestables = {
@@ -27,7 +28,7 @@ local commonFish = {
     {
         baseId = "mer_fish_goby",
         previewMesh = "mer_fishing\\f\\goby.nif",
-        description = "The Goby is a small fish found all throughout Morrowind.",
+        description = "The Goby is a small fish found all throughout Morrowind. They make excellent baitfish for catching larger prey.",
         speed = 150,
         size = 1.1,
         difficulty = 30,
@@ -38,7 +39,7 @@ local commonFish = {
     {
         baseId = "mer_fish_salmon",
         previewMesh = "mer_fishing\\f\\salmon.nif",
-        description = "Salmon can be found in the lakes and rivers of the Ascadian Isles. Their meat is delicious eaten raw or cooked.",
+        description = "Salmon can be found in the oceans, lakes and rivers of the Ascadian Isles.",
         speed = 180,
         size = 1.4,
         difficulty = 40,
@@ -71,6 +72,7 @@ local commonFish = {
                 id = "ab_ingcrea_sfmeat_01",
                 min = 1,
                 max = 3,
+                isMeat = true,
             },
             {
                 id = "ingred_scales_01",
@@ -83,7 +85,7 @@ local commonFish = {
         baseId = "mer_fish_slaughter_sm",
         previewMesh = "mer_fishing\\f\\sfish_sm.nif",
         description = "Juvenile Slaughterfish may be small, but they can still put up a fight.",
-        speed = 200,
+        speed = 190,
         size = 1.1,
         difficulty = 30,
         class = "small",
@@ -94,7 +96,7 @@ local commonFish = {
         baseId = "mer_fish_trigger",
         previewMesh = "mer_fishing\\f\\trigger.nif",
         description = "The triggerfish is a small tropical fish commonly found in the waters of Azura's Coast. They are known for their aggressive behavior and sharp teeth.",
-        speed = 250,
+        speed = 230,
         size = 1.0,
         difficulty = 50,
         class = "small",
@@ -102,9 +104,34 @@ local commonFish = {
         niche = {
             regions = {
                 "Azura's Coast Region",
-                "Grazelands Region",
             }
         },
+    },
+    {
+        baseId = "mer_fish_catfish",
+        previewMesh = "mer_fishing\\f\\catfish.nif",
+        description = "The catfish is a small, bottom-feeding fish found in the swamps of the Bitter Coast. They are known for their barbels, which resemble a cat's whiskers.",
+        speed = 130,
+        size = 1.0,
+        difficulty = 45,
+        class = "small",
+        isBaitFish = true,
+        niche = {
+            regions = {
+                "Bitter Coast Region",
+            }
+        },
+    },
+    {
+        baseId = "mer_fish_sculpin",
+        previewMesh = "mer_fishing\\f\\sculpin.nif",
+        description = "The sculpin is a small fish that lives in both fresh and saltwater. They make excellent baitfish for catching larger prey.",
+        speed = 190,
+        size = 1.0,
+        difficulty = 30,
+        class = "small",
+        isBaitFish = true,
+        niche = {},
     }
 
 }
@@ -116,7 +143,7 @@ local uncommonFish = {
         baseId = "mer_fish_tambaqui",
         previewMesh = "mer_fishing\\f\\tambaqui.nif",
         description = "The tambaqui is a large tropical fish found along the eastern coast of Vvardenfell.",
-        speed = 100,
+        speed = 120,
         size = 2.0,
         difficulty = 50,
         class = "medium",
@@ -287,6 +314,14 @@ local legendaryFish = {
                 "West Gash Region"
             },
         },
+        harvestables = {
+            {
+                id = "mer_meat_shadowfin",
+                min = 2,
+                max = 3,
+                isMeat = true,
+            }
+        }
     },
     {
         baseId = "mer_fish_ashclaw",
@@ -300,21 +335,18 @@ local legendaryFish = {
             regions = {
                 "Molag Mar Region",
             },
-            lures = {
-                spinner = 100
-            }
         },
         harvestables = {
             {
                 id = "mer_meat_ashclaw",
-                min = 1,
-                max = 1,
+                min = 2,
+                max = 3,
                 isMeat = true,
             },
             {
                 id = "mer_ingred_ashlegs",
                 min = 1,
-                max = 1,
+                max = 2,
             }
         }
     },
@@ -352,6 +384,14 @@ local legendaryFish = {
                 iridescent = 80
             }
         },
+        harvestables = {
+            {
+                id = "mer_meat_swampmaw",
+                min = 2,
+                max = 3,
+                isMeat = true,
+            },
+        }
     },
     {
         baseId = "mer_fish_mega",
@@ -369,9 +409,6 @@ local legendaryFish = {
                 "dawn",
                 "dusk",
             },
-            lures = {
-                baitfish = 100,
-            }
         },
     }
 }
@@ -396,27 +433,27 @@ local FishType = require("mer.fishing.Fish.FishType")
 for _, fish in ipairs(commonFish) do
     fish.rarity = "common"
     logger:debug("Registering common fish %s", fish.baseId)
-    fish = FishType.register(fish)
+    fish = Interop.registerFishType(fish)
     registerFood(fish)
 end
 
 for _, fish in ipairs(uncommonFish) do
     fish.rarity = "uncommon"
     logger:debug("Registering uncommon fish %s", fish.baseId)
-    fish = FishType.register(fish)
+    fish = Interop.registerFishType(fish)
     registerFood(fish)
 end
 
 for _, fish in ipairs(rareFish) do
     fish.rarity = "rare"
     logger:debug("Registering rare fish %s", fish.baseId)
-    fish = FishType.register(fish)
+    fish = Interop.registerFishType(fish)
     registerFood(fish)
 end
 
 for _, fish in ipairs(legendaryFish) do
     fish.rarity = "legendary"
     logger:debug("Registering legendary fish %s", fish.baseId)
-    fish = FishType.register(fish)
+    fish = Interop.registerFishType(fish)
     registerFood(fish)
 end

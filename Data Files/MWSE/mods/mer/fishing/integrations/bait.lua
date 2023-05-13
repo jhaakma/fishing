@@ -1,6 +1,8 @@
 local common = require("mer.fishing.common")
 local logger = common.createLogger("Interop - Bait")
 
+local Interop = require("mer.fishing")
+
 ---@alias Fishing.Bait.type
 ---| '"lure"'            # Default lure.
 ---| '"spinner"'         # Used for catching small baitfish.
@@ -20,24 +22,40 @@ local BaitTypes = {
         id = "glowing",
         name = "Glowing Lure",
         description = "More effective at nighttime.",
+        getFishEffect = function(self, fish)
+            local classes = {
+                small = 1.0,
+                medium = 0.6,
+                large = 0.2,
+            }
+            return classes[fish.class] or 0.1
+        end,
         getHookChance = function(self)
             local time = tes3.worldController.hour.value
-            if time >= 6 and time <= 18 then
+            if time >= 18 or time <= 6 then
                 return 1.5
             end
-            return 0.5
+            return 0.75
         end
     },
     {
         id = "shiny",
         name = "Shiny Lure",
         description = "More effective during the daytime.",
+        getFishEffect = function(self, fish)
+            local classes = {
+                small = 1.0,
+                medium = 0.6,
+                large = 0.2,
+            }
+            return classes[fish.class] or 0.1
+        end,
         getHookChance = function(self)
             local time = tes3.worldController.hour.value
             if time >= 6 and time <= 18 then
                 return 1.5
             end
-            return 0.5
+            return 0.75
         end
     },
     {
@@ -94,10 +112,9 @@ local BaitTypes = {
         end
     },
 }
-local BaitType = require("mer.fishing.Bait.BaitType")
 for _, baitType in ipairs(BaitTypes) do
     logger:debug("Registering bait type %s", baitType.id)
-    BaitType.register(baitType)
+    Interop.registerBaitType(baitType)
 end
 
 ---@type Fishing.Bait[]
@@ -112,11 +129,22 @@ local baits = {
         uses = 10,
     },
     {
+        id = "mer_bug_spinner",
+        type = "spinner",
+    },
+    {
+        id = "mer_bug_spinner2",
+        type = "spinner",
+    },
+    {
+        id = "mer_silver_lure",
+        type = "shiny",
+    },
+    {
         id = "ingred_crab_meat_01",
         type = "bait",
         uses = 10,
     },
-
     {
         id = "ingred_pearl_01",
         type = "shiny",
@@ -135,9 +163,8 @@ local baits = {
 
 }
 
-local Bait = require("mer.fishing.Bait.Bait")
 for _, bait in ipairs(baits) do
     logger:debug("Registering bait %s", bait.id)
-    Bait.register(bait)
+    Interop.registerBait(bait)
 end
 

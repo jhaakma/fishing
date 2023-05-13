@@ -9,7 +9,8 @@ local MWSELogger = require("logging.logger")
 common.loggers = {}
 function common.createLogger(serviceName)
     local logger = MWSELogger.new{
-        name = string.format("Fishing - %s", serviceName),
+        name = string.format("%s - %s",
+            config.metadata.package.name, serviceName),
         logLevel = config.mcm.logLevel,
         includeTimestamp = true,
     }
