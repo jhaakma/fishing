@@ -3,13 +3,12 @@ A Fishing mod for Morrowind
 
 ## To do
 - Fishing rods
-- Lure effect snag chance
-- Fishing skill
 - Fishing "hotspots"
 - Fishing Rod quality affects tension limit
 
 ### DONE
 - Fillet mechanic
+- Fishing skill
 - Reeling Animations
 - location line of sight
 - Casting
@@ -27,6 +26,7 @@ A Fishing mod for Morrowind
 - Lures
 - Convert vanilla fishing rods to weapon
 - Merchant Manager
+- Lure effect snag chance
 
 ## Fishing Rods
 | Name                 | Description                                                                                                  |
