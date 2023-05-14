@@ -132,8 +132,27 @@ local commonFish = {
         class = "small",
         isBaitFish = true,
         niche = {},
-    }
-
+    },
+    {
+        baseId = "mer_fish_cod",
+        previewMesh = "mer_fishing\\f\\cod.nif",
+        description = "The cod is a medium sized fish found in the deeper waters of the Inner Sea. They are known for their delicious meat.",
+        speed = 170,
+        size = 1.5,
+        difficulty = 50,
+        class = "medium",
+        harvestables = {
+            {
+                id = "mer_meat_cod",
+                min = 1,
+                max = 3,
+                isMeat = true,
+            }
+        },
+        niche = {
+            minDepth = 200,
+        },
+    },
 }
 
 ---@type Fishing.FishType[]
@@ -182,28 +201,12 @@ local uncommonFish = {
         },
     },
     {
-        baseId = "mer_fish_discus",
-        previewMesh = "mer_fishing\\f\\discus.nif",
-        description = "The Discus is an uncommon, colorful fish found in the warmer regions of Morrowind.",
-        speed = 160,
-        size = 1.0,
-        difficulty = 40,
-        class = "small",
-        isBaitFish = true,
-        niche = {
-            regions = {
-                "Ascadian Isles Region",
-                "Azura's Coast Region",
-            }
-        },
-    },
-    {
         baseId = "mer_fish_angelshark",
         previewMesh = "mer_fishing\\f\\angel.nif",
         description = "The Angelshark is small for a shark, but still formidable. They are found all throughout the waters of Vvardenfell.",
         speed = 150,
         size = 1.3,
-        class = "medium",
+        class = "large",
         difficulty = 50,
         niche = {
             minDepth = 200,
@@ -220,6 +223,22 @@ local uncommonFish = {
 }
 ---@type Fishing.FishType[]
 local rareFish = {
+    {
+        baseId = "mer_fish_discus",
+        previewMesh = "mer_fishing\\f\\discus.nif",
+        description = "The Discus is an uncommon, colorful fish found in the warmer regions of Morrowind.",
+        speed = 160,
+        size = 1.0,
+        difficulty = 40,
+        class = "small",
+        isBaitFish = true,
+        niche = {
+            regions = {
+                "Ascadian Isles Region",
+                "Azura's Coast Region",
+            }
+        },
+    },
     {
         baseId = "mer_fish_jelly",
         previewMesh = "mer_fishing\\f\\jellyfish.nif",
@@ -256,6 +275,12 @@ local rareFish = {
                 id = "mer_ingred_copperscales",
                 min = 2,
                 max = 4,
+            },
+            {
+                id = "mer_meat_copper",
+                min = 1,
+                max = 2,
+                isMeat = true,
             }
         }
     },
@@ -294,6 +319,14 @@ local rareFish = {
         size = 4.4,
         difficulty = 75,
         class = "large",
+        harvestables = {
+            {
+                id = "mer_trophy_marlin",
+                min = 1,
+                max = 1,
+                isTrophy = true,
+            }
+        }
     }
 }
 ---@type Fishing.FishType[]
@@ -320,6 +353,12 @@ local legendaryFish = {
                 min = 2,
                 max = 3,
                 isMeat = true,
+            },
+            {
+                id = "mer_trophy_shadowfin",
+                min = 1,
+                max = 1,
+                isTrophy = true,
             }
         }
     },
@@ -347,6 +386,12 @@ local legendaryFish = {
                 id = "mer_ingred_ashlegs",
                 min = 1,
                 max = 2,
+            },
+            {
+                id = "mer_trophy_ashclaw",
+                min = 1,
+                max = 1,
+                isTrophy = true,
             }
         }
     },
@@ -363,6 +408,14 @@ local legendaryFish = {
                 "Sheogorad",
             },
         },
+        harvestables = {
+            {
+                id = "mer_trophy_iskal",
+                min = 1,
+                max = 1,
+                isTrophy = true,
+            }
+        }
     },
     {
         baseId = "mer_fish_swampmaw",
@@ -382,15 +435,21 @@ local legendaryFish = {
             lures = {
                 glowing = 100,
                 iridescent = 80
-            }
+            },
         },
         harvestables = {
             {
                 id = "mer_meat_swampmaw",
-                min = 2,
-                max = 3,
+                min = 3,
+                max = 6,
                 isMeat = true,
             },
+            {
+                id = "mer_trophy_swampmaw",
+                min = 1,
+                max = 1,
+                isTrophy = true,
+            }
         }
     },
     {
@@ -410,6 +469,14 @@ local legendaryFish = {
                 "dusk",
             },
         },
+        harvestables = {
+            {
+                id = "mer_trophy_megamax",
+                min = 1,
+                max = 1,
+                isTrophy = true,
+            }
+        }
     }
 }
 

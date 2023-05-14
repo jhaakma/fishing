@@ -1,0 +1,33 @@
+[package]
+name = "Ultimate Fishing"
+description = """\
+Ultimate Fishing is a mod that adds a fishing skill and minigame to Morrowind.
+- Equip lures and bait to your fishing rod, and catch over 20 different species of fish throughout Vvardenfell.
+- Defeat each fish in a battle of wits and stamina. Ensure the tension doesn't get too low or too high, and tire the fish out before you run out of fatigue yourself.
+- Fully animated fishing mechanics, including simulated line tension, player animations, and fish AI.
+- Five legendary fish to catch. When harvesting a legendary fish, you will receive a trophy head that you can place on your wall
+- Ashfall integration: bushcraft fishing poles, cook and eat the fish you catch
+"""
+authors = [ "Merlord",]
+version = "0.0.11"
+
+[dependencies]
+assets = []
+
+[dependencies.mwse]
+buildnumber = 3204
+
+[dependencies.mge-xe]
+version = ">=0.15.0"
+
+[tools.mwse]
+lua-mod = "mer.fishing"
+
+[dependencies.mods."Skills Module"]
+mwse-module = "OtherSkills"
+url = "https://www.nexusmods.com/morrowind/mods/46034?tab=files"
+
+[dependencies.mods."The Crafting Framework"]
+mwse-module = "CraftingFramework"
+version = "^1.11.0"
+url = "https://www.nexusmods.com/morrowind/mods/51009?tab=files"

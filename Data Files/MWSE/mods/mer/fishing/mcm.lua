@@ -3,10 +3,10 @@ local logger = common.createLogger("MCM")
 local config = require("mer.fishing.config")
 local metadata = config.metadata --[[@as MWSE.Metadata]]
 local LINKS_LIST = {
-    -- {
-    --     text = "Release history",
-    --     url = "https://github.com/jhaakma/***/releases"
-    -- },
+    {
+        text = "Release history",
+        url = "https://github.com/jhaakma/fishing/releases"
+    },
     -- {
     --     text = "Wiki",
     --     url = "https://github.com/jhaakma/***/wiki"
@@ -25,6 +25,21 @@ local CREDITS_LIST = {
         text = "Made by Merlord",
         url = "https://www.nexusmods.com/users/3040468?tab=user+files",
     },
+    {
+        text = "Animations by Greatness7",
+        url = "https://github.com/Greatness7"
+    },
+    {
+        text = "Legendary Fish models by Melchior Darhk",
+        url = "https://www.nexusmods.com/morrowind/users/962116"
+    },
+    {
+        text = "Fish AI and other code improvements by Hrnchamd",
+        url = "https://www.nexusmods.com/morrowind/users/843673"
+    },
+    {
+        text = "Common fish models by Cait"
+    },
 }
 
 local function addSideBar(component)
@@ -37,7 +52,11 @@ local function addSideBar(component)
     end
     local creditsCategory = component.sidebar:createCategory("Credits")
     for _, credit in ipairs(CREDITS_LIST) do
-        creditsCategory:createHyperLink{ text = credit.text, url = credit.url }
+        if credit.url then
+            creditsCategory:createHyperLink{ text = credit.text, url = credit.url }
+        else
+            creditsCategory:createInfo{ text = credit.text }
+        end
     end
 end
 
@@ -52,21 +71,21 @@ local function registerMCM()
     local page = template:createSideBarPage{ label = "Settings"}
     addSideBar(page)
 
-    page:createYesNoButton{
-        label = "Enable Mod",
-        description = "Turn this mod on or off.",
-        variable = mwse.mcm.createTableVariable{ id = "enabled", table = config.mcm },
-        callback = function(self)
-            if self.variable.value == true then
-                logger:info("Enabling mod")
-                event.trigger("Fishing:ModEnabled")
-                event.trigger("Fishing:McmUpdated")
-            else
-                logger:info("Disabling mod")
-                event.trigger("Fishing:ModDisabled")
-            end
-        end
-    }
+    -- page:createYesNoButton{
+    --     label = "Enable Mod",
+    --     description = "Turn this mod on or off.",
+    --     variable = mwse.mcm.createTableVariable{ id = "enabled", table = config.mcm },
+    --     callback = function(self)
+    --         if self.variable.value == true then
+    --             logger:info("Enabling mod")
+    --             event.trigger("Fishing:ModEnabled")
+    --             event.trigger("Fishing:McmUpdated")
+    --         else
+    --             logger:info("Disabling mod")
+    --             event.trigger("Fishing:ModDisabled")
+    --         end
+    --     end
+    -- }
 
     page:createYesNoButton{
         label = "Enable cheat mode",

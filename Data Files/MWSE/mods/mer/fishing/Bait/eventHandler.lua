@@ -61,11 +61,25 @@ local function onEquip(e)
                     callback = function()
                         logger:debug("Eating bait %s", itemId)
                         skipEquip = true
-                        ---@diagnostic disable
-                        mwscript.equip{
-                            reference = tes3.player,
-                            item = baitObject,
-                        }---@diagnostic enable
+                        -- ---@diagnostic disable
+                        -- mwscript.equip{
+                        --     reference = tes3.player,
+                        --     item = baitObject,
+                        -- }---@diagnostic enable
+
+                        ---@type equipEventData
+                        local eventData = {
+                            item = e.item,
+                            itemData = e.itemData,
+                            reference = tes3.player
+                        }
+                        local response = event.trigger("equip", eventData, { filter = tes3.player })
+                        if response.block ~= true then
+                            tes3.player.mobile:equip{
+                                item = e.item,
+                                itemData = e.itemData
+                            }
+                        end
                     end
                 },
             },

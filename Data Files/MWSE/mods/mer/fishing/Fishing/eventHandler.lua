@@ -57,31 +57,6 @@ event.register("addSound", function(e)
 end, { priority = 500})
 
 
---[[
-    Bite interval determined by:
-    - LUCK attribute
-    - Fishing skill
-]]
-local function generateBiteInterval()
-    if config.mcm.cheatMode then
-        logger:trace("Cheat mode enabled, bite interval set to 1 second")
-        return 1
-    end
-    local defaultInterval = 5
-    local skill = FishingSkill.getCurrent()
-    local skillEffect = math.remap(skill,
-        0, 100,
-        1.0, 0.70)
-    local luck = math.clamp(0, 100, tes3.mobilePlayer.luck.current)
-    local luckEffect = math.remap(luck,
-        0, 100,
-        1.0, 0.5)
-    local random = math.random(5)
-    local interval = defaultInterval * skillEffect * luckEffect + random
-    logger:trace("Bite interval: %s", interval)
-    return interval
-end
-
 
 event.register("loaded", function()
     --fish bite timer
@@ -95,11 +70,11 @@ event.register("loaded", function()
             callback = function()
                 logger:trace("Fish bite timer finished")
                 FishingService.triggerFish()
-                startFishBiteTimer(generateBiteInterval())
+                startFishBiteTimer(FishingService.generateBiteInterval())
             end
         }
     end
-    startFishBiteTimer(generateBiteInterval())
+    startFishBiteTimer(FishingService.generateBiteInterval())
 
     --Check any interim states and cancel
     local state = FishingStateManager.getCurrentState()

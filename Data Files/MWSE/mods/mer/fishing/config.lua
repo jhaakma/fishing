@@ -1,7 +1,7 @@
 ---@class Fishing.config
 local config = {}
-config.configPath = "Fishing"
-config.metadata = toml.loadFile("Data Files\\Fishing-metadata.toml")
+config.configPath = "UltimateFishing"
+config.metadata = toml.loadFile("Data Files\\UltimateFishing-metadata.toml")
 ---@class Fishing.config.constants
 config.constants = {
     --How many times to try to find a valid position for a fish startPosition
@@ -82,7 +82,20 @@ local mcmDefault = {
     cheatMode = false,
     logLevel = "INFO",
     fishingMerchants = {
-        ["arrille"] = true
+        ["arrille"] = true,--seyda neen trader - high elf - 800
+        ["goldyn belaram"] = true,--suran pawnbroker - Dark Elf - 450
+        ["clagius clanler"] = true,--balmora outfitter - Imperial - 800
+        ["fadase selvayn"] = true,--tel branora trader - Dark Elf - 500
+        ["tiras sadus"] = true,--ald'ruhn trader - Dark Elf - 799
+        ["heifnir"] = true,--dagon fel trader - Nord - 700
+        ["ancola"] = true,--sadrith mora trader - Redguard - 800
+        ["ababael timsar-dadisun"] = true,--super pro ashlander merchant - Dark Elf - what 9000
+        ["shulki ashunbabi"] = true,--Gnisis trader - Dark Elf - 400
+        ["perien aurelie"] = true, --hla-oad pawnbroker - Breton - 150
+        ["thongar"] = true,--Khuul trader/fake inkeeper - Nord - 1200
+        ["vasesius viciulus"] = true,--Molag mar trader - Imperial - 1000
+        ["sedam omalen"] = true,--Ald Velothi's only trader - Dark Elf 400
+        ["ferele athram"] = true, --Tel Aruhn trader
     },
 }
 ---@type Fishing.config.MCM

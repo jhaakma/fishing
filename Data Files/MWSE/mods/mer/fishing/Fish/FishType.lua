@@ -6,6 +6,7 @@ local Bait = require("mer.fishing.Bait.Bait")
 local Ashfall = include("mer.ashfall.interop")
 local Harvest = require("mer.fishing.Harvest")
 local FishingSkill = require("mer.fishing.FishingSkill")
+local CraftingFramework = include("CraftingFramework")
 
 ---@alias Fishing.FishType.rarity
 ---| '"common"'
@@ -24,6 +25,7 @@ local FishingSkill = require("mer.fishing.FishingSkill")
 ---@field min number The minimum amount of the object that is harvested
 ---@field max number The maximum amount of the object that is harvested
 ---@field isMeat boolean If true, the object is treated as meat for Ashfall cooking purposes
+---@field isTrophy boolean If true, will be set up as static Activator in Crafting Framework
 
 ---@class Fishing.FishType.new.params
 ---@field baseId string The id of the base object representation of the fish
@@ -97,6 +99,20 @@ function FishType.new(e)
                         type = "bait",
                         uses = 10
                     }
+                end
+                if harvestable.isTrophy then
+                    if CraftingFramework then
+                        logger:debug("Registering %s as trophy", harvestable.id)
+                        CraftingFramework.Recipe:new{
+                            id = "Fishing:" .. harvestable.id,
+                            craftableId = harvestable.id,
+                            craftedOnly = false,
+                            placedObject = harvestable.id .. "_s",
+                            pinToWall = true,
+                            placementSetting = "free",
+                            blockPlacementSettingToggle = true,
+                        }
+                    end
                 end
             end
         end

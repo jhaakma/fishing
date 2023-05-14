@@ -16,26 +16,8 @@ local FishingSkill = require("mer.fishing.FishingSkill")
 ---@class Fishing.FishingService
 local FishingService = {}
 
-local function getBiteDuration()
-    if config.mcm.cheatMode then
-        return 2.0
-    end
 
-    local min = 0.15
-    --TODO: base on fishing skill
-    local skill = FishingSkill.getCurrent()
-    local max = math.remap(skill,
-        0, 100,
-        0.3, 0.6
-    )
-    local biteDuration = math.random(
-        math.floor(min*100),
-        math.floor(max*100)
-    )/100
 
-    logger:debug("Bite duration: %s", biteDuration)
-    return biteDuration
-end
 
 ---@param lure tes3reference
 ---@param landCallback function
@@ -185,32 +167,7 @@ local function startCasting()
     end
 end
 
----Calculate the chance a bite is real or just a nibble
-local function calculateRealBiteChance()
-    if config.mcm.cheatMode then
-        return true
-    end
 
-    --Roll based on bait hook chance
-    local roll = math.random()
-    local fishingRod = FishingRod.getEquipped()
-    local bait = fishingRod and fishingRod:getEquippedBait()
-    if bait then
-        local baitMultiplier = 1 / bait:getType():getHookChance()
-        logger:debug("Bait hook multiplier: %s", baitMultiplier)
-        roll = roll * baitMultiplier
-    end
-
-    --Skill determines chance needed
-    local skill = FishingSkill.getCurrent()
-    local chanceNeeded = math.remap(skill,
-        0, 100,
-        config.constants.MIN_BITE_CHANCE, config.constants.MAX_BITE_CHANCE
-    )
-
-    logger:debug("Real bite chance: %s, needed: %s", roll, chanceNeeded)
-    return roll < chanceNeeded
-end
 
 local function endBite()
     local state = FishingStateManager.getCurrentState()
@@ -230,7 +187,7 @@ local function realBite()
         logger:debug("Playing bite animation")
         Animations.lureBite(lure)
         timer.start{
-            duration = getBiteDuration(),
+            duration = FishingService.getBiteDuration(),
             callback = function()
                 endBite()
             end
@@ -280,7 +237,7 @@ end
 function FishingService.triggerFish()
     local state = FishingStateManager.getCurrentState()
     if state == "WAITING" then
-        if calculateRealBiteChance() then
+        if FishingService.calculateRealBite() then
             logger:debug("SwimService is biting")
             startFish()
         else
@@ -379,6 +336,10 @@ function FishingService.startSwing()
     local state = FishingStateManager.getCurrentState()
 
     local rod = FishingRod:getEquipped()
+    if (state == "WAITING") then
+        Animations.reverseSwing()
+    end
+
     if (state == "WAITING") or (state == "CHASING") then
         logger:debug("%s cancel fishing", state)
         tes3.messageBox("You fail to catch anything.")
@@ -397,6 +358,85 @@ function FishingService.startSwing()
     else
         logger:debug("Activate blocked by state - %s", state)
     end
+end
+
+--[[
+    Bite interval determined by:
+    - LUCK attribute
+    - Fishing skill
+]]
+function FishingService.generateBiteInterval()
+    if config.mcm.cheatMode then
+        logger:trace("Cheat mode enabled, bite interval set to 1 second")
+        return 1
+    end
+    local defaultInterval = 5
+    local skill = FishingSkill.getCurrent()
+    local skillEffect = math.remap(skill,
+        0, 100,
+        1.0, 0.70)
+    local luck = math.clamp(0, 100, tes3.mobilePlayer.luck.current)
+    local luckEffect = math.remap(luck,
+        0, 100,
+        1.0, 0.5)
+    local random = math.random(5)
+    local interval = defaultInterval * skillEffect * luckEffect + random
+    logger:trace("Bite interval: %s", interval)
+    return interval
+end
+
+function FishingService.getBiteDuration()
+    if config.mcm.cheatMode then
+        return 2.0
+    end
+
+
+    --TODO: base on fishing skill
+    local skill = FishingSkill.getCurrent()
+
+    local min = math.remap(skill,
+        0, 100,
+        0.1, 0.3
+    )
+
+    local max = math.remap(skill,
+        0, 100,
+        0.3, 0.6
+    )
+    local biteDuration = math.random(
+        math.floor(min*100),
+        math.floor(max*100)
+    )/100
+
+    logger:debug("Bite duration: %s", biteDuration)
+    return biteDuration
+end
+
+---Calculate the chance a bite is real or just a nibble
+function FishingService.calculateRealBite()
+    if config.mcm.cheatMode then
+        return true
+    end
+
+    --Roll based on bait hook chance
+    local roll = math.random()
+    local fishingRod = FishingRod.getEquipped()
+    local bait = fishingRod and fishingRod:getEquippedBait()
+    if bait then
+        local baitMultiplier = 1 / bait:getType():getHookChance()
+        logger:debug("Bait hook multiplier: %s", baitMultiplier)
+        roll = roll * baitMultiplier
+    end
+
+    --Skill determines chance needed
+    local skill = FishingSkill.getCurrent()
+    local chanceNeeded = math.remap(skill,
+        0, 100,
+        config.constants.MIN_BITE_CHANCE, config.constants.MAX_BITE_CHANCE
+    )
+
+    logger:debug("Real bite chance: %s, needed: %s", roll, chanceNeeded)
+    return roll < chanceNeeded
 end
 
 return FishingService
