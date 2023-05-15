@@ -77,16 +77,16 @@ function FishingLine:setTension(tension)
 end
 
 
---- Update the fishing line's end point and tension.
+--- Update the fishing line's end points and tension.
 ---
----@param position tes3vector3
-function FishingLine:updateEndPoint(position)
-    -- Recenter the fishing line to the parent position.
-    local origin = self.sceneNode.parent.worldTransform.translation
+---@param origin tes3vector3
+---@param destination tes3vector3
+function FishingLine:updateEndPoints(origin, destination)
+    -- Recenter the fishing line to the origin position.
     self.sceneNode.translation = origin
 
     -- Convert absolute position into relative position.
-    position = (position - origin) / self.sceneNode.scale
+    local position = destination - origin
 
     -- -- Calculate tension value as a function of distance.
     -- local distance = math.clamp(position:length(), MIN_DIST, MAX_DIST)

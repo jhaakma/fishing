@@ -42,27 +42,25 @@ function LineManager.attachLines(lure)
     local landed = false
 
     updateFishingLine = function()
-        -- Ensure the fishing line is attached to the correct parent (1st/3rd).
-        local parent = tes3.is3rdPerson() and attachFishingLine3rd or attachFishingLine1st
-        if fishingLine.sceneNode.parent ~= parent then
-            fishingLine:attachTo(parent)
-        end
-
-        local attachPosition = lureAttachPoint.worldTransform.translation
-        if not (lureSafeRef and lureSafeRef:valid()) then
-            logger:debug("Lure is not valid, stopping fishing line")
-            cancel()
-            return
-        end
         if FishingStateManager.isState("IDLE") then
             logger:debug("Player is idle, stopping fishing line")
             cancel()
             return
         end
-        if attachPosition:distance(tes3.player.position) > config.constants.FISHING_LINE_MAX_DISTANCE then
+        local lurePosition = lureAttachPoint.worldTransform.translation
+        if lurePosition:distance(tes3.player.position) > config.constants.FISHING_LINE_MAX_DISTANCE then
             logger:debug("Player is too far away, stopping fishing line")
             cancel()
             return
+        end
+        if not (lureSafeRef and lureSafeRef:valid()) then
+            logger:debug("Lure is not valid, stopping fishing line")
+            cancel()
+            return
+        end
+        -- Ensure the fishing line is attached to the lure.
+        if fishingLine.sceneNode.parent ~= lureSafeRef.sceneNode then
+            fishingLine:attachTo(lureSafeRef.sceneNode)
         end
         if FishingStateManager.isState("WAITING") then
             if not landed then
@@ -72,9 +70,13 @@ function LineManager.attachLines(lure)
                 return
             end
         end
-        fishingLine:updateEndPoint(attachPosition:copy())
+        -- Get the appropriate 1st/3rd person pole position.
+        local attachFishingLine = tes3.is3rdPerson() and attachFishingLine3rd or attachFishingLine1st
+        local attachPosition = attachFishingLine.worldTransform.translation
+        -- Update the fishing line.
+        fishingLine:updateEndPoints(attachPosition, lurePosition)
     end
-    event.register("cameraControl", updateFishingLine)
+    event.register("cameraControl", updateFishingLine, { priority = 1000 })
     return fishingLine
 end
 
