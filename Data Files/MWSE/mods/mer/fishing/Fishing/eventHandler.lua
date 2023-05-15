@@ -85,7 +85,7 @@ event.register("loaded", function()
         common.enablePlayerControls()
         FishingStateManager.endFishing()
     end
-end)
+end, { priority = -10} )
 
 local blockMove = false
 local function dontMove(e)
