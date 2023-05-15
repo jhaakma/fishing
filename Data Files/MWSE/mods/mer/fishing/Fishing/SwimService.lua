@@ -96,17 +96,15 @@ local m1 = tes3matrix33.new()
 ---@param e SwimService.findTargetPosition.params
 function SwimService.findTargetPosition(e)
     local origin = e.origin
-    local minDistance = e.minDistance or config.constants.FISH_POSITION_DISTANCE_MIN
-    local maxDistance = e.maxDistance or config.constants.FISH_POSITION_DISTANCE_MAX
 
     logger:debug("Target position: %s", origin)
     logger:debug("Finding start position")
     for i=1, config.constants.FISH_POSITION_ATTEMPTS do
         --Every failed attempts, reduce the distance, to a minimum of 50
         local ABSOLUTE_MIN = 50
-        local distanceReductionPerAttempt = minDistance / config.constants.FISH_POSITION_ATTEMPTS
-        local min = math.max(ABSOLUTE_MIN, minDistance - (distanceReductionPerAttempt * i))
-        local max = math.max(ABSOLUTE_MIN, maxDistance - (distanceReductionPerAttempt * i))
+        local distanceReductionPerAttempt = e.minDistance / config.constants.FISH_POSITION_ATTEMPTS
+        local min = math.max(ABSOLUTE_MIN, e.minDistance - (distanceReductionPerAttempt * i))
+        local max = math.max(ABSOLUTE_MIN, e.maxDistance - (distanceReductionPerAttempt * i))
         local distance = math.random(min, max)
 
         logger:trace("Distance: %s", distance)

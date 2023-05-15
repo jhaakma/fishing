@@ -2,6 +2,7 @@ local FishInstance = require("mer.fishing.Fish.FishInstance")
 local Niche = require("mer.fishing.Fish.Niche")
 local common = require("mer.fishing.common")
 local logger = common.createLogger("FishType")
+local config = require("mer.fishing.config")
 local Bait = require("mer.fishing.Bait.Bait")
 local Ashfall = include("mer.ashfall.interop")
 local Harvest = require("mer.fishing.Harvest")
@@ -49,9 +50,9 @@ local FishType = {
     ---@type table<Fishing.FishType.rarity, number>
     rarityValues = {
         common = 1.0,
-        uncommon = 0.20,
-        rare = 0.10,
-        legendary = 0.05
+        uncommon = 0.25,
+        rare = 0.05,
+        legendary = 0.02,
     }
 }
 
@@ -141,7 +142,7 @@ function FishType.register(e)
 end
 
 function FishType:getStartingFatigue()
-    return math.remap(self.difficulty, 0, 100, 50, 200)
+    return math.remap(self.difficulty, 0, 100, 1, 400)
 end
 
 function FishType:getBaseObject()
@@ -169,6 +170,19 @@ function FishType:getRarityEffect()
     rarityEffect = math.clamp(rarityEffect * skillEffect, 0, 1.0)
 
     return rarityEffect
+end
+
+---@return number min, number max The min and max distance from the lure
+function FishType:getStartDistance()
+    local MIN = config.constants.FISH_POSITION_DISTANCE_MIN
+    local MAX = config.constants.FISH_POSITION_DISTANCE_MAX
+    --Slow fish start closer to the lure
+    local speed = math.clamp(self.speed, 0, 100)
+    local speedEffect = math.remap(speed,
+        0, 100,
+        0.1, 1.0
+    )
+    return MIN * speedEffect, MAX * speedEffect
 end
 
 return FishType

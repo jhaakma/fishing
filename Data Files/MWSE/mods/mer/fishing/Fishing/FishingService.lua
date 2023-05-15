@@ -195,6 +195,7 @@ local function realBite()
     end
 end
 
+
 local function startFish()
     logger:debug("Starting fish")
     local lure = FishingStateManager.getLure()
@@ -212,8 +213,11 @@ local function startFish()
 
 
     local to = lure.position
+    local min, max = fish.fishType:getStartDistance()
     local from = SwimService.findTargetPosition{
         origin = to,
+        minDistance = min,
+        maxDistance = max,
     }
     if from then
         FishingStateManager.setState("CHASING")
