@@ -27,19 +27,19 @@ local function getHarvestablesDescription(harvestables)
         local obj = tes3.getObject(harvestable.id)
         if not obj then
             logger:error("Harvestable object %s does not exist", harvestable.id)
-            return ""
+        else
+            description = description .. string.format("- %s (%s-%s)\n", obj.name, harvestable.min, harvestable.max)
         end
-        description = description .. string.format("- %s (%s-%s)\n", obj.name, harvestable.min, harvestable.max)
     end
     description = description:sub(1, -2)
     return description
 end
 
-local function getReceivedItemsMessage(harvestables)
+local function getReceivedItemsMessage(harvested)
     local message = "You received the following: \n"
-    for _, harvestable in ipairs(harvestables) do
-        local obj = tes3.getObject(harvestable.id)
-        message = message .. string.format("- %s\n", obj.name, harvestable.min, harvestable.max)
+    for id, count in pairs(harvested) do
+        local obj = tes3.getObject(id)
+        message = message .. string.format("- %dx %s\n", count, obj.name)
     end
     message = message:sub(1, -2)
     return message
@@ -70,16 +70,25 @@ function Harvest.registerFish(fishType)
                 craftCallback = function(_, _)
                     --add each harvestable to inventory
                     local item
+                    local harvested = {}
                     for _, harvestable in ipairs(fishType.harvestables) do
                         local count = math.random(harvestable.min, harvestable.max)
-                        item = tes3.addItem{
-                            reference = tes3.player,
-                            item = harvestable.id,
-                            count = count,
-                            playSound = false
-                        }--[[@as tes3misc]]
+                        local obj = tes3.getObject(harvestable.id) --[[@as tes3ingredient]]
+                        if count > 0 and obj then
+                            item = tes3.addItem{
+                                reference = tes3.player,
+                                item = obj,
+                                count = count,
+                                playSound = false
+                            }--[[@as tes3misc]]
+                            harvested[harvestable.id] = count
+                        end
                     end
-                    tes3.messageBox(getReceivedItemsMessage(fishType.harvestables))
+                    if table.size(harvested) == 0 then
+                        tes3.messageBox("You failed to harvest anything.")
+                        return
+                    end
+                    tes3.messageBox(getReceivedItemsMessage(harvested))
                     tes3.playItemPickupSound{ reference = tes3.player, item = item}
                 end,
                 materials = {

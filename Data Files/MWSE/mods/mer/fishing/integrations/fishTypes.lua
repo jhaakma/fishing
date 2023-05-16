@@ -244,10 +244,9 @@ local rareFish = {
                 isMeat = true,
             },
             {
-                id = "ab_ingcrea_sturgeonroe01",
+                id = "ab_ingcrea_sturgeonroe",
                 min = 0,
                 max = 1,
-                isMeat = false,
             }
         },
     },
