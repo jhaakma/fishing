@@ -76,7 +76,6 @@ function FishingLine:setTension(tension)
     self.tension = tension
 end
 
-
 --- Update the fishing line's end points and tension.
 ---
 ---@param origin tes3vector3
@@ -101,7 +100,7 @@ function FishingLine:updateEndPoints(origin, destination)
     endp.value = position * 2
     endp.value.z = 0
     self.curveData:updateDerivedValues()
-    self.sceneNode.appCulled = false
+    self.sceneNode:update()
 end
 
 return FishingLine
