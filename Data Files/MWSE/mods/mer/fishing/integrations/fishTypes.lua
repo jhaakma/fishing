@@ -489,8 +489,19 @@ local loot = {
         difficulty = 5,
         class = "loot",
         niche = {},
-        rarity = "uncommon",
+        rarity = "common",
     },
+    {
+        baseId = "mer_fishing_pole_01",
+        description = "Somewhere out there is a very sad fisherman.",
+        speed = 30,
+        size = 1.0,
+        difficulty = 10,
+        class = "loot",
+        niche = {},
+        rarity = "uncommon",
+
+    }
 }
 
 
@@ -532,6 +543,11 @@ event.register("initialized", function (e)
         logger:debug("Registering legendary fish %s", fish.baseId)
         fish = Interop.registerFishType(fish)
         registerFood(fish)
+    end
+    for _, fish in ipairs(loot) do
+        fish.rarity = "loot"
+        logger:debug("Registering loot %s", fish.baseId)
+        fish = Interop.registerFishType(fish)
     end
 end)
 
