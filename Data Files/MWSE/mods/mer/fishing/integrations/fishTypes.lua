@@ -549,4 +549,3 @@ event.register("initialized", function (e)
         fish = Interop.registerFishType(fish)
     end
 end)
-WHAT TEH FUCKL
