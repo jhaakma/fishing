@@ -500,8 +500,8 @@ local loot = {
         class = "loot",
         niche = {},
         rarity = "uncommon",
+    },
 
-    }
 }
 
 
@@ -545,9 +545,8 @@ event.register("initialized", function (e)
         registerFood(fish)
     end
     for _, fish in ipairs(loot) do
-        fish.rarity = "loot"
         logger:debug("Registering loot %s", fish.baseId)
         fish = Interop.registerFishType(fish)
     end
 end)
-
+WHAT TEH FUCKL
