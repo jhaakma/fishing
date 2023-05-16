@@ -60,7 +60,7 @@ function FightManager:fail(reason, didSnap)
         }
         tes3.playVoiceover({ actor = tes3.player, voiceover = tes3.voiceover.hit })
         tes3.playAnimation({
-            reference = tes3.player,
+            reference = tes3.is3rdPerson() and tes3.player or tes3.player1stPerson,
             group = math.random(tes3.animationGroup.hit1, tes3.animationGroup.hit5),
         })
     end
