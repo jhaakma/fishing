@@ -162,9 +162,10 @@ local baits = {
     }
 
 }
-
-for _, bait in ipairs(baits) do
-    logger:debug("Registering bait %s", bait.id)
-    Interop.registerBait(bait)
-end
+event.register("initialized", function (e)
+    for _, bait in ipairs(baits) do
+        logger:debug("Registering bait %s", bait.id)
+        Interop.registerBait(bait)
+    end
+end)
 

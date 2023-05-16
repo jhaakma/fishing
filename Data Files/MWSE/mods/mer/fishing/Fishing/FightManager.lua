@@ -384,15 +384,19 @@ function FightManager:fightSimulate(e)
     self:updateTension()
 
     local fishingLine = FishingStateManager.getFishingLine()
-    if fishingLine and fishingLine:getTension() >= config.constants.FIGHT_TENSION_UPPER_LIMIT then
-        self:fail("Line Snapped!", true)
-        return
+    local tension = fishingLine and fishingLine:getTension() or 0
+    if tension then
+        if tension >= config.constants.FIGHT_TENSION_UPPER_LIMIT then
+            logger:trace("Snap Tension: %s", tension)
+            self:fail("Line Snapped!", true)
+            return
+        end
+        if tension <= config.constants.FIGHT_TENSION_LOWER_LIMIT then
+            logger:trace("Escape Tension: %s", tension)
+            self:fail("Fish Escaped!")
+            return
+        end
     end
-    if fishingLine and fishingLine:getTension() <= config.constants.FIGHT_TENSION_LOWER_LIMIT then
-        self:fail("Fish Escaped!")
-        return
-    end
-
     if self.fish.fatigue <= self:getFishFatigueLimit() then
         self:success()
         return

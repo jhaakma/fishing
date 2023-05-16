@@ -8,16 +8,6 @@ local Interop = require("mer.fishing")
 ---@type Fishing.FishType.new.params[]
 local commonFish = {
     {
-        baseId = "misc_com_bottle_10",
-        description = "It's a bottle.",
-        speed = 30,
-        size = 0.5,
-        difficulty = 5,
-        class = "small",
-        niche = {},
-    },
-
-    {
         baseId = "mer_fish_bass",
         previewMesh = "mer_fishing\\f\\bass.nif",
         description = "The largemouth bass is a medium sized, carnivourous fish found all throughout Morrowind. They can put up a good fight when hooked, but are prized for their delicious meat.",
@@ -490,47 +480,58 @@ local legendaryFish = {
     }
 }
 
+local loot = {
+    {
+        baseId = "misc_com_bottle_10",
+        description = "It's a bottle.",
+        speed = 30,
+        size = 0.5,
+        difficulty = 5,
+        class = "loot",
+        niche = {},
+        rarity = "uncommon",
+    },
+}
+
 
 
 local Ashfall = include("mer.ashfall.interop")
----@param fish Fishing.FishType
-local function registerFood(fish)
-    if Ashfall then
-       local obj = fish:getBaseObject()
-       if obj.objectType == tes3.objectType.ingredient then
-            logger:debug("Registering %s as meat", obj.id)
-            Ashfall.registerFoods{
-                [obj.id] = "meat"
-            }
-       end
+event.register("initialized", function (e)
+    ---@param fish Fishing.FishType
+    local function registerFood(fish)
+        if Ashfall then
+            local obj = fish:getBaseObject()
+            if obj.objectType == tes3.objectType.ingredient then
+                    logger:debug("Registering %s as meat", obj.id)
+                    Ashfall.registerFoods{
+                        [obj.id] = "meat"
+                    }
+            end
+        end
     end
-end
+    for _, fish in ipairs(commonFish) do
+        fish.rarity = "common"
+        logger:debug("Registering common fish %s", fish.baseId)
+        fish = Interop.registerFishType(fish)
+        registerFood(fish)
+    end
+    for _, fish in ipairs(uncommonFish) do
+        fish.rarity = "uncommon"
+        logger:debug("Registering uncommon fish %s", fish.baseId)
+        fish = Interop.registerFishType(fish)
+        registerFood(fish)
+    end
+    for _, fish in ipairs(rareFish) do
+        fish.rarity = "rare"
+        logger:debug("Registering rare fish %s", fish.baseId)
+        fish = Interop.registerFishType(fish)
+        registerFood(fish)
+    end
+    for _, fish in ipairs(legendaryFish) do
+        fish.rarity = "legendary"
+        logger:debug("Registering legendary fish %s", fish.baseId)
+        fish = Interop.registerFishType(fish)
+        registerFood(fish)
+    end
+end)
 
-local FishType = require("mer.fishing.Fish.FishType")
-for _, fish in ipairs(commonFish) do
-    fish.rarity = "common"
-    logger:debug("Registering common fish %s", fish.baseId)
-    fish = Interop.registerFishType(fish)
-    registerFood(fish)
-end
-
-for _, fish in ipairs(uncommonFish) do
-    fish.rarity = "uncommon"
-    logger:debug("Registering uncommon fish %s", fish.baseId)
-    fish = Interop.registerFishType(fish)
-    registerFood(fish)
-end
-
-for _, fish in ipairs(rareFish) do
-    fish.rarity = "rare"
-    logger:debug("Registering rare fish %s", fish.baseId)
-    fish = Interop.registerFishType(fish)
-    registerFood(fish)
-end
-
-for _, fish in ipairs(legendaryFish) do
-    fish.rarity = "legendary"
-    logger:debug("Registering legendary fish %s", fish.baseId)
-    fish = Interop.registerFishType(fish)
-    registerFood(fish)
-end

@@ -54,11 +54,14 @@ local function getLeftBlockProportion()
     local minRange = config.constants.TENSION_MINIMUM
     local maxRange = config.constants.TENSION_MAXIMUM
     local totalRange = maxRange - minRange
+    logger:debug("totalRange: %s", totalRange)
 
     local minLimit = config.constants.FIGHT_TENSION_LOWER_LIMIT
     local leftSize = minLimit - minRange
+    logger:debug("leftSize: %s", leftSize)
 
-    return leftSize / totalRange
+    logger:debug("leftSize / totalRange: %s", leftSize / totalRange)
+    return leftSize / totalRange * 0.9
 end
 
 local function getRightBlockProportion()
@@ -69,10 +72,10 @@ local function getRightBlockProportion()
     local maxLimit = config.constants.FIGHT_TENSION_UPPER_LIMIT
     local rightSize = maxRange - maxLimit
 
-    return rightSize / totalRange
+    return rightSize / totalRange * 0.9
 end
 
---[[
+--[[Y
     Creates an indicator showing how much tension
     is being applied to the fishing line.
 
@@ -102,7 +105,7 @@ function FightIndicator:createTensionBar(parent)
     tensionBar.autoHeight = true
 
     --Add red bar to the left
-    local red = tes3vector3.new(0.75,0.1,0.1)
+    local red = tes3vector3.new(0.75,0.2,0.2)
     local extraOverlapZone = 10
     local leftBlock = tensionBar:createRect{
         color = red,
@@ -131,7 +134,7 @@ function FightIndicator:createTensionBar(parent)
     local image = tensionImage:createImage{
         path = "textures\\mer_fishing\\tension_indicator.dds",
     }
-    image.width = 64
+    image.width = 32
     image.height = 32
     image.scaleMode = true
 end
@@ -178,11 +181,12 @@ function FightIndicator:updateMenu()
      end
     --update tension indicator
     local tensionIndicator = menu:findChild(self.uiids.tensionIndicator)
-    local tension = self.fightManager:getTension()
+    local tension = self.fightManager:getTension() - config.constants.TENSION_MINIMUM
     local totalTension = config.constants.TENSION_MAXIMUM - config.constants.TENSION_MINIMUM
     local tensionProportion = tension / totalTension
     tensionIndicator.absolutePosAlignX = tensionProportion
 
+    logger:trace("Indicator Tension: %s", tension)
     --update fatigue
     local fatigueBar = menu:findChild(self.uiids.fatigueBar)
     fatigueBar.widget.current = self.fightManager.fish.fatigue

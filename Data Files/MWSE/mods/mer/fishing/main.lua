@@ -19,11 +19,10 @@ local function initAll(path)
 end
 
 
+--Integrations
+initAll("integrations")
 
 event.register("initialized", function()
-
-    --Integrations
-    initAll("integrations")
     ---event handlers
     require("mer.fishing.FishingSkill.eventHandler")
     require("mer.fishing.PlayerAnimations")

@@ -8,6 +8,9 @@ local fishingRods = {
     }
 }
 
-for _, data in ipairs(fishingRods) do
-    Interop.registerFishingRod(data)
-end
+event.register("initialized", function (e)
+    for _, data in ipairs(fishingRods) do
+        Interop.registerFishingRod(data)
+    end
+end)
+
