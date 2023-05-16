@@ -24,6 +24,10 @@ function LineManager.attachLines(lure)
 
     local updateFishingLine
     local lureSafeRef = tes3.makeSafeObjectHandle(lure)
+    if lureSafeRef == nil then
+        logger:error("Could not find lure reference")
+        return
+    end
 
     local function cancel()
         logger:debug("Cancelling fishing line")
@@ -47,21 +51,24 @@ function LineManager.attachLines(lure)
             cancel()
             return
         end
+        if not lureSafeRef:valid() then
+            logger:debug("Lure is not valid, stopping fishing line")
+            cancel()
+            return
+        end
         local lurePosition = lureAttachPoint.worldTransform.translation
         if lurePosition:distance(tes3.player.position) > config.constants.FISHING_LINE_MAX_DISTANCE then
             logger:debug("Player is too far away, stopping fishing line")
             cancel()
             return
         end
-        if not (lureSafeRef and lureSafeRef:valid()) then
-            logger:debug("Lure is not valid, stopping fishing line")
-            cancel()
-            return
-        end
+
         -- Ensure the fishing line is attached to the lure.
-        if fishingLine.sceneNode.parent ~= lureSafeRef.sceneNode then
-            fishingLine:attachTo(lureSafeRef.sceneNode)
+
+        if fishingLine.sceneNode.parent ~= lureAttachPoint then
+            fishingLine:attachTo(lureAttachPoint)
         end
+
         if FishingStateManager.isState("WAITING") then
             if not landed then
                 logger:debug("Lure has landed, transitioning tension")
@@ -70,9 +77,11 @@ function LineManager.attachLines(lure)
                 return
             end
         end
+
         -- Get the appropriate 1st/3rd person pole position.
         local attachFishingLine = tes3.is3rdPerson() and attachFishingLine3rd or attachFishingLine1st
         local attachPosition = attachFishingLine.worldTransform.translation
+
         -- Update the fishing line.
         fishingLine:updateEndPoints(attachPosition, lurePosition)
     end

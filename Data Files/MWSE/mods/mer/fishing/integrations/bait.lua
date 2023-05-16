@@ -108,10 +108,10 @@ local BaitTypes = {
         description = "Increases chance of catching random loot.",
         getFishEffect = function(self, fish)
             local classes = {
-                small = 0.4,
+                small = 0.8,
                 medium = 0.3,
                 large = 0.1,
-                loot = 1.0,
+                loot = 0.5,
             }
             return classes[fish.class] or 0.1
         end
@@ -168,7 +168,7 @@ local baits = {
     {
         id = "ingred_scrap_metal_01",
         type = "sinker",
-        uses = 20,
+        uses = 10,
     }
 
 }
