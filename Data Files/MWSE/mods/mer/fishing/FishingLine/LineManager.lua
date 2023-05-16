@@ -64,6 +64,7 @@ function LineManager.attachLines(lure)
         end
 
         -- Ensure the fishing line is attached to the lure.
+        lureAttachPoint:update({controllers=true})
         if fishingLine.sceneNode.parent ~= lureAttachPoint then
             fishingLine:attachTo(lureAttachPoint)
         end
