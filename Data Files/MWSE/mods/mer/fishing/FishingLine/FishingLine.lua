@@ -101,7 +101,7 @@ function FishingLine:updateEndPoints(origin, destination)
     endp.value = position * 2
     endp.value.z = 0
     self.curveData:updateDerivedValues()
-    self.sceneNode:update()
+    self.sceneNode:update({controllers=true})
 end
 
 return FishingLine
