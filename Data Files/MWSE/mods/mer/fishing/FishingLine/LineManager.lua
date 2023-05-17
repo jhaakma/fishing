@@ -85,7 +85,7 @@ function LineManager.attachLines(lure)
         -- Update the fishing line.
         fishingLine:updateEndPoints(attachPosition, lurePosition)
     end
-    event.register("cameraControl", updateFishingLine, { priority = 1000 })
+    event.register("cameraControl", updateFishingLine, { priority = -9000 })
     return fishingLine
 end
 

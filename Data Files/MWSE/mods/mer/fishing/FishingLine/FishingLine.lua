@@ -88,10 +88,6 @@ function FishingLine:updateEndPoints(origin, destination)
     -- Convert absolute position into relative position.
     local position = destination - origin
 
-    -- -- Calculate tension value as a function of distance.
-    -- local distance = math.clamp(position:length(), MIN_DIST, MAX_DIST)
-    -- local tension = math.remap(distance, MIN_DIST, MAX_DIST, MIN_TENSION, MAX_TENSION)
-
     -- Apply the calculated position and tension values.
     local keys = self.curveData.positionKeys
     local midp = keys[2]
@@ -101,9 +97,6 @@ function FishingLine:updateEndPoints(origin, destination)
     endp.value = position * 2
     endp.value.z = 0
     self.curveData:updateDerivedValues()
-    if tes3.is3rdPerson() then
-        self.sceneNode:update({controllers=true})
-    end
 end
 
 return FishingLine
