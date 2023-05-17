@@ -64,6 +64,8 @@ config.constants = {
 
     MIN_BITE_CHANCE = 0.25,
     MAX_BITE_CHANCE = 0.75,
+
+    UNCLAMP_WAVES_DURATION = 0.5,
 }
 
 

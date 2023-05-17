@@ -250,7 +250,7 @@ function FightManager:startSwim()
         end
         SwimService.startSwimming{
             speed = self.fish:getReelSpeed(),
-            turnSpeed = math.random(3, 6),
+            turnSpeed = math.random(3, 4),
             physics = self.fishPhysics,
             from = lure.position,
             to = self.targetPosition,

@@ -1,5 +1,6 @@
 local common = require("mer.fishing.common")
 local logger = common.createLogger("Animations")
+local config = require("mer.fishing.config")
 local RippleGenerator = require("mer.fishing.Fishing.RippleGenerator")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 ---@class Fishing.Animations
@@ -24,7 +25,16 @@ function Animations.splash(position, size)
     })
 end
 
+---@param lure tes3reference
 function Animations.lureLand(lure)
+    --set lure z to waterLevel
+    local waterLevel = lure.cell.waterLevel or 0
+    lure.position = tes3vector3.new(
+        lure.position.x,
+        lure.position.y,
+        waterLevel
+    )
+
     tes3.playAnimation{
         reference = lure,
         group = tes3.animationGroup.idle,
@@ -117,6 +127,7 @@ end
 
 
 function Animations.reverseSwing()
+    local previousState = FishingStateManager.getCurrentState()
     logger:debug("Playing snap animation")
     --cancelling swing animation
     timer.start{
@@ -136,7 +147,7 @@ function Animations.unclampWaves()
     if not previousWaveHeight then return end
     local currentWaveHeight = mge.distantLandRenderConfig.waterWaveHeight
     --smooth transition
-    local duration = 0.5
+    local duration = config.constants.UNCLAMP_WAVES_DURATION
     local iterations = duration / 0.01
     local from = currentWaveHeight
     local to = previousWaveHeight

@@ -33,7 +33,9 @@ event.register("mouseButtonDown", function(e)
     if not tes3.player then return end
     if tes3ui.menuMode() then return end
     if e.button == 0 then
-        FishingService.startSwing()
+        if not tes3.player.mobile.controlsDisabled then
+            FishingService.startSwing()
+        end
     end
 end)
 

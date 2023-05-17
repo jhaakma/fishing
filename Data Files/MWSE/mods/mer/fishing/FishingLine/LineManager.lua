@@ -56,15 +56,23 @@ function LineManager.attachLines(lure)
             cancel()
             return
         end
+
+        -- Get the appropriate 1st/3rd person pole position.
+        lureAttachPoint:update({ controllers = true })
         local lurePosition = lureAttachPoint.worldTransform.translation
-        if lurePosition:distance(tes3.player.position) > config.constants.FISHING_LINE_MAX_DISTANCE then
+
+        -- Get the appropriate 1st/3rd person pole position.
+        local attachFishingLine = tes3.is3rdPerson() and attachFishingLine3rd or attachFishingLine1st
+        attachFishingLine:update({ controllers = true })
+        local attachPosition = attachFishingLine.worldTransform.translation
+
+        if lurePosition:distance(attachPosition) > config.constants.FISHING_LINE_MAX_DISTANCE then
             logger:debug("Player is too far away, stopping fishing line")
             cancel()
             return
         end
 
         -- Ensure the fishing line is attached to the lure.
-
         if fishingLine.sceneNode.parent ~= lureAttachPoint then
             fishingLine:attachTo(lureAttachPoint)
         end
@@ -77,10 +85,6 @@ function LineManager.attachLines(lure)
                 return
             end
         end
-
-        -- Get the appropriate 1st/3rd person pole position.
-        local attachFishingLine = tes3.is3rdPerson() and attachFishingLine3rd or attachFishingLine1st
-        local attachPosition = attachFishingLine.worldTransform.translation
 
         -- Update the fishing line.
         fishingLine:updateEndPoints(attachPosition, lurePosition)

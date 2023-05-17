@@ -68,7 +68,7 @@ local function launchLure(lure, landCallback)
         local result = tes3.rayTest{
             position = lure.position + tes3vector3.new(0, 0, 10),
             direction = tes3vector3.new(0, 0, -1),
-            ignore = { lure },
+            ignore = { lure, tes3.player },
         }
         if result then
             local hitGround =  result.intersection.z > lure.cell.waterLevel

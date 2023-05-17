@@ -211,15 +211,15 @@ function FishingStateManager.endFishing()
     FishingStateManager.clearData()
     --give time for waves to settle
 
-
-    local alreadyEnded = FishingStateManager.isState("IDLE")
-    if alreadyEnded then
-        logger:debug("already ended")
-        return
-    end
+    -- local alreadyEnded = FishingStateManager.isState("IDLE")
+    -- if alreadyEnded then
+    --     logger:debug("already ended")
+    --     return
+    -- end
     FishingStateManager.setState("BLOCKED")
+
     timer.start{
-        duration = 0.5,
+        duration = config.constants.UNCLAMP_WAVES_DURATION,
         callback = function()
             common.enablePlayerControls()
             FishingStateManager.setState("IDLE")
