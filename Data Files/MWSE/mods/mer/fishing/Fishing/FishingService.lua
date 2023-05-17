@@ -16,33 +16,25 @@ local FishingSkill = require("mer.fishing.FishingSkill")
 ---@class Fishing.FishingService
 local FishingService = {}
 
-
-
-
 ---@param lure tes3reference
 ---@param landCallback function
 local function launchLure(lure, landCallback)
-    do --update speed opn object (TODO: Fix this with praticle bindings later)
-        local mesh = tes3.loadMesh("mer_fishing\\LureParticle.nif")
-        local particles = mesh:getObjectByName("Particles")
-
-        local castStrength = FishingStateManager.getCastStrength()
-        particles.controller.speed = math.remap(castStrength, 0, 1,
-            config.constants.MIN_CAST_SPEED, config.constants.MAX_CAST_SPEED)
-    end
-
-    local vfx = tes3.createVisualEffect{
+    local vfx = tes3.createVisualEffect {
         object = "mer_lure_particle",
         position = lure.position,
+        lifespan = 20,
     }
     FishingStateManager.setParticle(vfx.effectNode)
-    local effectNode = vfx.effectNode
-    local particles = effectNode:getObjectByName("Particles") --[[@as niParticles]]
-    local controller = particles.controller --[[@as niParticleSystemController]]
 
-    effectNode.rotation:toRotationZ(tes3.player.orientation.z)
+    local castStrength = FishingStateManager.getCastStrength()
+    castStrength = math.remap(castStrength, 0, 1, config.constants.MIN_CAST_SPEED, config.constants.MAX_CAST_SPEED)
 
-    logger:debug("Setting lure speed to %s", controller.speed)
+    local particles = vfx.effectNode:getObjectByName("Particles") --[[@as niParticles]]
+    local particle = particles.controller.particleData[1] --[[@as niPerParticleData]] ---@diagnostic disable-line
+    local velocity = tes3.getPlayerEyeVector() * castStrength
+    local r = particles.worldTransform.rotation:transpose()
+    particle.velocity = r * velocity
+    logger:debug("Set lure velocity to %s", velocity)
 
     local safeLure = tes3.makeSafeObjectHandle(lure)
     local safeParticle = tes3.makeSafeObjectHandle(vfx)
@@ -68,9 +60,9 @@ local function launchLure(lure, landCallback)
             finish(false)
             return
         end
-        local transform = vfx.effectNode.worldTransform
-        local vertex = particles.data.vertices[1]
-        lure.position = transform * vertex
+
+        --snap lure to the particle position
+        lure.position = particles.worldTransform * particles.data.vertices[1]
 
         --check for collision with ground
         local result = tes3.rayTest{
@@ -153,7 +145,7 @@ local function startCasting()
             FishingSkill.landLure()
         end)
         timer.start{
-            duration = 0.1,
+            duration = 0.05,
             callback = function()
                 lure = FishingStateManager.getLure()
                 if lure then
