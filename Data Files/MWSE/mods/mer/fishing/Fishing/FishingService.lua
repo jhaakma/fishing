@@ -37,7 +37,6 @@ local function launchLure(lure, landCallback)
     logger:debug("Set lure velocity to %s", velocity)
 
     local safeLure = tes3.makeSafeObjectHandle(lure)
-    local safeParticle = tes3.makeSafeObjectHandle(vfx)
     local updateLurePosition
 
     local function finish(success)
@@ -55,7 +54,7 @@ local function launchLure(lure, landCallback)
             finish(false)
             return
         end
-        if not (safeParticle and safeParticle:valid()) then
+        if not FishingStateManager.getParticle().parent then
             logger:debug("Particle is not valid, stopping updateLurePosition")
             finish(false)
             return
