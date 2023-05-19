@@ -181,10 +181,8 @@ function FishingStateManager.getIgnoreRefs()
     end
 
     for _, cell in pairs(tes3.getActiveCells()) do
-        for ref in cell:iterateReferences() do
-            if ref.sceneNode and ref.mobile then
-                table.insert(ignoreNodes, ref.sceneNode)
-            end
+        for _, ref in pairs(cell.actors) do
+            table.insert(ignoreNodes, ref.sceneNode)
         end
     end
 
