@@ -87,6 +87,14 @@ event.register("loaded", function()
         common.enablePlayerControls()
         FishingStateManager.endFishing()
     end
+
+    for _, vfx in pairs(tes3.worldController.vfxManager.data) do
+        if vfx.effectObject.id:lower() == "mer_lure_particle" then
+            logger:debug("Deleting lure particle with maxAge: %s", vfx.maxAge)
+            vfx.expired = true
+        end
+    end
+
 end, { priority = -10} )
 
 local blockMove = false
