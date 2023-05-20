@@ -165,7 +165,7 @@ local uncommonFish = {
         description = "The piranha is a small, carnivorous fish found during the daytime in the shallow waters of Vvarrdenfell. With its sharp teeth and aggressive behavior, the piranha is a formidable predator that strikes fear into the hearts of anglers.",
         speed = 230,
         size = 0.9,
-        difficulty = 36,
+        difficulty = 25,
         class = "small",
         isBaitFish = true,
         niche = {
@@ -181,7 +181,7 @@ local uncommonFish = {
         description = "The Ghost Snapper, a nocturnal inhabitant of Morrowind's waters, features pale skin that glows under moonlight. It's a rare catch for anglers, but its meat is considered a delicacy by those who have tasted it.",
         speed = 190,
         size = 1.4,
-        difficulty = 64,
+        difficulty = 45,
         class = "medium",
         harvestables = {
             {

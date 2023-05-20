@@ -66,35 +66,38 @@ function Niche:isInRegion()
     return false
 end
 
-local function getCurrentTimeslot( )
+local function getCurrentTimeslots( )
+    local activeTimeslots = {}
     local hour = tes3.worldController.hour.value
     if hour >= 4 and hour < 8 then
-        return "dawn"
+        table.insert(activeTimeslots, "dawn")
     elseif hour >= 7 and hour < 17 then
-        return "day"
+        table.insert(activeTimeslots, "day")
     elseif hour >= 16 and hour < 20 then
-        return "dusk"
+        table.insert(activeTimeslots, "dusk")
     else
-        return "night"
+        table.insert(activeTimeslots, "night")
     end
+    return activeTimeslots
 end
 
 function Niche:isActiveAtTime()
-    local timeslot = getCurrentTimeslot()
-
-    logger:trace("Checking if active at %s", timeslot)
-    if not self.times then
-        logger:trace("No times defined, fish are always active")
-        -- If undefined, fish are always active
-        return true
-    end
-    for _, fishTime in ipairs(self.times) do
-        if fishTime == timeslot then
-            logger:trace("Fish is active at %s", timeslot)
+    local timeslotss = getCurrentTimeslots()
+    for _, timeslot in ipairs(timeslotss) do
+        logger:trace("Checking if active at %s", timeslot)
+        if not self.times then
+            logger:trace("No times defined, fish are always active")
+            -- If undefined, fish are always active
             return true
         end
+        for _, fishTime in ipairs(self.times) do
+            if fishTime == timeslot then
+                logger:trace("Fish is active at %s", timeslot)
+                return true
+            end
+        end
     end
-    logger:trace("Fish is not active at %s", timeslot)
+    logger:trace("Fish is not active for current time")
     return false
 end
 

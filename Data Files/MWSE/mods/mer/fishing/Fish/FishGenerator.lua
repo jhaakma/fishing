@@ -109,7 +109,7 @@ function FishGenerator.generate(e)
 
     ---A multiplier that increases with each attempt until a fish is caught
     local frequencyMultipler = 1.0
-    local instance
+    local instance --[[@as Fishing.FishType.instance]]
     while #validFishTypes.all > 0 and not instance do
         local pick = table.choice(validFishTypes.all) --[[@as Fishing.FishType]]
         local proportionEffect = getProportionEffect(validFishTypes, pick)
@@ -126,6 +126,9 @@ function FishGenerator.generate(e)
     if not instance then
         logger:warn("No valid fish types available")
         return nil
+    end
+    if tes3.player and tes3.player.data.merDebugEnabled then
+        tes3.messageBox("Picked %s", instance:getName())
     end
     return instance
 end
