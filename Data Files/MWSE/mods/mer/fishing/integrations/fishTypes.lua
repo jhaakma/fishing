@@ -159,7 +159,22 @@ local commonFish = {
 
 ---@type Fishing.FishType[]
 local uncommonFish = {
-
+    {
+        baseId = "mer_fish_piranha",
+        previewMesh = "mer_fishing\\f\\piranha.nif",
+        description = "The piranha is a small, carnivorous fish found during the daytime in the shallow waters of Vvarrdenfell. With its sharp teeth and aggressive behavior, the piranha is a formidable predator that strikes fear into the hearts of anglers.",
+        speed = 230,
+        size = 0.9,
+        difficulty = 36,
+        class = "small",
+        isBaitFish = true,
+        niche = {
+            times = {
+                "day"
+            },
+            maxDepth = 300,
+        }
+    },
     {
         baseId = "mer_fish_snapper",
         previewMesh = "mer_fishing\\f\\snapper.nif",
