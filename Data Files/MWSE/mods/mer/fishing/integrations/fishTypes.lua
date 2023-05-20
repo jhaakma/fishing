@@ -161,11 +161,33 @@ local commonFish = {
 local uncommonFish = {
 
     {
+        baseId = "mer_fish_snapper",
+        previewMesh = "mer_fishing\\f\\snapper.nif",
+        description = "The Ghost Snapper, a nocturnal inhabitant of Morrowind's waters, features pale skin that glows under moonlight. It's a rare catch for anglers, but its meat is considered a delicacy by those who have tasted it.",
+        speed = 190,
+        size = 1.4,
+        difficulty = 64,
+        class = "medium",
+        harvestables = {
+            {
+                id = "mer_meat_snapper",
+                min = 2,
+                max = 4,
+                isMeat = true,
+            }
+        },
+        niche = {
+            times = {
+                "night"
+            }
+        },
+    },
+    {
         baseId = "mer_fish_tambaqui",
         previewMesh = "mer_fishing\\f\\tambaqui.nif",
         description = "The tambaqui is a large tropical fish that thrives along the eastern coast of Vvardenfell. With its impressive size and striking appearance, this species captivates the imaginations of anglers seeking a thrilling challenge in their pursuit.",
         speed = 170,
-        size = 2.0,
+        size = 1.8,
         difficulty = 43,
         class = "medium",
         niche = {
@@ -207,7 +229,7 @@ local uncommonFish = {
         previewMesh = "mer_fishing\\f\\angel.nif",
         description = "The Angelshark is a small yet formidable species of shark that can be found throughout the waters of Vvardenfell. Despite its size, it possesses a striking presence and an impressive set of skills. The Angelshark combines stealth and strength, making it a skilled predator capable of capturing its prey swiftly and efficiently.",
         speed = 180,
-        size = 1.3,
+        size = 2.1,
         class = "large",
         difficulty = 55,
         niche = {
