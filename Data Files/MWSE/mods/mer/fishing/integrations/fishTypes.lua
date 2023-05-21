@@ -71,7 +71,9 @@ local commonFish = {
         difficulty = 50,
         class = "large",
         niche = {
-            minDepth = 250,
+            interiors = true,
+            exteriors = true,
+            minDepth = 200,
         },
         harvestables = {
             {
@@ -96,7 +98,10 @@ local commonFish = {
         difficulty = 25,
         class = "small",
         isBaitFish = true,
-        niche = {},
+        niche = {
+            interiors = true,
+            exteriors = true,
+        },
     },
     {
         baseId = "mer_fish_trigger",
@@ -199,6 +204,8 @@ local uncommonFish = {
         class = "small",
         isBaitFish = true,
         niche = {
+            interiors = true,
+            exteriors = true,
             maxDepth = 300,
         }
     },
@@ -264,7 +271,28 @@ local uncommonFish = {
                 isMeat = true,
             }
         }
-    }
+    },
+    {
+        baseId = "mer_fish_marrow",
+        previewMesh = "mer_fishing\\f\\marrow.nif",
+        description = "The marrowfish is a peculiar creature with bulging eyes and an oily red body. Its rarity and unique habitat within caves make it a true discovery for adventurous anglers. Beyond its captivating appearance, the marrowfish possesses powerful alchemical properties, making it a sought-after specimen among practitioners of the arcane arts.",
+        speed = 180,
+        size = 1.8,
+        difficulty = 70,
+        class = "medium",
+        niche = {
+            interiors = true,
+            exteriors = false,
+        },
+        harvestables = {
+            {
+                id = "mer_meat_marrow",
+                min = 2,
+                max = 4,
+                isMeat = true,
+            },
+        }
+    },
 }
 ---@type Fishing.FishType[]
 local rareFish = {
@@ -354,27 +382,6 @@ local rareFish = {
                 max = 2,
                 isMeat = true,
             }
-        }
-    },
-    {
-        baseId = "mer_fish_marrow",
-        previewMesh = "mer_fishing\\f\\marrow.nif",
-        description = "The marrowfish is a peculiar creature with bulging eyes and an oily red body. Its rarity and unique habitat within caves make it a true discovery for adventurous anglers. Beyond its captivating appearance, the marrowfish possesses powerful alchemical properties, making it a sought-after specimen among practitioners of the arcane arts.",
-        speed = 180,
-        size = 1.8,
-        difficulty = 70,
-        class = "medium",
-        niche = {
-            interiors = true,
-            exteriors = false,
-        },
-        harvestables = {
-            {
-                id = "mer_meat_marrow",
-                min = 2,
-                max = 4,
-                isMeat = true,
-            },
         }
     },
     {
@@ -490,21 +497,14 @@ local legendaryFish = {
     {
         baseId = "mer_fish_swampmaw",
         previewMesh = "mer_fishing\\f\\swampmaw.nif",
-        description = "The swampmaw is a colossal eel lurking within the murky swamps of the Bitter Coast. Armed with sharp teeth and an insatiable appetite, this predatory fish preys upon smaller fish and unwary travelers venturing too close to the water's edge at night. Its sheer size and fearsome reputation make it a formidable adversary for daring anglers.",
+        description = "The swampmaw is a colossal eel lurking within the murky swamps of the Bitter Coast. Armed with sharp teeth and an insatiable appetite, this predatory fish preys upon smaller fish and unwary travelers venturing too close to the water's edge. Its sheer size and fearsome reputation make it a formidable adversary for daring anglers.",
         speed = 200,
         size = 3.7,
         difficulty = 90,
         class = "large",
         niche = {
-            times = {
-                "night"
-            },
             regions = {
                 "Bitter Coast Region",
-            },
-            lures = {
-                glowing = 100,
-                iridescent = 80
             },
         },
         harvestables = {
@@ -516,6 +516,27 @@ local legendaryFish = {
             },
             {
                 id = "mer_trophy_swampmaw",
+                min = 1,
+                max = 1,
+                isTrophy = true,
+            }
+        }
+    },
+    {
+        baseId = "mer_fish_void",
+        previewMesh = "mer_fishing\\f\\void.nif",
+        description = "The Void Thresher, a large black fish with four fiery red eyes, dwells deep within Vvardenfell's underground caves. Its shadowy coloration, reminiscent of the Dark Elves, earned it the nickname \"Azura's Curse.\" This elusive predator feeds on cave-dwelling creatures and awaits unsuspecting prey in the darkest corners of its subterranean realm. Its enigmatic presence beckons adventurers to explore the depths and confront the mysteries that lie within.",
+        speed = 200,
+        size = 3.5,
+        difficulty = 85,
+        class = "large",
+        niche = {
+            interiors = true,
+            exteriors = false,
+        },
+        harvestables = {
+            {
+                id = "mer_trophy_void",
                 min = 1,
                 max = 1,
                 isTrophy = true,
