@@ -15,7 +15,8 @@ local commonFish = {
         size = 2.0,
         difficulty = 30,
         class = "medium",
-        niche = {},
+        niche = {
+        },
         harvestables = {
             {
                 id = "mer_meat_bass",
@@ -28,18 +29,20 @@ local commonFish = {
     {
         baseId = "mer_fish_goby",
         previewMesh = "mer_fishing\\f\\goby.nif",
-        description = "The goby is a small fish that can be found throughout Morrowind. While its size may be modest, it serves as excellent bait for luring in larger prey, making it a favorite among seasoned anglers.",
+        description = "The goby is a small fish that can be found throughout Morrowind during the day. While its size may be modest, it serves as excellent bait for luring in larger prey, making it a favorite among seasoned anglers.",
         speed = 150,
         size = 1.1,
         difficulty = 20,
         class = "small",
         isBaitFish = true,
-        niche = {},
+        niche = {
+            times = { "day" },
+        },
     },
     {
         baseId = "mer_fish_salmon",
         previewMesh = "mer_fishing\\f\\salmon.nif",
-        description = "Salmon are versatile fish that inhabit the oceans, lakes, and rivers of the Ascadian Isles. With their remarkable ability to navigate various water bodies, they provide an exciting challenge for anglers seeking a rewarding catch.",
+        description = "Salmon are versatile fish that inhabit the oceans, lakes, and rivers of the Ascadian Isles and feed during the day. With their remarkable ability to navigate various water bodies, they provide an exciting challenge for anglers seeking a rewarding catch.",
         speed = 180,
         size = 1.4,
         difficulty = 40,
@@ -48,6 +51,7 @@ local commonFish = {
             regions = {
                 "Ascadian Isles Region",
             },
+            times = { "day" },
         },
         harvestables = {
             {
@@ -106,7 +110,8 @@ local commonFish = {
         niche = {
             regions = {
                 "Azura's Coast Region",
-            }
+            },
+            times = { "day" },
         },
     },
     {
@@ -133,7 +138,9 @@ local commonFish = {
         difficulty = 22,
         class = "small",
         isBaitFish = true,
-        niche = {},
+        niche = {
+            times = { "day" },
+        },
     },
     {
         baseId = "mer_fish_cod",
@@ -153,27 +160,8 @@ local commonFish = {
         },
         niche = {
             minDepth = 200,
+            times = { "day" },
         },
-    },
-}
-
----@type Fishing.FishType[]
-local uncommonFish = {
-    {
-        baseId = "mer_fish_piranha",
-        previewMesh = "mer_fishing\\f\\piranha.nif",
-        description = "The piranha is a small, carnivorous fish found during the daytime in the shallow waters of Vvarrdenfell. With its sharp teeth and aggressive behavior, the piranha is a formidable predator that strikes fear into the hearts of anglers.",
-        speed = 230,
-        size = 0.9,
-        difficulty = 25,
-        class = "small",
-        isBaitFish = true,
-        niche = {
-            times = {
-                "day"
-            },
-            maxDepth = 300,
-        }
     },
     {
         baseId = "mer_fish_snapper",
@@ -196,6 +184,23 @@ local uncommonFish = {
                 "night"
             }
         },
+    },
+}
+
+---@type Fishing.FishType[]
+local uncommonFish = {
+    {
+        baseId = "mer_fish_piranha",
+        previewMesh = "mer_fishing\\f\\piranha.nif",
+        description = "The piranha is a small, carnivorous fish found in the shallow waters of Vvarrdenfell. With its sharp teeth and aggressive behavior, the piranha is a formidable predator that strikes fear into the hearts of anglers.",
+        speed = 230,
+        size = 0.9,
+        difficulty = 25,
+        class = "small",
+        isBaitFish = true,
+        niche = {
+            maxDepth = 300,
+        }
     },
     {
         baseId = "mer_fish_tambaqui",
@@ -249,6 +254,7 @@ local uncommonFish = {
         difficulty = 55,
         niche = {
             minDepth = 200,
+            times = { "day" },
         },
         harvestables = {
             {
@@ -272,6 +278,7 @@ local rareFish = {
         class = "large",
         niche = {
             minDepth = 400,
+            times = { "day" },
         },
         harvestables = {
             {
@@ -297,6 +304,7 @@ local rareFish = {
         class = "small",
         isBaitFish = true,
         niche = {
+            times = { "day" },
             regions = {
                 "Ascadian Isles Region",
                 "Azura's Coast Region",
@@ -312,7 +320,7 @@ local rareFish = {
         difficulty = 18,
         class = "medium",
         niche = {
-            minDepth = 400,
+            minDepth = 350,
             times = {
                 "night"
             }
@@ -373,13 +381,14 @@ local rareFish = {
         baseId = "mer_fish_marlin",
         previewMesh = "mer_fishing\\f\\marlin.nif",
         description = "To engage in a battle of wills with a blue marlin is a testament to one's angling prowess. These powerful and determined creatures, found in the deep seawaters surrounding Vvardenfell, exhibit strength, speed, and an indomitable spirit. Catching a blue marlin requires both skill and physical fortitude, with live baitfish serving as the key to success.",
-        niche = {
-            minDepth = 500,
-        },
         speed = 230,
         size = 4.4,
         difficulty = 75,
         class = "large",
+        niche = {
+            minDepth = 500,
+            times = { "day" },
+        },
         harvestables = {
             {
                 id = "mer_trophy_marlin",
@@ -426,7 +435,7 @@ local legendaryFish = {
     {
         baseId = "mer_fish_ashclaw",
         previewMesh = "mer_fishing\\f\\ashclaw.nif",
-        description = "The ashclaw is a large and intimidating fish with claw-like fins, residing in Lake Nabia within the Molag Amur Region. Its formidable appearance and predatory nature create an aura of fear, intriguing those who dare to seek it within its inhospitable habitat.",
+        description = "The ashclaw is a large and intimidating fish with claw-like fins, residing in Lake Nabia and other waters within the Molag Amur Region. Its formidable appearance and predatory nature create an aura of fear, intriguing those who dare to seek it within its inhospitable habitat.",
         speed = 200,
         size = 3.4,
         difficulty = 80,
