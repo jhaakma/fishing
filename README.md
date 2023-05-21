@@ -5,6 +5,12 @@ A Fishing mod for Morrowind
 - Fishing rods
 - Fishing "hotspots"
 - Fishing Rod quality affects tension limit
+- Fix fishing line anim sync
+- Add Old Man quest
+- More common fish
+- More night fish
+- More loot
+- Improve loot catch mechanics
 
 ### DONE
 - Fillet mechanic
