@@ -166,6 +166,26 @@ local baits = {
         uses = 10,
     },
     {
+        id = "ab_ingcrea_glowbugthoraxred",
+        type = "glowing",
+        uses = 10,
+    },
+    {
+        id = "ab_ingcrea_glowbugthoraxgreen",
+        type = "glowing",
+        uses = 10,
+    },
+    {
+        id = "ab_ingcrea_glowbugthoraxviol",
+        type = "glowing",
+        uses = 10,
+    },
+    {
+        id = "ab_ingcrea_glowbugthoraxblue",
+        type = "glowing",
+        uses = 10,
+    },
+    {
         id = "ingred_scrap_metal_01",
         type = "sinker",
         uses = 10,
