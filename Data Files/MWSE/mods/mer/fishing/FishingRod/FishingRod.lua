@@ -139,6 +139,18 @@ function FishingRod:getEquippedBait()
     end
 end
 
+--reduces condition of equipped fishing rod
+function FishingRod:degrade(degradeAmount)
+    if not self.itemData then return end
+    logger:debug("Degrading fishing rod by %s", degradeAmount)
+    self.itemData.condition = math.max(0, self.itemData.condition - degradeAmount)
+    if self.itemData.condition <= 0 then
+        tes3.messageBox("%s is broken.", self:getName())
+        tes3.playSound{reference = tes3.player, sound = "Item Misc Down"}
+
+    end
+end
+
 function FishingRod:useBait()
     logger:debug("Using bait")
     local bait = self:getEquippedBait()
@@ -172,8 +184,6 @@ end
 function FishingRod:getName()
     return self.item.name
 end
-
-
 
 ---@param id string
 function FishingRod.getConfig(id)

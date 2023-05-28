@@ -72,8 +72,8 @@ local function registerMCM()
     addSideBar(page)
 
     -- page:createYesNoButton{
-    --     label = "Enable Mod",
-    --     description = "Turn this mod on or off.",
+        -- label = string.format("Enable %s", metadata.package.name),
+        -- description = "Enable or disable the mod.",
     --     variable = mwse.mcm.createTableVariable{ id = "enabled", table = config.mcm },
     --     callback = function(self)
     --         if self.variable.value == true then
@@ -95,7 +95,7 @@ local function registerMCM()
 
     page:createDropdown{
         label = "Log Level",
-        description = "Set the logging level for all Fishing Loggers.",
+        description = "Set the logging level for all Loggers.",
         options = {
             { label = "TRACE", value = "TRACE"},
             { label = "DEBUG", value = "DEBUG"},

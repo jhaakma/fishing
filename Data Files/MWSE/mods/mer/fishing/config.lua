@@ -52,6 +52,9 @@ config.constants = {
     --the amount of fatigue drained per second when the player is relaxing
     FIGHT_PLAYER_FATIGUE_RELAX_DRAIN_PER_SECOND = 3,
 
+    -- The amount of rod damage while reeling per second
+    FIGHT_ROD_DAMAGE_PER_SECOND = 0.25,
+
     --The a multiplier on the distance towards the player the fish will pull based on tension
     FIGHT_TENSION_DISTANCE_EFFECT_MAXIMUM = 0.5,
 

@@ -15,6 +15,7 @@ local FishingSkill = require("mer.fishing.FishingSkill")
 ---@field lineLength number how mich fishing line is out
 ---@field fightIndicator Fishing.FightIndicator
 ---@field playerFatigue number accululation of fatigue drain, when it reaches one, subtract it from the player
+---@field rodDamage number accumulation of rod damage, when it reaches one, subtract it from the rod
 ---@field fishPhysics table<number, Fishing.FishPhysics> physics for each fish
 ---@field ended boolean
 local FightManager = {}
@@ -30,6 +31,7 @@ function FightManager.new(e)
     }
     self.callback = e.callback
     self.playerFatigue = 0
+    self.rodDamage = 0
     self.fishPhysics = {}
     self.ended = false
     return self
@@ -340,8 +342,33 @@ function FightManager:tirePlayer(delta)
         }
         self.playerFatigue = 0
     end
-
 end
+
+--[[
+    While reeling in, damage rod based on fish strength
+]]
+function FightManager:damageRod(delta)
+    local change = 0
+    if self.reeling then
+        local fishStrength = self.fish.fishType.difficulty
+        local fishStrengthEffect = math.remap(fishStrength, 0, 100, 0.5, 1.5)
+
+        change = config.constants.FIGHT_ROD_DAMAGE_PER_SECOND
+            * fishStrengthEffect * delta
+
+        self.rodDamage = self.rodDamage + change
+        if self.rodDamage > 1 then
+            logger:trace("Damaging rod by: %s", self.rodDamage)
+            local rod = FishingRod:getEquipped()
+            if rod then
+                rod:degrade(self.rodDamage)
+                self.rodDamage = 0
+            end
+        end
+    end
+end
+
+
 
 function FightManager:getFishFatigueLimit()
     if tes3.player.object.inventory:contains("mer_fishing_net") then
@@ -380,6 +407,7 @@ function FightManager:fightSimulate(e)
 
     self:tireFish(e.delta)
     self:tirePlayer(e.delta)
+    self:damageRod(e.delta)
     self:updateLineLength(e.delta)
     self:updateTension()
 
