@@ -9,7 +9,8 @@ local bushcraftingRecipes = {
             { material = "fibre", count = 6 },
             { material = "resin", count = 1 }
         },
-        category = "Fishing"
+        category = "Fishing",
+        soundType = "wood",
     },
     {
         id = "Fishing:mer_fishing_net",
@@ -20,7 +21,19 @@ local bushcraftingRecipes = {
             { material = "netting", count = 1 },
             { material = "rope", count = 1 },
         },
-        category = "Fishing"
+        category = "Fishing",
+        soundType = "rope",
+    },
+    {
+        id = "Fishing:mer_fish_rack",
+        craftableId = "mer_fish_rack",
+        description = "A wooden fish rack.",
+        materials = {
+            { material = "wood", count = 4 },
+            { material = "rope", count = 1 },
+        },
+        category = "Fishing",
+        soundType = "wood",
     }
 }
 local function registerAshfallRecipes(e)

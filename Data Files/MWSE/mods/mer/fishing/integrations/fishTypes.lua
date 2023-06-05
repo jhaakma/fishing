@@ -131,7 +131,9 @@ local commonFish = {
         niche = {
             regions = {
                 "Bitter Coast Region",
-            }
+            },
+            interiors = true,
+            exteriors = true
         },
     },
     {
