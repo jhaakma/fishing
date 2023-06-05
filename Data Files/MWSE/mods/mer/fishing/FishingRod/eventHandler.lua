@@ -12,12 +12,7 @@ event.register("equip", function(e)
         if not pole then
             logger:warn("mer_fishing_pole_01 not found")
         else
-            --Remove fishing pole
-            tes3.removeItem{
-                reference = e.reference,
-                item = e.item,
-                count = 1
-            }
+
             --Add new fishing pole
             tes3.addItem{
                 reference = e.reference,
@@ -30,6 +25,12 @@ event.register("equip", function(e)
                 mwscript.equip{
                     reference = e.reference,
                     item = pole
+                }
+                --Remove vanilla fishing pole
+                tes3.removeItem{
+                    reference = e.reference,
+                    item = e.item,
+                    count = 1
                 }
             end)
             --block event
