@@ -8,10 +8,7 @@ local supplyList = {
     mer_fishing_net = 1,
     misc_de_fishing_pole = 1,
 }
-
-event.register("initialized", function (e)
-    for id, count in pairs(supplyList) do
-        logger:debug("Registering fishing supply %s with count %s", id, count)
-        Interop.registerFishingSupply({id = id, count = count})
-    end
-end)
+for id, count in pairs(supplyList) do
+    logger:debug("Registering fishing supply %s with count %s", id, count)
+    Interop.registerFishingSupply({id = id, count = count})
+end
