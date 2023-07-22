@@ -18,6 +18,7 @@ local logger = common.createLogger("Niche")
 local Niche = {}
 
 
+---Creates a new niche
 function Niche.new(o)
     logger:trace("Creating niche: %s", require("inspect").inspect(o))
     local self = setmetatable({}, { __index = Niche })
@@ -42,6 +43,10 @@ function Niche.new(o)
     return self
 end
 
+--[[
+    Returns true if the fish is in the current region
+    @return boolean
+]]
 function Niche:isInRegion()
     local currentRegion = tes3.player.cell.region
     if not self.regions then
@@ -66,6 +71,10 @@ function Niche:isInRegion()
     return false
 end
 
+--[[
+    Returns the current timeslot(s) as a table
+    @return string[]
+]]
 local function getCurrentTimeslots( )
     local activeTimeslots = {}
     local hour = tes3.worldController.hour.value
@@ -81,6 +90,10 @@ local function getCurrentTimeslots( )
     return activeTimeslots
 end
 
+--[[
+    Returns true if the fish is active at the current time
+    @return boolean
+]]
 function Niche:isActiveAtTime()
     local timeslotss = getCurrentTimeslots()
     for _, timeslot in ipairs(timeslotss) do
@@ -101,8 +114,13 @@ function Niche:isActiveAtTime()
     return false
 end
 
+--[[
+    Returns true if the fish is active in the current cell type (interior/exterior)
+    @return boolean
+]]
 function Niche:isActiveCellType()
-    local isInterior = tes3.player.cell.isInterior
+    local cell = tes3.player.cell
+    local isInterior = cell.isInterior and not cell.behavesAsExterior
     logger:trace("Checking if active in %s", isInterior and "interior" or "exterior")
     if isInterior then
         return self.interiors ~= false
@@ -111,6 +129,11 @@ function Niche:isActiveCellType()
     end
 end
 
+--[[
+    Returns true if the fish is active at the given depth
+    @param depth number
+    @return boolean
+]]
 ---@param depth number
 function Niche:isAtDepth(depth)
     logger:trace("Checking if fish is at depth %s", depth)
