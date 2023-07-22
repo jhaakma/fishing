@@ -2,8 +2,10 @@
     Register default fish types
 ]]
 local common = require("mer.fishing.common")
+local config = require("mer.fishing.config")
 local logger = common.createLogger("Integrations - fishTypes")
 local Interop = require("mer.fishing")
+local FishType = require("mer.fishing.Fish.FishType")
 
 ---@type Fishing.FishType.new.params[]
 local commonFish = {
@@ -638,5 +640,22 @@ event.register("initialized", function (e)
     for _, fish in ipairs(loot) do
         logger:debug("Registering loot %s", fish.baseId)
         fish = Interop.registerFishType(fish)
+    end
+
+    --Fish tooltips
+    if config.mcm.enableFishTooltips then
+        local tooltipsComplete = include("Tooltips Complete.interop")
+        if tooltipsComplete then
+            ---@param fishType Fishing.FishType
+            local function registerFishTooltip(fishType)
+                if fishType:getBaseObject() then
+                    --tooltip showing rarity, class, and description
+                    tooltipsComplete.addTooltip(fishType:getBaseObject().id,  fishType.description)
+                end
+            end
+            for _, fishType in pairs(FishType.registeredFishTypes) do
+                registerFishTooltip(fishType)
+            end
+        end
     end
 end)

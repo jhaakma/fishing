@@ -88,6 +88,13 @@ local function registerMCM()
     -- }
 
     page:createYesNoButton{
+        label = "Enable Fish Tooltips",
+        description = "Adds tooltips to fish that show their description. Requires Tooltips Complete mod.",
+        variable = mwse.mcm.createTableVariable{ id = "enableFishTooltips", table = config.mcm },
+        restartRequired = true,
+    }
+
+    page:createYesNoButton{
         label = "Enable cheat mode",
         description = "Makes fish strike instantly, for testing/debugging purposes only.",
         variable = mwse.mcm.createTableVariable{ id = "cheatMode", table = config.mcm },

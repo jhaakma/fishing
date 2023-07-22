@@ -84,6 +84,7 @@ local persistentDefault = {
 ---@class Fishing.config.MCM
 local mcmDefault = {
     enabled = true,
+    enableFishTooltips = true,
     cheatMode = false,
     logLevel = "INFO",
     fishingMerchants = {
