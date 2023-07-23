@@ -33,7 +33,6 @@ local m2 = tes3matrix33.new()
 local function createPreviewPane(parent, meshID)
     local menu = getMenu()
 
-
     logger:debug("Creating preview pane for %s", meshID)
     local previewBorder = menu:findChild(uiids.previewBorder)
     if previewBorder then
@@ -127,38 +126,6 @@ local function createPreviewPane(parent, meshID)
     return previewBorder
 end
 
-local function createCloseButton(parent, okCallback)
-    local block = parent:createBlock()
-    block.flowDirection = "left_to_right"
-    block.widthProportional = 1.0
-    block.autoHeight = true
-    block.childAlignX = 1.0
-
-    local closeButton = block:createButton{ text = "Take" }
-    closeButton:register("mouseClick", function()
-        local menu = getMenu()
-        if menu then
-            menu:destroy()
-            tes3ui.leaveMenuMode()
-        end
-        if okCallback then
-            okCallback()
-        end
-    end)
-    return closeButton
-end
-
----@param fishType Fishing.FishType
-local function getMeshID(fishType)
-    if fishType.previewMesh then
-        return fishType.previewMesh
-    end
-    local object = fishType:getBaseObject()
-    if object then
-        return object.mesh
-    end
-end
-
 local function rotateNif(e)
     local menu = tes3ui.findMenu(uiids.menu)
     if not menu then
@@ -174,21 +141,11 @@ local function rotateNif(e)
     end
 end
 
-local function addAOrAnPrefix(name)
-    local vowels = {"a", "e", "i", "o", "u"}
-    local firstLetter = string.sub(name, 1, 1):lower()
-    for _, vowel in ipairs(vowels) do
-        if firstLetter == vowel then
-            return "an " .. name
-        end
-    end
-    return "a " .. name
-end
 
 ---@param parent tes3uiElement
----@param fishType Fishing.FishType
-local function createDescription(parent, fishType)
-    local fishObj = fishType:getBaseObject()
+---@param headerText string
+---@param description string
+local function createDescription(parent, headerText, description)
     --create text block
     local textBlock = parent:createThinBorder{ id = uiids.textBlock }
     textBlock.widthProportional = 1.0
@@ -198,7 +155,6 @@ local function createDescription(parent, fishType)
     textBlock.paddingAllSides = 10
 
     ---create header
-    local headerText = string.format("You caught %s!", addAOrAnPrefix(fishObj.name))
     local header = textBlock:createLabel{ id = uiids.header, text = headerText }
     header.color = tes3ui.getPalette("header_color")
     header.wrapText = true
@@ -206,19 +162,52 @@ local function createDescription(parent, fishType)
     header.widthProportional = 1.0
 
     ---create description
-    local descriptionText = fishType.description
-    local description = textBlock:createLabel{ id = uiids.description, text = descriptionText }
-    description.wrapText = true
-    description.justifyText = "center"
-    description.widthProportional = 1.0
+    local descriptionText = description
+    local descriptionLabel = textBlock:createLabel{ id = uiids.description, text = descriptionText }
+    descriptionLabel.wrapText = true
+    descriptionLabel.justifyText = "center"
+    descriptionLabel.widthProportional = 1.0
 
     textBlock:updateLayout()
     return textBlock
 end
 
----@param fishType Fishing.FishType
----@param okCallback function
-function TrophyMenu.createMenu(fishType, okCallback)
+local function createButtonsBlock(parent)
+    local block = parent:createBlock()
+    block.flowDirection = "left_to_right"
+    block.widthProportional = 1.0
+    block.autoHeight = true
+    block.childAlignX = 1.0
+    return block
+end
+
+local function createButton(parent, button)
+    local closeButton = parent:createButton{ text = button.text }
+    closeButton:register("mouseClick", function()
+        local menu = getMenu()
+        if menu then
+            menu:destroy()
+            tes3ui.leaveMenuMode()
+        end
+        if button.callback then
+            button.callback()
+        end
+    end)
+    return closeButton
+end
+
+---@class TrophyMenu.createMenu.params
+---@field header string The header text
+---@field description string The description text
+---@field previewMesh string The mesh to be displayed in the trophy menu
+---@field buttons TrophyMenu.createMenu.buttonConfig[] A list of buttons to be displayed
+
+---@class TrophyMenu.createMenu.buttonConfig
+---@field text string The text to be displayed on the button
+---@field callback function The function to be called when the button is clicked
+
+---@param e TrophyMenu.createMenu.params
+function TrophyMenu.createMenu(e)
     local menu = tes3ui.createMenu{
         id = uiids.menu,
         fixedFrame = true
@@ -227,9 +216,12 @@ function TrophyMenu.createMenu(fishType, okCallback)
     menu.minHeight = TrophyMenu.PREVIEW_HEIGHT
     menu.absolutePosAlignX = 0.5
     menu.flowDirection = "top_to_bottom"
-    createPreviewPane(menu, getMeshID(fishType))
-    createDescription(menu, fishType)
-    createCloseButton(menu, okCallback)
+    createPreviewPane(menu, e.previewMesh)
+    createDescription(menu, e.header, e.description)
+    local buttonsBlock = createButtonsBlock(menu)
+    for _, button in ipairs(e.buttons) do
+        createButton(buttonsBlock, button)
+    end
     event.register("enterFrame", rotateNif)
     menu:updateLayout()
     tes3ui.enterMenuMode(uiids.menu)

@@ -185,4 +185,15 @@ function FishType:getStartDistance()
     return MIN * speedEffect, MAX * speedEffect
 end
 
+function FishType:getPreviewMesh()
+    if self.previewMesh then
+        return self.previewMesh
+    else
+        local object = self:getBaseObject()
+        if object then
+            return object.mesh
+        end
+    end
+end
+
 return FishType

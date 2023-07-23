@@ -34,4 +34,15 @@ function common.enablePlayerControls()
     tes3.setPlayerControlState{ enabled = true}
 end
 
+function common.addAOrAnPrefix(name)
+    local vowels = {"a", "e", "i", "o", "u"}
+    local firstLetter = string.sub(name, 1, 1):lower()
+    for _, vowel in ipairs(vowels) do
+        if firstLetter == vowel then
+            return "an " .. name
+        end
+    end
+    return "a " .. name
+end
+
 return common

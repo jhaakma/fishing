@@ -287,16 +287,36 @@ local function catchFish()
     timer.start{
         duration = 0.75,
         callback = function()
-
-            TrophyMenu.createMenu(fish.fishType, function()
-                tes3.addItem{
-                    reference = tes3.player,
-                    item = fishObj,
-                    count = 1,
-                }
-                FishingStateManager.endFishing()
-                FishingSkill.catchFish(fish.fishType)
-            end)
+            local fishName = fish:getName()
+            local buttons = {
+                {
+                    text = "Take",
+                    callback = function()
+                        tes3.addItem{
+                            reference = tes3.player,
+                            item = fishObj,
+                            count = 1,
+                            showMessage = true,
+                        }
+                        FishingStateManager.endFishing()
+                        FishingSkill.catchFish(fish.fishType)
+                    end
+                },
+                {
+                    text = "Release",
+                    callback = function()
+                        FishingStateManager.endFishing()
+                        tes3.playSound{ reference = tes3.player, sound = "Swim Left" }
+                        tes3.messageBox("You release the %s back into the water.", fish:getName())
+                    end
+                },
+            }
+            TrophyMenu.createMenu{
+                header = string.format("You caught %s!", common.addAOrAnPrefix(fishName)),
+                description = fish.fishType.description,
+                previewMesh = fish.fishType:getPreviewMesh(),
+                buttons = buttons,
+            }
         end
     }
 end
