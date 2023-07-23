@@ -20,6 +20,9 @@ function FishInstance.new(fishType)
     return self
 end
 
+--[[
+    Returns the name of the fish
+]]
 function FishInstance:getName()
     return self.fishType:getBaseObject().name
 end

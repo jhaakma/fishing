@@ -10,12 +10,16 @@ local Bait = require("mer.fishing.Bait.Bait")
 event.register("uiObjectTooltip", function(e)
     local bait = Bait.get(e.object.id:lower())
     if bait then
-        UI.addLabelToTooltip(
-            e.tooltip,
-            bait:getTypeName(),
-            config.constants.TOOLTIP_COLOR_BAIT
-        )
-        return
+        --Don't show tooltip on cooked bait
+        local isCooked = e.itemData and Bait.isCooked(e.itemData.data)
+        if not isCooked then
+            UI.addLabelToTooltip(
+                e.tooltip,
+                bait:getTypeName(),
+                config.constants.TOOLTIP_COLOR_BAIT
+            )
+            return
+        end
     end
 
     local fishType = FishType.get(e.object.id)

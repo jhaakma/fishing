@@ -23,6 +23,12 @@ local function onEquip(e)
     local itemId = e.item.id:lower()
     local bait = Bait.get(itemId)
     if bait then
+        local isCooked = e.itemData and Bait.isCooked(e.itemData.data)
+        if e.itemData and Bait.isCooked(e.itemData.data) then
+            logger:debug("Bait %s is cooked, skipping Bait menu", itemId)
+            return
+        end
+
         local fishingRod = FishingRod.getEquipped()
         local baitObject = tes3.getObject(itemId)
         local message = string.format("%s - %s", bait:getName(), bait:getTypeName())

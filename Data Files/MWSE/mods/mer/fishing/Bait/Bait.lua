@@ -24,6 +24,21 @@ function Bait.get(itemId)
     return Bait.registeredBait[itemId:lower()]
 end
 
+--[[
+    Check if the item is cooked
+]]
+---@param data table? The itemData.data table of a reference or inventory item
+---@return boolean
+function Bait.isCooked(data)
+    local cookedAmount = data
+        and data.cookedAmount
+        or 0
+    if cookedAmount > 0 then
+        return true
+    end
+    return false
+end
+
 --Register a new Bait item
 ---@param o Fishing.Bait.config
 function Bait.register(o)
