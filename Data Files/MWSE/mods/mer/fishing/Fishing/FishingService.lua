@@ -308,6 +308,7 @@ local function catchFish()
                         FishingStateManager.endFishing()
                         tes3.playSound{ reference = tes3.player, sound = "Swim Left" }
                         tes3.messageBox("You release the %s back into the water.", fish:getName())
+                        FishingSkill.catchFish(fish.fishType)
                     end
                 },
             }
