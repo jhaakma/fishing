@@ -1,3 +1,5 @@
+local FishRack = require("mer.fishing.FishRack")
+
 ---@type CraftingFramework.Recipe.data[]
 local bushcraftingRecipes = {
     {
@@ -26,6 +28,7 @@ local bushcraftingRecipes = {
     },
     {
         id = "Fishing:mer_fish_rack",
+        name = "Fish Rack",
         craftableId = "mer_fish_rack",
         description = "A wooden fish rack.",
         materials = {
@@ -34,6 +37,47 @@ local bushcraftingRecipes = {
         },
         category = "Fishing",
         soundType = "wood",
+        maxSteepness = 25,
+        activateCallback = function (self, e)
+            local fishRack = FishRack:new(e.reference)
+            if fishRack then
+                return fishRack:onActivate()
+            end
+            return false
+        end,
+        additionalUI = function (indicator, parentElement)
+            if not indicator.reference then return end
+            local fishRack = FishRack:new(indicator.reference)
+            if fishRack then
+                fishRack:doTooltip(parentElement, indicator.nodeLookingAt)
+            end
+        end,
+        additionalMenuOptions = {
+            {
+                text = "Hang Fish",
+                callback = function(e)
+                    local fishRack = FishRack:new(e.reference)
+                    if fishRack then
+                        fishRack:openAddFishMenu()
+                    end
+                end,
+                enableRequirements = function(e)
+                    local fishRack = FishRack:new(e.reference)
+                    return fishRack ~= nil
+                        and fishRack:canAddFish()
+                end,
+                tooltipDisabled = function(e)
+                    local fishRack = FishRack:new(e.reference)
+                    if not fishRack then return nil end
+                    if not FishRack.playerHasHangableFish() then
+                        return { text = "You don't have any fish to hang" }
+                    end
+                    if not fishRack:hasEmptyHook() then
+                        return { text = "This fish rack is full" }
+                    end
+                end
+            }
+        }
     }
 }
 local function registerAshfallRecipes(e)

@@ -19,6 +19,10 @@ local FishingRod = {
 ---@field id string
 ---@field quality number
 
+---------------------------------------------------
+-- Static Functions
+---------------------------------------------------
+
 --Register an item as a fishing rod
 ---@param e Fishing.FishingRod.config
 function FishingRod.register(e)
@@ -80,6 +84,7 @@ function FishingRod.new(e)
     return self
 end
 
+-- Get the fishing rod equipped by the player
 ---@return Fishing.FishingRod|nil
 function FishingRod.getEquipped()
     local weaponStack = tes3.getEquippedItem{
@@ -93,6 +98,65 @@ function FishingRod.getEquipped()
     }
 end
 
+-- Get the config for a fishing rod
+---@param id string
+function FishingRod.getConfig(id)
+    return FishingRod.registeredFishingRods[id:lower()]
+end
+
+-- Returns true if the player has a fishing rod equipped
+---@return boolean
+function FishingRod.isEquipped()
+    local weaponStack = tes3.getEquippedItem{
+        actor = tes3.player,
+        objectType = tes3.objectType.weapon
+    }
+    if not weaponStack then return false end
+    return FishingRod.getConfig(weaponStack.object.id) ~= nil
+end
+
+-- Get the position of the end of the fishing pole
+function FishingRod.getPoleEndPosition()
+    local ref = tes3.is3rdPerson() and tes3.player or tes3.player1stPerson
+    local attachNode = ref.sceneNode:getObjectByName("AttachFishingLine")--[[@as niNode]]
+    return attachNode.worldTransform.translation
+end
+
+-- Play the cast sound
+function FishingRod.playCastSound(castStrength)
+    local pitch = math.remap(castStrength, 0, 1, 2.0, 1.0)
+    logger:debug("Playing cast sound with pitch %s", pitch)
+    tes3.playSound{
+        reference = tes3.player,
+        sound = "mer_fish_cast",
+        pitch = pitch
+    }
+end
+
+-- Play the reel sound
+function FishingRod.playReelSound(e)
+    FishingRod.stopReelSound()
+    tes3.playSound{
+        reference = tes3.player,
+        sound = "mer_fish_reel",
+        loop = e.doLoop,
+        pitch = e.pitch or 1.0
+    }
+end
+
+-- Stop the reel sound from playing
+function FishingRod.stopReelSound()
+    tes3.removeSound{
+        reference = tes3.player,
+        sound = "mer_fish_reel"
+    }
+end
+
+---------------------------------------------------
+-- Instance Functions
+---------------------------------------------------
+
+-- Equip a bait to the fishing rod
 ---@param bait Fishing.Bait
 function FishingRod:equipBait(bait)
     logger:debug("Equipping bait %s", bait:getName())
@@ -126,6 +190,7 @@ function FishingRod:equipBait(bait)
     tes3.messageBox("Equipped %s to %s", bait:getName(), self:getName())
 end
 
+-- Get the bait equipped to the fishing rod
 ---@return Fishing.Bait|nil
 function FishingRod:getEquippedBait()
     if self.data.equippedBait then
@@ -139,7 +204,7 @@ function FishingRod:getEquippedBait()
     end
 end
 
---reduces condition of equipped fishing rod
+-- Reduces condition of equipped fishing rod
 function FishingRod:degrade(degradeAmount)
     if not self.itemData then return end
     logger:debug("Degrading fishing rod by %s", degradeAmount)
@@ -147,10 +212,10 @@ function FishingRod:degrade(degradeAmount)
     if self.itemData.condition <= 0 then
         tes3.messageBox("%s is broken.", self:getName())
         tes3.playSound{reference = tes3.player, sound = "Item Misc Down"}
-
     end
 end
 
+-- Use bait, reducing uses by 1
 function FishingRod:useBait()
     logger:debug("Using bait")
     local bait = self:getEquippedBait()
@@ -174,6 +239,8 @@ function FishingRod:useBait()
     logger:debug("- Remaining uses: %s", bait.uses)
 end
 
+-- Returns true if the fishing rod has bait equipped
+---@return boolean
 function FishingRod:hasBait()
     local bait = self:getEquippedBait()
     if not bait then return false end
@@ -181,55 +248,11 @@ function FishingRod:hasBait()
     return bait.uses > 0
 end
 
+-- Get the name of the fishing rod
+---@return string
 function FishingRod:getName()
     return self.item.name
 end
 
----@param id string
-function FishingRod.getConfig(id)
-    return FishingRod.registeredFishingRods[id:lower()]
-end
-
-function FishingRod.isEquipped()
-    local weaponStack = tes3.getEquippedItem{
-        actor = tes3.player,
-        objectType = tes3.objectType.weapon
-    }
-    if not weaponStack then return false end
-    return FishingRod.getConfig(weaponStack.object.id) ~= nil
-end
-
-function FishingRod.getPoleEndPosition()
-    local ref = tes3.is3rdPerson() and tes3.player or tes3.player1stPerson
-    local attachNode = ref.sceneNode:getObjectByName("AttachFishingLine")--[[@as niNode]]
-    return attachNode.worldTransform.translation
-end
-
-function FishingRod.playCastSound(castStrength)
-    local pitch = math.remap(castStrength, 0, 1, 2.0, 1.0)
-    logger:debug("Playing cast sound with pitch %s", pitch)
-    tes3.playSound{
-        reference = tes3.player,
-        sound = "mer_fish_cast",
-        pitch = pitch
-    }
-end
-
-function FishingRod.playReelSound(e)
-    FishingRod.stopReelSound()
-    tes3.playSound{
-        reference = tes3.player,
-        sound = "mer_fish_reel",
-        loop = e.doLoop,
-        pitch = e.pitch or 1.0
-    }
-end
-
-function FishingRod.stopReelSound()
-    tes3.removeSound{
-        reference = tes3.player,
-        sound = "mer_fish_reel"
-    }
-end
 
 return FishingRod

@@ -43,6 +43,7 @@ local CraftingFramework = include("CraftingFramework")
 
 ---@class Fishing.FishType : Fishing.FishType.new.params
 local FishType = {
+    HANG_NODE = "HANG_FISH",
     --- A list of all registered fish types
     ---@type table<string, Fishing.FishType>
     registeredFishTypes = {},
@@ -194,6 +195,16 @@ function FishType:getPreviewMesh()
             return object.mesh
         end
     end
+end
+
+--Check whether this fish can be hung from a rack
+--by checking its mesh for a HANG_FISH node
+function FishType:canHang()
+    local mesh = self:getPreviewMesh()
+    if not mesh then return false end
+    local nif = tes3.loadMesh(mesh, false)
+    local node = nif:getObjectByName(FishType.HANG_NODE)
+    return node ~= nil
 end
 
 return FishType
