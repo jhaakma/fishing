@@ -30,8 +30,9 @@ local CraftingFramework = include("CraftingFramework")
 
 ---@class Fishing.FishType.new.params
 ---@field baseId string The id of the base object representation of the fish
+---@field variants? string[] A table of variant ids that can be selected when instancing this fish
 ---@field previewMesh? string The mesh to be displayed in the trophy menu
----@field description string The description to be displayed when the fish is caught
+---@field description? string The description to be displayed when the fish is caught
 ---@field speed number The base speed of the fish, in units per second
 ---@field size number A multiplier on the size of the ripples. Default 1.0
 ---@field difficulty number The difficulty of catching the fish, out of 100. Default 10 (easy)
@@ -42,6 +43,7 @@ local CraftingFramework = include("CraftingFramework")
 ---@field isBaitFish? boolean If true, this fish can be used as live bait
 
 ---@class Fishing.FishType : Fishing.FishType.new.params
+---@field variants table<string, boolean> A set of variant ids that can be selected when instancing this fish
 local FishType = {
     HANG_NODE = "HANG_FISH",
     --- A list of all registered fish types
@@ -50,24 +52,30 @@ local FishType = {
     --- A list of multipliers for each rarity
     ---@type table<Fishing.FishType.rarity, number>
     rarityValues = {
-        common = 1.0,
-        uncommon = 0.30,
-        rare = 0.20,
-        legendary = 0.02,
+        common = 0.60,
+        uncommon = 0.25,
+        rare = 0.10,
+        legendary = 0.05,
     }
 }
 
 ---@param e Fishing.FishType.new.params
 function FishType.new(e)
     logger:assert(type(e.baseId) == "string", "FishType must have a baseId")
-    logger:assert(type(e.description) == "string", "FishType must have a description")
     logger:assert(type(e.speed) == "number", "FishType must have a speed")
     if e.previewMesh then
         logger:assert(tes3.getFileExists(string.format("Meshes\\%s", e.previewMesh)), "Preview mesh does not exist")
     end
 
+    ---@type Fishing.FishType
     local self = setmetatable({}, { __index = FishType })
     self.baseId = e.baseId:lower()
+    if e.variants then
+        self.variants = {}
+        for _, variant in ipairs(e.variants) do
+            self.variants[variant:lower()] = true
+        end
+    end
     self.previewMesh = e.previewMesh
     self.description = e.description
     self.speed = e.speed or 100
@@ -82,7 +90,7 @@ function FishType.new(e)
     Harvest.registerFish(self)
     if Ashfall then
         local obj = self:getBaseObject()
-        if obj.objectType == tes3.objectType.ingredient then
+        if obj and obj.objectType == tes3.objectType.ingredient then
              logger:debug("Registering %s as meat", obj.id)
              Ashfall.registerFoods{
                  [obj.id] = "meat"
@@ -122,8 +130,11 @@ function FishType.new(e)
     return self
 end
 
+---@return Fishing.FishType | nil
 function FishType.get(id)
-    return FishType.registeredFishTypes[id:lower()]
+    if id then
+        return FishType.registeredFishTypes[id:lower()]
+    end
 end
 
 ---Register a new type of fish
@@ -169,7 +180,6 @@ function FishType:getRarityEffect()
         1.0, 2.0
     )
     rarityEffect = math.clamp(rarityEffect * skillEffect, 0, 1.0)
-
     return rarityEffect
 end
 
@@ -205,6 +215,33 @@ function FishType:canHang()
     local nif = tes3.loadMesh(mesh, false)
     local node = nif:getObjectByName(FishType.HANG_NODE)
     return node ~= nil
+end
+
+
+---@class Fishing.FishType.verbs
+---@field Take string
+---@field Release string
+---@field caught string
+---@field release string
+
+function FishType:getVerbs()
+    local verbs = {
+        ---@type Fishing.FishType.verbs
+        loot = {
+            Take = "Take",
+            Release = "Discard",
+            caught = "snagged",
+            release = "discard",
+        },
+        ---@type Fishing.FishType.verbs
+        fish = {
+            Take = "Take",
+            Release = "Release",
+            caught = "caught",
+            release = "release",
+        }
+    }
+    return verbs[self.class] or verbs.fish
 end
 
 return FishType

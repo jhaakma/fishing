@@ -98,7 +98,7 @@ local function createPreviewPane(parent, meshID)
 
     local maxDimension
     local bb = rootNode:createBoundingBox(rootNode.scale) ---@diagnostic disable-line
-    local height = bb.max.z - bb.min.z
+    local height = (bb.max.z - bb.min.z)*2
     local width = bb.max.y - bb.min.y
     local depth = bb.max.x - bb.min.x
     maxDimension = math.max(width, depth, height)
@@ -162,11 +162,13 @@ local function createDescription(parent, headerText, description)
     header.widthProportional = 1.0
 
     ---create description
-    local descriptionText = description
-    local descriptionLabel = textBlock:createLabel{ id = uiids.description, text = descriptionText }
-    descriptionLabel.wrapText = true
-    descriptionLabel.justifyText = "center"
-    descriptionLabel.widthProportional = 1.0
+    if description then
+        local descriptionText = description
+        local descriptionLabel = textBlock:createLabel{ id = uiids.description, text = descriptionText }
+        descriptionLabel.wrapText = true
+        descriptionLabel.justifyText = "center"
+        descriptionLabel.widthProportional = 1.0
+    end
 
     textBlock:updateLayout()
     return textBlock

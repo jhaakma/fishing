@@ -4,31 +4,63 @@ local logger = common.createLogger("FishInstance")
 ---@class Fishing.FishType.instance
 ---@field fishType Fishing.FishType
 ---@field fatigue number How much fatigue the fish has left
+---@field objectId? string The object id of the fish (if it has been modified)
 local FishInstance = {}
 
 ---@param fishType Fishing.FishType
 ---@return Fishing.FishType.instance | nil
 function FishInstance.new(fishType)
+    logger:debug("Instancing %s", fishType.baseId)
     local self = setmetatable({}, { __index = FishInstance })
     local baseObject = fishType:getBaseObject()
     if not baseObject then
         logger:warn("Could not find base object for %s", fishType.baseId)
         return nil
     end
+    if fishType.variants then
+        --lowercase all the variants
+        for variant, _ in pairs(fishType.variants) do
+            fishType.variants[variant:lower()] = true
+        end
+        --add base id if not already there
+        fishType.variants[fishType.baseId:lower()] = true
+        --check which variants are valid
+        local validVariants = {}
+        for variant, _ in pairs(fishType.variants) do
+            if tes3.getObject(variant) then
+                table.insert(validVariants, variant)
+            end
+        end
+        --pick a variant
+        self.objectId = table.choice(validVariants)
+        logger:debug("- Selected variant %s", self.objectId)
+    end
     self.fishType = fishType
     self.fatigue = fishType:getStartingFatigue()
     return self
 end
 
+function FishInstance:getPreviewMesh()
+    if self.fishType.previewMesh then
+        return self.fishType.previewMesh
+    else
+        local object = self:getInstanceObject()
+        if object then
+            return object.mesh
+        end
+    end
+end
+
+
 --[[
     Returns the name of the fish
 ]]
 function FishInstance:getName()
-    return self.fishType:getBaseObject().name
+    return self:getInstanceObject().name
 end
 
 function FishInstance:getInstanceObject()
-    return tes3.getObject(self.fishType.baseId) --[[@as tes3misc]]
+    return tes3.getObject(self.objectId or self.fishType.baseId) --[[@as tes3misc]]
 end
 
 function FishInstance:getSplashSize()

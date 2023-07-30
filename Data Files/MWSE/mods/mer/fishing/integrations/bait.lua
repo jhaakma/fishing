@@ -22,15 +22,12 @@ local BaitTypes = {
         id = "glowing",
         name = "Glowing Lure",
         description = "More effective at nighttime.",
-        getFishEffect = function(self, fish)
-            local classes = {
-                small = 1.0,
-                medium = 0.6,
-                large = 0.2,
-                loot = 0.1,
-            }
-            return classes[fish.class] or 0.1
-        end,
+        classCatchChances = {
+            small = 0.5,
+            medium = 0.3,
+            large = 0.1,
+            loot = 0.1,
+        },
         getHookChance = function(self)
             local time = tes3.worldController.hour.value
             if time >= 18 or time <= 6 then
@@ -43,15 +40,12 @@ local BaitTypes = {
         id = "shiny",
         name = "Shiny Lure",
         description = "More effective during the daytime.",
-        getFishEffect = function(self, fish)
-            local classes = {
-                small = 1.0,
-                medium = 0.6,
-                large = 0.2,
-                loot = 0.1,
-            }
-            return classes[fish.class] or 0.1
-        end,
+        classCatchChances = {
+            small = 0.5,
+            medium = 0.3,
+            large = 0.1,
+            loot = 0.1,
+        },
         getHookChance = function(self)
             local time = tes3.worldController.hour.value
             if time >= 6 and time <= 18 then
@@ -64,57 +58,45 @@ local BaitTypes = {
         id = "spinner",
         name = "Spinner",
         description = "Most effective at catching small baitfish.",
-        getFishEffect = function(self, fish)
-            local classes = {
-                small = 1.0,
-                medium = 0.4,
-                large = 0,
-                loot = 0.1,
-            }
-            return classes[fish.class] or 0.1
-        end
+        classCatchChances = {
+            small = 0.7,
+            medium = 0.2,
+            large = 0,
+            loot = 0.1,
+        },
     },
     {
         id = "bait",
         name = "Bait",
         description = "Most effective at catching medium sized fish.",
-        getFishEffect = function(self, fish)
-            local classes = {
-                small = 0.4,
-                medium = 1.0,
-                large = 0.1,
-                loot = 0.05,
-            }
-            return classes[fish.class] or 0.1
-        end
+        classCatchChances = {
+            small = 0.3,
+            medium = 0.5,
+            large = 0.1,
+            loot = 0.1,
+        },
     },
     {
         id = "baitfish",
         name = "Baitfish",
         description = "Most effective at catching large fish.",
-        getFishEffect = function(self, fish)
-            local classes = {
-                small = 0,
-                medium = 0.2,
-                large = 1.0,
-                loot = 0.01,
-            }
-            return classes[fish.class] or 0.1
-        end
+        classCatchChances = {
+            small = 0,
+            medium = 0.4,
+            large = 0.5,
+            loot = 0.1,
+        },
     },
     {
         id = "sinker",
         name = "Sinker",
         description = "Increases chance of catching random loot.",
-        getFishEffect = function(self, fish)
-            local classes = {
-                small = 0.8,
-                medium = 0.3,
-                large = 0.1,
-                loot = 0.5,
-            }
-            return classes[fish.class] or 0.1
-        end
+        classCatchChances = {
+            small = 0.3,
+            medium = 0.1,
+            large = 0.0,
+            loot = 0.6,
+        },
     },
 }
 for _, baitType in ipairs(BaitTypes) do
@@ -188,7 +170,7 @@ local baits = {
     {
         id = "ingred_scrap_metal_01",
         type = "sinker",
-        uses = 10,
+        uses = 50,
     }
 
 }

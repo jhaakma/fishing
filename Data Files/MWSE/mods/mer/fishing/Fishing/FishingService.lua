@@ -197,7 +197,8 @@ local function startFish()
     local depth = FishingSpot.getDepth(lure.position)
     local fish = FishGenerator.generate{ depth = depth }
     if not fish then
-        logger:warn("Unable to generate fish")
+        logger:debug("No fish generated")
+        Animations.lureNibble(lure)
         return
     end
     FishingStateManager.setActiveFish(fish)
@@ -274,7 +275,6 @@ local function catchFish()
         logger:warn("No fish found")
         return
     end
-    local fishObj = fish:getInstanceObject()
 
     local lure = FishingStateManager.getLure()
     if not lure then
@@ -287,10 +287,25 @@ local function catchFish()
     timer.start{
         duration = 0.75,
         callback = function()
+            if fish.fishType.class == "loot" then
+                logger:debug("Caught loot, checking if drippable")
+                --Dripifiy catch if it's drippable loot
+                local drip = include("mer.drip")
+                if drip and drip.dripify then
+                    logger:debug("Drip installed, attempting to dripify")
+                    local loot = drip.dripify(fish:getInstanceObject())
+                    if loot then
+                        fish.objectId = loot.object.id
+                        logger:debug("Dripified loot %s", loot.baseObject.id)
+                    end
+                end
+            end
+            local verbs = fish.fishType:getVerbs()
+            local fishObj = fish:getInstanceObject()
             local fishName = fish:getName()
             local buttons = {
                 {
-                    text = "Take",
+                    text = verbs.Take,
                     callback = function()
                         tes3.addItem{
                             reference = tes3.player,
@@ -303,19 +318,19 @@ local function catchFish()
                     end
                 },
                 {
-                    text = "Release",
+                    text = verbs.Release,
                     callback = function()
                         FishingStateManager.endFishing()
                         tes3.playSound{ reference = tes3.player, sound = "Swim Left" }
-                        tes3.messageBox("You release the %s back into the water.", fish:getName())
+                        tes3.messageBox("You %s the %s back into the water.", verbs.release, fish:getName())
                         FishingSkill.catchFish(fish.fishType)
                     end
                 },
             }
             TrophyMenu.createMenu{
-                header = string.format("You caught %s!", common.addAOrAnPrefix(fishName)),
+                header = string.format("You %s %s!",verbs.caught, common.addAOrAnPrefix(fishName)),
                 description = fish.fishType.description,
-                previewMesh = fish.fishType:getPreviewMesh(),
+                previewMesh = fish:getPreviewMesh(),
                 buttons = buttons,
             }
         end

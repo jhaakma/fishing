@@ -1,22 +1,22 @@
 local common = require("mer.fishing.common")
 local logger = common.createLogger("Niche")
 
-
 ---@alias Fishing.FishType.Niche.Time
 ---| '"dawn"' #The fish is active during dawn
 ---| '"day"' #The fish is active during the day
 ---| '"dusk"' #The fish is active during dusk
 ---| '"night"' #The fish is active during the night
 
+---A Niche defines where and when a fish can be found.
 ---@class Fishing.FishType.Niche
----@field regions? string[] The regions where the fish can be found. If undefined, the fish can be found everywhere. Not checked when in interior cells
+---@field regions? string[] If defined, limits fish to the regioned specified.
+---@field cells? string[] If defined, limits fish to the cells specified. Uses pattern matching, for example "Vivec" will match "Vivec, Foreign Quarter Waistworks".
 ---@field times? Fishing.FishType.Niche.Time[] What times of day the fish is active. If undefined, the fish is always active.
 ---@field interiors? boolean `default: false` Whether the fish can be found in interiors. If undefined, the fish can not be found in interiors.
 ---@field exteriors? boolean `default: true` Whether the fish can be found in exteriors. If undefined, the fish can be found in exteriors.
 ---@field minDepth? number `default: 0` The minimum depth the fish can be found at.
 ---@field maxDepth? number The maximum depth the fish can be found at. If undefined, max depth is infinite.
 local Niche = {}
-
 
 ---Creates a new niche
 function Niche.new(o)
@@ -28,6 +28,13 @@ function Niche.new(o)
         for _, region in ipairs(o.regions) do
             logger:trace("Region: %s", region)
             table.insert(self.regions, region:lower())
+        end
+    end
+    if o.cells then
+        self.cells = {}
+        for _, cell in ipairs(o.cells) do
+            logger:trace("Cell: %s", cell)
+            table.insert(self.cells, cell:lower())
         end
     end
     self.times = o.times
@@ -43,10 +50,32 @@ function Niche.new(o)
     return self
 end
 
---[[
-    Returns true if the fish is in the current region
-    @return boolean
-]]
+
+---Returns true if the fish can be found in the current cell
+---@return boolean
+function Niche:isInCell()
+    local cell = tes3.player.cell
+    logger:trace("Checking if in cell %s", cell.id)
+    if not self.cells then
+        logger:trace("No cells defined, fish are everywhere")
+        -- If undefined, fish are everywhere
+        return true
+    end
+
+    local cellId = cell.id:lower()
+    for _, cellPattern in ipairs(self.cells) do
+        if string.find(cellId, cellPattern) then
+            logger:trace("Fish is in cell %s", cellId)
+            return true
+        end
+    end
+    logger:trace("Fish is not in cell %s", cellId)
+    return false
+end
+
+
+---Returns true if the fish can be found in the current region
+---@return boolean
 function Niche:isInRegion()
     local currentRegion = tes3.player.cell.region
     if not self.regions then
@@ -71,10 +100,8 @@ function Niche:isInRegion()
     return false
 end
 
---[[
-    Returns the current timeslot(s) as a table
-    @return string[]
-]]
+---Returns the current timeslot(s) as a table
+---@return string[]
 local function getCurrentTimeslots( )
     local activeTimeslots = {}
     local hour = tes3.worldController.hour.value
@@ -90,10 +117,8 @@ local function getCurrentTimeslots( )
     return activeTimeslots
 end
 
---[[
-    Returns true if the fish is active at the current time
-    @return boolean
-]]
+---Returns true if the fish is active at the current time
+---@return boolean
 function Niche:isActiveAtTime()
     local timeslotss = getCurrentTimeslots()
     for _, timeslot in ipairs(timeslotss) do
@@ -114,10 +139,8 @@ function Niche:isActiveAtTime()
     return false
 end
 
---[[
-    Returns true if the fish is active in the current cell type (interior/exterior)
-    @return boolean
-]]
+---Returns true if the fish is active in the current cell type (interior/exterior)
+---@return boolean
 function Niche:isActiveCellType()
     local cell = tes3.player.cell
     local isInterior = cell.isInterior and not cell.behavesAsExterior
@@ -129,12 +152,9 @@ function Niche:isActiveCellType()
     end
 end
 
---[[
-    Returns true if the fish is active at the given depth
-    @param depth number
-    @return boolean
-]]
+---Returns true if the fish is active at the given depth
 ---@param depth number
+---@return boolean
 function Niche:isAtDepth(depth)
     logger:trace("Checking if fish is at depth %s", depth)
     logger:trace("Min depth: %s, max depth: %s", self.minDepth, self.maxDepth)
@@ -150,9 +170,12 @@ function Niche:isAtDepth(depth)
     return true
 end
 
+---Returns true if the fish is active in the current cell
 ---@param depth number
+---@return boolean
 function Niche:isActive(depth)
     local isActive = self:isInRegion()
+        and self:isInCell()
         and self:isActiveAtTime()
         and self:isActiveCellType()
         and self:isAtDepth(depth)

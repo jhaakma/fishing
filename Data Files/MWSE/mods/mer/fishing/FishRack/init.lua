@@ -54,7 +54,6 @@ ReferenceManager:new{
     end
 }
 
-
 ---------------------------------------------------
 -- Static Functions
 ---------------------------------------------------
@@ -103,19 +102,19 @@ end
 
 ---@return table<string, Fishing.FishType>
 function FishRack.getHangableFishTypes()
-    logger:debug("Getting hangable fish types")
+    logger:trace("Getting hangable fish types")
     if FishRack.hangableFishTypesCache then
-        logger:debug("Using cached hangable fish types")
+        logger:trace("Using cached hangable fish types")
         return FishRack.hangableFishTypesCache
     end
     local hangableFishTypes = {}
     for id, fishType in pairs(FishType.registeredFishTypes) do
-        logger:debug("Checking %s", fishType.baseId)
+        logger:trace("Checking %s", fishType.baseId)
         if fishType:canHang() then
-            logger:debug("- Can hang")
+            logger:trace("- Can hang")
             hangableFishTypes[id] = fishType
         else
-            logger:debug("- Can't hang")
+            logger:trace("- Can't hang")
         end
     end
     if table.size(hangableFishTypes) > 0 then
@@ -195,9 +194,9 @@ function FishRack:updateFishNode(nodeId)
         logger:debug("- Found Hook Node %s", hookNode.name)
         hookNode:detachAllChildren()
         local hookData = self.data.hookDatas[nodeId] or {}
-        local fishId = hookData.fishId
-        if fishId then
-            local fishType = FishType.get(hookData.fishId)
+
+        local fishType = FishType.get(hookData.fishId)
+        if fishType then
             local fishNode = tes3.loadMesh(fishType:getPreviewMesh(), false) --[[@as niNode]]
             local hangNode = fishNode:getObjectByName(FishType.HANG_NODE):clone() --[[@as niNode]]
             hookNode:attachChild(hangNode)
@@ -281,11 +280,11 @@ end
 function FishRack:getHookLookingAt(lookingAtNode)
     local hangNode = NodeUtils.getNamedParent(lookingAtNode, FishType.HANG_NODE)
     if not hangNode then
-        logger:warn("No hang node parent")
+        logger:trace("No hang node parent")
         return
     end
     if #hangNode.children == 0 then
-        logger:warn("Hang node doesn't have a fish")
+        logger:trace("Hang node doesn't have a fish")
         return
     end
     local hookNode = hangNode.parent
@@ -302,9 +301,6 @@ function FishRack:doTooltip(parentElement, lookingAtNode)
     if not fishId then return end
     local fish = tes3.getObject(fishId)
     if not fish then return end
-
-    logger:debug("Creating label")
-
     local labelText = string.format("Take %s", fish.name)
     local nameLabel = parentElement.parent:findChild("CraftingFramework:activatorTooltipLabel")
     if not nameLabel then
