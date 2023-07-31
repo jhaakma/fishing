@@ -4,6 +4,7 @@ local config = require("mer.fishing.config")
 local SwimService = require("mer.fishing.Fishing.SwimService")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 local FishingRod = require("mer.fishing.FishingRod.FishingRod")
+local FishingNet = require("mer.fishing.FishingNet")
 local FightIndicator = require("mer.fishing.ui.FightIndicator")
 local FishingSkill = require("mer.fishing.FishingSkill")
 
@@ -369,9 +370,8 @@ function FightManager:damageRod(delta)
 end
 
 
-
 function FightManager:getFishFatigueLimit()
-    if tes3.player.object.inventory:contains("mer_fishing_net") then
+    if FishingNet.playerHasNet() then
         return self.fish.fishType:getStartingFatigue() / 10
     else
         return 0

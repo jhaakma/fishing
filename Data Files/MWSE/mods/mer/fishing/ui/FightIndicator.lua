@@ -6,6 +6,7 @@
 local common = require("mer.fishing.common")
 local logger = common.createLogger("FightIndicator")
 local config = require("mer.fishing.config")
+local FishingNet = require("mer.fishing.FishingNet")
 
 ---@class Fishing.FightIndicator.new.params
 ---@field fightManager Fishing.FightManager
@@ -161,7 +162,7 @@ function FightIndicator:createFatigueBar(parent)
     fatigueBar.widthProportional = 1
     fatigueBar.height = 20
 
-    if tes3.player.object.inventory:contains("mer_fishing_net") then
+    if FishingNet.playerHasNet() then
         local netIcon = border:createImage{
             path = "textures\\mer_fishing\\neticon.dds",
         }

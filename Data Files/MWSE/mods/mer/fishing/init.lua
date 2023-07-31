@@ -8,6 +8,7 @@ Interop.registerBait = require("mer.fishing.Bait.Bait").register
 Interop.registerBaitType = require("mer.fishing.Bait.BaitType").register
 Interop.registerFishType = require("mer.fishing.Fish.FishType").register
 Interop.registerFishingRod = require("mer.fishing.FishingRod.FishingRod").register
+Interop.registerFishingNet = require("mer.fishing.FishingNet").register
 Interop.registerFishingSupply = require("mer.fishing.Merchant.Supplies").register
 Interop.registerMerchant = function()
     logger:info("Registering fishing merchant")
