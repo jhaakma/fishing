@@ -49,10 +49,9 @@ local swishSounds = {
 ---Block vanilla weapon swish sounds when casting fishing line
 ---@param e addSoundEventData
 event.register("addSound", function(e)
-    local doBlockSound = e.reference == tes3.player
-        and FishingStateManager.isState("CASTING")
-        and swishSounds[e.sound.id:lower()]
-    if doBlockSound then
+    if e.reference ~= tes3.player then return end
+    if not FishingRod.isEquipped() then return end
+    if swishSounds[e.sound.id:lower()] then
         logger:debug("Blocking vanilla weapon swish sound")
         return false
     end
