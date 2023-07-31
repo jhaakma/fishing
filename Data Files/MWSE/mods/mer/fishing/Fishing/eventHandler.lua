@@ -11,21 +11,21 @@ local FishingSkill = require("mer.fishing.FishingSkill")
 event.register("attackHit", function(e)
     if e.reference ~= tes3.player then return end
     logger:debug("Swing strength = %s",tes3.player.mobile.actionData.attackSwing)
-    local fishingRod = FishingRod.getEquipped()
-    if fishingRod then
+    if FishingRod.isEquipped() then
         logger:debug("Player released attack with fishing rod")
         FishingService.release()
     end
 end)
 
--- event.register("attackStart", function(e)
---     if e.reference ~= tes3.player then return end
---     local fishingRod = getFishingRod()
---     if fishingRod then
---         logger:debug("Player started attack with fishing rod")
---         fishingRod:startSwing()
---     end
--- end)
+---Force player to always chop when attacking with a fishing rod
+---@param e attackStartEventData
+event.register("attackStart", function(e)
+    if e.reference ~= tes3.player then return end
+    if FishingRod.isEquipped() then
+        logger:debug("Forcing fishing rod to chop")
+        e.attackType = tes3.physicalAttackType.chop
+    end
+end)
 
 ---Event if activate is mapped to mouse
 ---@param e mouseButtonUpEventData
