@@ -13,6 +13,9 @@ local bushcraftingRecipes = {
         },
         category = "Fishing",
         soundType = "wood",
+        skillRequirements = {
+            { skill = "Bushcrafting", requirement = 15 }
+        }
     },
     {
         id = "Fishing:mer_fishing_net",
@@ -25,6 +28,9 @@ local bushcraftingRecipes = {
         },
         category = "Fishing",
         soundType = "rope",
+        skillRequirements = {
+            { skill = "Bushcrafting", requirement = 40 }
+        }
     },
     {
         id = "Fishing:mer_fish_rack",
@@ -34,6 +40,9 @@ local bushcraftingRecipes = {
         materials = {
             { material = "wood", count = 4 },
             { material = "rope", count = 1 },
+        },
+        skillRequirements = {
+            { skill = "Bushcrafting", requirement = 20 }
         },
         category = "Fishing",
         soundType = "wood",
