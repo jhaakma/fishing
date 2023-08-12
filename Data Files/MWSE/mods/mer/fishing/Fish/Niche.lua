@@ -8,7 +8,7 @@ local logger = common.createLogger("Niche")
 ---| '"night"' #The fish is active during the night
 
 ---A Niche defines where and when a fish can be found.
----@class Fishing.FishType.Niche
+---@class Fishing.FishType.Niche.new.params
 ---@field regions? string[] If defined, limits fish to the regioned specified.
 ---@field cells? string[] If defined, limits fish to the cells specified. Uses pattern matching, for example "Vivec" will match "Vivec, Foreign Quarter Waistworks".
 ---@field times? Fishing.FishType.Niche.Time[] What times of day the fish is active. If undefined, the fish is always active.
@@ -16,6 +16,9 @@ local logger = common.createLogger("Niche")
 ---@field exteriors? boolean `default: true` Whether the fish can be found in exteriors. If undefined, the fish can be found in exteriors.
 ---@field minDepth? number `default: 0` The minimum depth the fish can be found at.
 ---@field maxDepth? number The maximum depth the fish can be found at. If undefined, max depth is infinite.
+---@field requirements? fun(self: Fishing.FishType.Niche): boolean A function that returns true if the fish can be found in the current cell. If undefined, the fish can be found everywhere.
+
+---@class Fishing.FishType.Niche : Fishing.FishType.Niche.new.params
 local Niche = {}
 
 ---Creates a new niche
@@ -47,6 +50,7 @@ function Niche.new(o)
     self.exteriors = o.exteriors ~= false
     self.minDepth = o.minDepth or 0
     self.maxDepth = o.maxDepth
+    self.requirements = o.requirements
     return self
 end
 
@@ -179,6 +183,7 @@ function Niche:isActive(depth)
         and self:isActiveAtTime()
         and self:isActiveCellType()
         and self:isAtDepth(depth)
+        and (self.requirements == nil or self:requirements())
     logger:trace("Fish is %s", isActive and "active" or "inactive")
     return isActive
 end

@@ -74,11 +74,10 @@ config.constants = {
 
 ---@class Fishing.config.persistent
 local persistentDefault = {
-    ---The total number of fish this character has ever caught
-    ---@type number
-    totalFishCaught = 0,
     ---@type Fishing.fishingState|nil
     fishingState = nil,
+    ---@type table<string, number> The number of each fish type caught
+    fishTypesCaught = {}
 }
 
 ---@class Fishing.config.MCM
@@ -115,6 +114,9 @@ config.persistent = setmetatable({}, {
     __index = function(_, key)
         if not tes3.player then return end
         tes3.player.data[config.configPath] = tes3.player.data[config.configPath] or persistentDefault
+        if tes3.player.data[config.configPath][key] == nil then
+            tes3.player.data[config.configPath][key] = persistentDefault[key]
+        end
         return tes3.player.data[config.configPath][key]
     end,
     __newindex = function(_, key, value)

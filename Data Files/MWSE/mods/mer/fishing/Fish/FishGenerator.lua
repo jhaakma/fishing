@@ -64,16 +64,16 @@ function FishGenerator.getValidFish(depth)
         },
     }
     logger:debug("Picking fish")
-    for id, fish in pairs(FishType.registeredFishTypes) do
-        if tes3.getObject(fish.baseId) then
+    for id, fishType in pairs(FishType.registeredFishTypes) do
+        if tes3.getObject(fishType.baseId) then
             logger:trace("Checking fish %s", id)
-            if fish.niche:isActive(depth) then
+            if fishType:isActive(depth) then
                 logger:trace("- %s is active", id)
-                local rarity = fish.rarity
-                local class = fish.class
+                local rarity = fishType.rarity
+                local class = fishType.class
                 logger:trace("- Rarity: %s, class: %s", rarity, class)
-                table.insert(validFishTypes[class][rarity], fish)
-                table.insert(validFishTypes[class].all, fish)
+                table.insert(validFishTypes[class][rarity], fishType)
+                table.insert(validFishTypes[class].all, fishType)
             end
         else
             logger:trace("%s object does not exist")

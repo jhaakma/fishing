@@ -8,29 +8,36 @@ local FishingNet = require("mer.fishing.FishingNet")
 local FightIndicator = require("mer.fishing.ui.FightIndicator")
 local FishingSkill = require("mer.fishing.FishingSkill")
 
----@class Fishing.FightManager
+
+---@class Fishing.FightManager.new.params
 ---@field fish Fishing.FishType.instance The fish to fight
 ---@field callback fun(self: Fishing.FightManager, succeeded: boolean, failMessage?: string) The callback to run when the fight is over
----@field targetPosition tes3vector3
+
+---@class Fishing.FightManager : Fishing.FightManager.new.params
+---@field targetPosition? tes3vector3
 ---@field reeling boolean if the player is actively reeling in the fish
 ---@field lineLength number how mich fishing line is out
 ---@field fightIndicator Fishing.FightIndicator
 ---@field playerFatigue number accululation of fatigue drain, when it reaches one, subtract it from the player
 ---@field rodDamage number accumulation of rod damage, when it reaches one, subtract it from the rod
 ---@field fishPhysics table<number, Fishing.FishPhysics> physics for each fish
----@field ended boolean
+---@field ended boolean whether the fight has ended
 local FightManager = {}
 local simulateFight
 
 
----@param e Fishing.FightManager
+---@param e Fishing.FightManager.new.params
+---@return Fishing.FightManager
 function FightManager.new(e)
+    ---@type Fishing.FightManager
     local self = setmetatable({}, { __index = FightManager })
     self.fish = e.fish
     self.fightIndicator = FightIndicator:new{
         fightManager = self
     }
     self.callback = e.callback
+    self.reeling = false
+    self.lineLength = 0
     self.playerFatigue = 0
     self.rodDamage = 0
     self.fishPhysics = {}

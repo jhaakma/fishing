@@ -2,11 +2,12 @@ local common = require("mer.fishing.common")
 local logger = common.createLogger("Integrations - loot")
 local Interop = require("mer.fishing")
 
+---@class Fishing.Integration.LootConfig.FishTypeDefaults : Fishing.FishType
+---@field baseId? any
+
 ---@class Fishing.Integration.LootConfig
----@field defaults Fishing.FishType
----@field types Fishing.FishType[]
-
-
+---@field defaults Fishing.Integration.LootConfig.FishTypeDefaults
+---@field types Fishing.FishType.new.params[]
 
 ---@class Fishing.Integration.Loots
 ---@field common Fishing.Integration.LootConfig
@@ -20,7 +21,7 @@ local loots = {
             speed = 60,
             difficulty = 5,
             class = "loot",
-            niche = {}
+            niche = {},
         },
         types = {
             {
@@ -30,7 +31,10 @@ local loots = {
                     "ashfall_stone"
                 }
             },
-            { baseId = "AB_Key_Junk" },
+            {
+                baseId = "AB_Key_Junk",
+                totalPopulation = 1,
+            },
             {
                 baseId = "misc_com_basket_01",
                 variants = {
@@ -218,7 +222,10 @@ local loots = {
             { baseId = "ashfall_crabpot_01_m" },
             { baseId = "misc_de_muck_shovel_01" },
             { baseId = "misc_6th_ash_statue_01" },
-            { baseId = "misc_de_lute_01" },
+            {
+                baseId = "misc_de_lute_01",
+                totalPopulation = 1
+            },
             {
                 baseId = "AB_Misc_ComCard01",
                 variants = {
@@ -239,14 +246,16 @@ local loots = {
                 baseId = "AB_Misc_ComCardDeck01",
                 variants = {
                     "AB_Misc_ComCardDeck02",
-                }
+                },
+                totalPopulation = 1
             },
             { baseId = "AB_Misc_HairSilverComb" },
             {
                 baseId = "AB_IngMine_BlackPearl_01",
                 variants = {
                     "AB_IngMine_GoldPearl_01",
-                }
+                },
+                totalPopulation = 1
             },
             { baseId = "chitin boots" },
             { baseId = "mole_crab_helm" },
@@ -261,6 +270,7 @@ local loots = {
             difficulty = 20,
             class = "loot",
             niche = {},
+            totalPopulation = 1,
         },
         types = {
             {
@@ -271,7 +281,8 @@ local loots = {
                     "AB_c_ExquisiteRing01",
                     "AB_c_ExtravagantRing01",
                     "AB_c_ExtravagantRing02"
-                }
+                },
+                totalPopulation = 5
             },
             {
                 baseId = "extravagant_amulet_01",
@@ -280,16 +291,21 @@ local loots = {
                     "exquisite_amulet_01",
                     "AB_c_ExquisiteAmulet01",
                     "AB_c_ExtravagantAmulet01"
-                }
+                },
+                totalPopulation = 5
             },
             {
                 baseId = "dwemer_boots",
                 variants = {
                     "glass_boots",
                     "daedric_boots"
-                }
+                },
+                totalPopulation = 2
             },
-            { baseId = "AB_w_EbonyDagger" },
+            {
+                baseId = "AB_w_EbonyDagger",
+                totalPopulation = 1
+            },
         }
     }
 }

@@ -118,6 +118,7 @@ local function spawnLure(lurePosition)
     local lure = tes3.createReference({
         object = "mer_lure_anim",
         position = lurePosition,
+        orientation = tes3vector3.new(0, 0, 0),
         cell = tes3.player.cell,
     })
     bait:attachToAnim(lure)
@@ -275,6 +276,8 @@ local function catchFish()
         logger:warn("No fish found")
         return
     end
+    --reduce fish population
+    fish.fishType:reducePopulation(1)
 
     local lure = FishingStateManager.getLure()
     if not lure then
@@ -337,6 +340,10 @@ local function catchFish()
     }
 end
 
+---@class Fishing.FightEndEventParams
+---@field fish Fishing.FishType.instance
+---@field successful boolean
+
 local function startFight()
     logger:debug("Starting fight")
     local fish = FishingStateManager.getCurrentFish()
@@ -352,8 +359,12 @@ local function startFight()
     Animations.splash(lure.position, fish:getSplashSize())
     FightManager.new{
         fish = fish,
-        callback = function(_fightManager, success, failMessage)
-            if success then
+        callback = function(_fightManager, successful, failMessage)
+            event.trigger("Fishing:FightEnd", {
+                fish = fish,
+                successful = successful,
+            })
+            if successful then
                 catchFish()
             else
                 tes3.messageBox(failMessage or "It got away...")

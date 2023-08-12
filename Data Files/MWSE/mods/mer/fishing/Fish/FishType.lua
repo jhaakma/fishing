@@ -25,24 +25,26 @@ local CraftingFramework = include("CraftingFramework")
 ---@field id string The id of the object that is harvested
 ---@field min number The minimum amount of the object that is harvested
 ---@field max number The maximum amount of the object that is harvested
----@field isMeat boolean If true, the object is treated as meat for Ashfall cooking purposes
----@field isTrophy boolean If true, will be set up as static Activator in Crafting Framework
+---@field isMeat? boolean If true, the object is treated as meat for Ashfall cooking purposes. Default false
+---@field isTrophy? boolean If true, will be set up as static Activator in Crafting Framework. Default false
 
 ---@class Fishing.FishType.new.params
 ---@field baseId string The id of the base object representation of the fish
 ---@field variants? string[] A table of variant ids that can be selected when instancing this fish
 ---@field previewMesh? string The mesh to be displayed in the trophy menu
 ---@field description? string The description to be displayed when the fish is caught
----@field speed number The base speed of the fish, in units per second
----@field size number A multiplier on the size of the ripples. Default 1.0
----@field difficulty number The difficulty of catching the fish, out of 100. Default 10 (easy)
----@field class Fishing.FishType.class The class of the fish. Default "medium"
----@field rarity Fishing.FishType.rarity The rarity of the fish. Default "common"
----@field niche? Fishing.FishType.Niche The niche where the fish can be found
+---@field speed? number The base speed of the fish, in units per second. Default 100
+---@field size? number A multiplier on the size of the ripples. Default 1.0
+---@field difficulty? number The difficulty of catching the fish, out of 100. Default 10 (easy)
+---@field class? Fishing.FishType.class The class of the fish. Default "medium"
+---@field rarity? Fishing.FishType.rarity The rarity of the fish. Default "common"
+---@field niche? Fishing.FishType.Niche.new.params The niche where the fish can be found
 ---@field harvestables? Fishing.FishType.Harvestable[] The item that can be harvested from the fish
----@field isBaitFish? boolean If true, this fish can be used as live bait
+---@field isBaitFish? boolean If true, this fish can be used as live bait. Default false
+---@field totalPopulation? number If set, only this many fish of this type can ever be caught. Default nil
 
 ---@class Fishing.FishType : Fishing.FishType.new.params
+---@field niche Fishing.FishType.Niche
 ---@field variants table<string, boolean> A set of variant ids that can be selected when instancing this fish
 local FishType = {
     HANG_NODE = "HANG_FISH",
@@ -86,6 +88,7 @@ function FishType.new(e)
     self.niche = Niche.new(e.niche)
     self.harvestables = e.harvestables
     self.isBaitFish = e.isBaitFish
+    self.totalPopulation = e.totalPopulation
 
     Harvest.registerFish(self)
     if Ashfall then
@@ -241,6 +244,49 @@ function FishType:getVerbs()
         }
     }
     return verbs[self.class] or verbs.fish
+end
+
+---@return number #The total number of this fish that the player has caught
+function FishType:getTotalCaught()
+    return config.persistent.fishTypesCaught[self.baseId] or 0
+end
+
+---@return number|nil #The total population of this fish. If nil, this fish has an infinite population
+function FishType:getPopulation()
+    if self.totalPopulation == nil then return nil end
+    local remaining = self.totalPopulation - self:getTotalCaught()
+    return math.clamp(remaining, 0, self.totalPopulation)
+end
+
+---@param amount number #The amount to reduce the population by
+---@return number|nil #The new population, or nil if this fish has an infinite population
+function FishType:reducePopulation(amount)
+    if self.totalPopulation == nil then return nil end
+    local newNumCaught = math.clamp(self:getTotalCaught() + amount, 0, self.totalPopulation)
+    config.persistent.fishTypesCaught[self.baseId] = newNumCaught
+    return self:getPopulation()
+end
+
+---@param amount number #The amount to increase the population by
+---@return number|nil #The new population, or nil if this fish has an infinite population
+function FishType:increasePopulation(amount)
+    if self.totalPopulation == nil then return nil end
+    local newNumCaught = math.clamp(self:getTotalCaught() - amount, 0, self.totalPopulation)
+    config.persistent.fishTypesCaught[self.baseId] = newNumCaught
+    return self:getPopulation()
+end
+
+function FishType:isExtinct()
+    if self.totalPopulation == nil then return false end
+    local isExtinct = self:getPopulation() <= 0
+    logger:debug("%s is %s", self.baseId, isExtinct and "extinct" or "not extinct")
+    return isExtinct
+end
+
+---@return boolean #Whether this fish is active at the given depth
+function FishType:isActive(depth)
+    return self.niche:isActive(depth)
+       and self:isExtinct() == false
 end
 
 return FishType
