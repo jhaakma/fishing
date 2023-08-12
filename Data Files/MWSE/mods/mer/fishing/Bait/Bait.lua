@@ -10,7 +10,7 @@ local BaitType = require("mer.fishing.Bait.BaitType")
 ---@field id string The id of the item that represents this bait
 ---@field type Fishing.Bait.type
 ---@field uses? number How many times this bait can be used before it is destroyed. If not set, bait is infinite and can be recovered after attaching
----@field floatMesh string path to the mesh override for the floater. If not set, the default float will be used.
+---@field floatMesh? string path to the mesh override for the floater. If not set, the default float will be used.
 
 ---@class Fishing.Bait : Fishing.Bait.config
 local Bait = {

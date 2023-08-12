@@ -90,20 +90,19 @@ function FishType.new(e)
     Harvest.registerFish(self)
     if Ashfall then
         local obj = self:getBaseObject()
-        if obj and obj.objectType == tes3.objectType.ingredient then
+        local fishIsMeat = obj ~= nil
+            and obj.objectType == tes3.objectType.ingredient
+            and self.class ~= "loot"
+        if fishIsMeat then
              logger:debug("Registering %s as meat", obj.id)
-             Ashfall.registerFoods{
-                 [obj.id] = "meat"
-             }
+             Ashfall.registerFoods{[obj.id] = "meat"}
         end
         --register isMeat harvestables
         if self.harvestables then
             for _, harvestable in ipairs(self.harvestables) do
                 if harvestable.isMeat then
                     logger:debug("Registering %s as meat", harvestable.id)
-                    Ashfall.registerFoods{
-                        [harvestable.id] = "meat"
-                    }
+                    Ashfall.registerFoods{ [harvestable.id] = "meat" }
                     Bait.register{
                         id = harvestable.id,
                         type = "bait",
