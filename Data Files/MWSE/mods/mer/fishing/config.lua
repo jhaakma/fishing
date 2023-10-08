@@ -84,6 +84,7 @@ local persistentDefault = {
 local mcmDefault = {
     enabled = true,
     enableFishTooltips = true,
+    easyHook = false,
     cheatMode = false,
     logLevel = "INFO",
     fishingMerchants = {

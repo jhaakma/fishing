@@ -304,15 +304,13 @@ local function catchFish()
                 end
             end
             local verbs = fish.fishType:getVerbs()
-            local fishObj = fish:getInstanceObject()
-            local fishName = fish:getName()
             local buttons = {
                 {
                     text = verbs.Take,
                     callback = function()
                         tes3.addItem{
                             reference = tes3.player,
-                            item = fishObj,
+                            item = fish:getInstanceObject(),
                             count = 1,
                             showMessage = true,
                         }
@@ -331,7 +329,7 @@ local function catchFish()
                 },
             }
             TrophyMenu.createMenu{
-                header = string.format("You %s %s!",verbs.caught, common.addAOrAnPrefix(fishName)),
+                header = string.format("You %s %s!",verbs.caught, fish:getPrefixedName()),
                 description = fish.fishType.description,
                 previewMesh = fish:getPreviewMesh(),
                 buttons = buttons,
@@ -409,7 +407,7 @@ end
 ]]
 function FishingService.generateBiteInterval()
     if config.mcm.cheatMode then
-        logger:trace("Cheat mode enabled, bite interval set to 1 second")
+        logger:trace("Cheat mode, bite interval is 1")
         return 1
     end
     local defaultInterval = 5
@@ -428,7 +426,7 @@ function FishingService.generateBiteInterval()
 end
 
 function FishingService.getBiteDuration()
-    if config.mcm.cheatMode then
+    if config.mcm.easyHook then
         return 2.0
     end
 

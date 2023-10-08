@@ -1,11 +1,20 @@
 local FishingSkill = require("mer.fishing.FishingSkill")
 local common = include("mer.fishing.common")
 local logger = common.createLogger("FishingSkill")
-local skillModule = include("OtherSkills.skillModule")
+local SkillsModule = include("SkillsModule")
 
 --INITIALISE SKILLS--
 local function onSkillsReady()
     logger:debug("Registering %s skill", FishingSkill.config.id)
-    skillModule.registerSkill(FishingSkill.config.id, FishingSkill.config)
+    SkillsModule.registerSkill(FishingSkill.config)
+    for _, modifier in ipairs(FishingSkill.modifiers) do
+        logger:debug("Adding modifier: %s", modifier.class)
+        SkillsModule.registerClassModifier{
+            skill = FishingSkill.config.id,
+            class = modifier.class,
+            race = modifier.race,
+            amount = modifier.amount
+        }
+    end
 end
-event.register("OtherSkills:Ready", onSkillsReady)
+onSkillsReady()

@@ -11,7 +11,7 @@ local logger = common.createLogger("BaitType")
 ---@field id Fishing.Bait.type
 ---@field name string
 ---@field description string
----@field getHookChance fun(self:Fishing.BaitType):number Returns a multiplier on the chance that any fish will get hooked
+---@field getHookChance? fun(self:Fishing.BaitType):number Returns a multiplier on the chance that any fish will get hooked
 ---@field classCatchChances Fishing.BaitType.classCatchChances
 local BaitType = {
     registeredBaitTypes = {},

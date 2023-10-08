@@ -42,6 +42,7 @@ local CraftingFramework = include("CraftingFramework")
 ---@field harvestables? Fishing.FishType.Harvestable[] The item that can be harvested from the fish
 ---@field isBaitFish? boolean If true, this fish can be used as live bait. Default false
 ---@field totalPopulation? number If set, only this many fish of this type can ever be caught. Default nil
+---@field namePrefix? string #If defined, will override the prefix before the name. E.g. "a fish", "an amulet" or "the Mesmer Ring"
 
 ---@class Fishing.FishType : Fishing.FishType.new.params
 ---@field niche Fishing.FishType.Niche
@@ -89,6 +90,7 @@ function FishType.new(e)
     self.harvestables = e.harvestables
     self.isBaitFish = e.isBaitFish
     self.totalPopulation = e.totalPopulation
+    self.namePrefix = e.namePrefix
 
     Harvest.registerFish(self)
     if Ashfall then
@@ -288,5 +290,6 @@ function FishType:isActive(depth)
     return self.niche:isActive(depth)
        and self:isExtinct() == false
 end
+
 
 return FishType

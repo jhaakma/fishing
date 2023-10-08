@@ -103,4 +103,14 @@ function FishInstance:getDistanceModifier()
     return distance
 end
 
+
+function FishInstance:getPrefixedName()
+    local name = self:getName()
+    if self.fishType.namePrefix then
+        return self.fishType.namePrefix + " " + name
+    else
+        return common.addAOrAnPrefix(self:getName())
+    end
+end
+
 return FishInstance
