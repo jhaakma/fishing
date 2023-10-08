@@ -17,10 +17,11 @@ version = ">=0.15.0"
 lua-mod = "mer.fishing"
 
 [dependencies.mods."Skills Module"]
-mwse-module = "OtherSkills"
+mwse-module = "SkillsModule"
 url = "https://www.nexusmods.com/morrowind/mods/46034?tab=files"
+version = "^2.0.0"
 
 [dependencies.mods."The Crafting Framework"]
 mwse-module = "CraftingFramework"
-version = "^1.15.0"
+version = "^1.17.0"
 url = "https://www.nexusmods.com/morrowind/mods/51009?tab=files"

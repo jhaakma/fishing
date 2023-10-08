@@ -1,9 +1,10 @@
-local skillModule = include("OtherSkills.skillModule")
+local SkillsModule = include("SkillsModule")
 local common = require("mer.fishing.common")
 local logger = common.createLogger("FishingSkill")
 
 ---@class Fishing.FishingSkill
 local FishingSkill = {
+    ---@type SkillsModule.Skill.constructorParams
     config = {
         id = "fishing",
         name = "Fishing",
@@ -14,37 +15,42 @@ local FishingSkill = {
         specialization = tes3.specialization.stealth,
     },
     progressValues = {
-        landLure = 5,
+        landLure = 2,
         fish = {
-            common = 10,
-            uncommon = 30,
-            rare = 50,
-            legendary = 60
+            common = 5,
+            uncommon = 10,
+            rare = 20,
+            legendary = 50
         }
+    },
+    modifiers = {
+        { class = "t_mw_fisherman", amount = 20 },
+        { class = "t_glb_fisherman", amount = 20 }
     }
 }
 
 --- Get the fishing skill object
+---@return SkillsModule.Skill
 function FishingSkill.get()
-    return skillModule.getSkill(FishingSkill.config.id)
+    return SkillsModule.skills[FishingSkill.config.id]
 end
 
 --- Get the current value of the fishing skill
 function FishingSkill.getCurrent()
-    return FishingSkill.get().value
+    return FishingSkill.get().current
 end
 
 --- Progress the fishing skill by the given amount
 function FishingSkill.progress(amount)
     local skill = FishingSkill.get()
-    skill:progressSkill(amount)
+    skill:exercise(amount)
 end
 
 --- Progress the fishing skill by the amount for landing a lure
 function FishingSkill.landLure()
     local skill = FishingSkill.get()
     logger:debug("Progressing Fishing skill by %s", FishingSkill.progressValues.landLure)
-    skill:progressSkill(FishingSkill.progressValues.landLure)
+    skill:exercise(FishingSkill.progressValues.landLure)
 end
 
 --- Progress the fishing skill by the amount for catching a fish
@@ -61,7 +67,7 @@ function FishingSkill.catchFish(fishType)
     logger:debug("Difficulty: %s. Effect: %s", fishType.difficulty, difficultyEffect)
     local value = classValue * difficultyEffect
     logger:debug("Progressing Fishing skill by %s", value)
-    skill:progressSkill(value)
+    skill:exercise(value)
 end
 
 
