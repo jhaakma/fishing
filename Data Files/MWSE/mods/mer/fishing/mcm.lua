@@ -94,8 +94,15 @@ local function registerMCM()
         restartRequired = true,
     }
 
+    --cheatMode
     page:createYesNoButton{
-        label = "Enable cheat mode",
+        label = "Enable Easy Hook Mode",
+        description = "Remove the skill effect on how difficult it is to initially hook a fish.",
+        variable = mwse.mcm.createTableVariable{ id = "easyHook", table = config.mcm },
+    }
+
+    page:createYesNoButton{
+        label = "Enable Cheat Mode",
         description = "Makes fish strike instantly, for testing/debugging purposes only.",
         variable = mwse.mcm.createTableVariable{ id = "cheatMode", table = config.mcm },
     }
