@@ -43,6 +43,7 @@ local CraftingFramework = include("CraftingFramework")
 ---@field isBaitFish? boolean If true, this fish can be used as live bait. Default false
 ---@field totalPopulation? number If set, only this many fish of this type can ever be caught. Default nil
 ---@field namePrefix? string #If defined, will override the prefix before the name. E.g. "a fish", "an amulet" or "the Mesmer Ring"
+---@field requirements? fun(self: Fishing.FishType):boolean #If defined, this fish type will only be available if this function returns true
 
 ---@class Fishing.FishType : Fishing.FishType.new.params
 ---@field niche Fishing.FishType.Niche
@@ -91,6 +92,7 @@ function FishType.new(e)
     self.isBaitFish = e.isBaitFish
     self.totalPopulation = e.totalPopulation
     self.namePrefix = e.namePrefix
+    self.requirements = e.requirements or function() return true end
 
     Harvest.registerFish(self)
     if Ashfall then
@@ -136,9 +138,7 @@ end
 
 ---@return Fishing.FishType | nil
 function FishType.get(id)
-    if id then
-        return FishType.registeredFishTypes[id:lower()]
-    end
+    return FishType.registeredFishTypes[id:lower()]
 end
 
 ---Register a new type of fish
@@ -287,7 +287,8 @@ end
 
 ---@return boolean #Whether this fish is active at the given depth
 function FishType:isActive(depth)
-    return self.niche:isActive(depth)
+    return self:requirements()
+    and self.niche:isActive(depth)
        and self:isExtinct() == false
 end
 

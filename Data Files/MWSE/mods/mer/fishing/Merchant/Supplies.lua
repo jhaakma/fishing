@@ -1,19 +1,22 @@
---[[
-    Class for registering items to be sold by the merchant
-]]
+local common = require("mer.fishing.common")
+local logger = common.createLogger("Supplies")
 
+---Class for registering items to be sold by the merchant
 ---@class Fishing.Supplies
 local Supplies = {
     supplyList = {}
 }
 
----@class Fishing.Supply.config
----@field id string the Item id
----@field count number the number of items to add to the merchant's inventory. Can be negative for restocking supplies
+---Get the list of items to be sold by fishing merchants
+---@return table<string, number>
+function Supplies.getSupplyList()
+    return Supplies.supplyList
+end
 
----Register an item to be sold by the merchant
----@param e Fishing.Supply.config
+---Register an item to be sold by fishing merchants
+---@param e { id: string, count: number}
 function Supplies.register(e)
+    logger:debug("Registering Fishing Supply %s:%d", e.id, e.count)
     Supplies.supplyList[e.id:lower()] = e.count
 end
 

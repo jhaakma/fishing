@@ -327,6 +327,9 @@ local fishConfigs = {
                     max = 1,
                 }
             },
+            requirements = function(_)
+                return tes3.isModActive("OAAB_Data.esm")
+            end
         },
         {
             baseId = "mer_fish_discus",

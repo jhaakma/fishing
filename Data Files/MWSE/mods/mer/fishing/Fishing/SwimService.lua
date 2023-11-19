@@ -49,8 +49,13 @@ local function hasLineOfSight(startPosition, targetPosition)
     return true
 end
 
+---Given a position, try and find a valid new position at a given distance in a given direction
+---To be valid it has to be in the water and in the line of sight of the player
+---@param startPosition tes3vector3 The position to start looking from
+---@param direction tes3vector3 The direction to look in
+---@param distance number The distance to look
 ---@return tes3vector3|nil # The position if unimpeded, nil if something blocked its path
-local function getTargetPosition(startPosition, direction, distance)
+local function findNewPosition(startPosition, direction, distance)
     local ignoreList = FishingStateManager.getIgnoreRefs()
     local ray = tes3.rayTest{
         position = startPosition,
@@ -88,11 +93,10 @@ local m1 = tes3matrix33.new()
 ---@field origin tes3vector3 where to start looking from
 ---@field minDistance number minimum distance to look. Defaults to config.constants.FISH_POSITION_DISTANCE_MIN
 ---@field maxDistance number maximum distance to look. Defaults to config.constants.FISH_POSITION_DISTANCE_MAX
----@field ignoreList table<tes3reference, boolean> references to ignore when raycasting
---[[
-    Given a position, try and find a position in a random direction
-    that is unimpeded
-]]
+---@field ignoreList? table<tes3reference, boolean> references to ignore when raycasting
+
+---Given a position, try and find a position in a random direction
+---that is unimpeded
 ---@param e SwimService.findTargetPosition.params
 function SwimService.findTargetPosition(e)
     local origin = e.origin
@@ -123,18 +127,17 @@ function SwimService.findTargetPosition(e)
             return
         end
 
-        local targetPosition = getTargetPosition(origin, direction, distance)
+        local targetPosition = findNewPosition(origin, direction, distance)
         if targetPosition then
             return targetPosition
         end
     end
 end
 
----@param startPosition tes3vector3
----@param distance number
+---Given a position, try to find a valid position closer to the player
+---@param startPosition tes3vector3 The position to start looking from
+---@param distance number The distance towards the player
 function SwimService.findPositionTowardsPlayer(startPosition, distance)
-    --find the position along the water plane towards the player by given distance,
-    -- or shorter if there is a collision
     local playerPos = tes3vector3.new(
         tes3.player.position.x,
         tes3.player.position.y,
@@ -143,7 +146,7 @@ function SwimService.findPositionTowardsPlayer(startPosition, distance)
     local direction = (playerPos - startPosition):normalized()
     logger:debug("Direction: %s", direction)
 
-    local targetPosition = getTargetPosition(startPosition, direction, distance)
+    local targetPosition = findNewPosition(startPosition, direction, distance)
     if targetPosition then
         return targetPosition
     end
