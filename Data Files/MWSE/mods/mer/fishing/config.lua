@@ -77,7 +77,11 @@ local persistentDefault = {
     ---@type Fishing.fishingState|nil
     fishingState = nil,
     ---@type table<string, number> The number of each fish type caught
-    fishTypesCaught = {}
+    fishTypesCaught = {},
+    ---@type table<string, string> Key: original fishing rod id, Value: copied fishing rod id
+    copiedFishingRods = {},
+    ---@type table<string, string> Key: original fishing net id, Value: copied fishing net id
+    copiedFishingNets = {},
 }
 
 ---@class Fishing.config.MCM
@@ -114,15 +118,14 @@ end
 config.persistent = setmetatable({}, {
     __index = function(_, key)
         if not tes3.player then return end
-        tes3.player.data[config.configPath] = tes3.player.data[config.configPath] or persistentDefault
-        if tes3.player.data[config.configPath][key] == nil then
-            tes3.player.data[config.configPath][key] = persistentDefault[key]
-        end
+        tes3.player.data[config.configPath] = tes3.player.data[config.configPath] or {}
+        table.copymissing(tes3.player.data[config.configPath], persistentDefault)
         return tes3.player.data[config.configPath][key]
     end,
     __newindex = function(_, key, value)
         if not tes3.player then return end
-        tes3.player.data[config.configPath] = tes3.player.data[config.configPath] or persistentDefault
+        tes3.player.data[config.configPath] = tes3.player.data[config.configPath] or {}
+        table.copymissing(tes3.player.data[config.configPath], persistentDefault)
         tes3.player.data[config.configPath][key] = value
     end
 })

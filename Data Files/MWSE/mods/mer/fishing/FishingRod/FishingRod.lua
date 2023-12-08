@@ -84,6 +84,10 @@ function FishingRod.new(e)
     return self
 end
 
+function FishingRod.isFishingRod(item)
+    return FishingRod.getConfig(item.id) ~= nil
+end
+
 -- Get the fishing rod equipped by the player
 ---@return Fishing.FishingRod|nil
 function FishingRod.getEquipped()

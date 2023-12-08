@@ -18,7 +18,6 @@ local function initAll(path)
     end
 end
 
-
 --Integrations
 initAll("integrations")
 
@@ -31,6 +30,7 @@ event.register("initialized", function()
     require("mer.fishing.ui.eventHandler")
     require("mer.fishing.Merchant.eventHandler")
     require("mer.fishing.FishingRod.eventHandler")
+    require("mer.fishing.FishingNet.eventHandler")
 
     local version = config.metadata.package.version
     logger:info("initialized %s", version)

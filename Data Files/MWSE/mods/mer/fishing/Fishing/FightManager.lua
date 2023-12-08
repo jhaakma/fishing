@@ -150,7 +150,7 @@ function FightManager:pickTargetPosition()
        logger:debug("Moving position %s units towards the player", distanceTowardsPlayer)
        targetPosition = positionTowardsPlayer
     else
-       logger:error("No position found towards the player")
+       logger:warn("No position found towards the player")
     end
     logger:debug("Target position: %s", targetPosition)
     self.targetPosition = targetPosition
