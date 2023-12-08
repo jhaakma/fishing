@@ -18,7 +18,7 @@ end)
 event.register("loaded", function(e)
     --Register copied fishing rods
     for originalId, copiedId in pairs(config.persistent.copiedFishingNets) do
-        logger:info("Registering copied fishing rod. Original: %s, New: %s",
+        logger:info("Registering copied fishing net. Original: %s, New: %s",
         originalId, copiedId)
         if FishingNet.get(originalId) then
             FishingNet.register{id = copiedId}
