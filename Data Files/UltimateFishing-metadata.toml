@@ -8,7 +8,7 @@ version = "1.4.3"
 assets = []
 
 [dependencies.mwse]
-buildnumber = 3519
+buildnumber = 3520
 
 [dependencies.mge-xe]
 version = ">=0.15.0"

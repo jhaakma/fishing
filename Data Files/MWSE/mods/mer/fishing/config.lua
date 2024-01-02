@@ -73,6 +73,7 @@ config.constants = {
 
 
 ---@class Fishing.config.persistent
+---@field fishingState Fishing.fishingState|nil
 local persistentDefault = {
     ---@type Fishing.fishingState|nil
     fishingState = nil,

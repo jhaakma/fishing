@@ -129,7 +129,7 @@ function FightManager:pickTargetPosition()
     logger:debug("Picking target position")
     local lure = FishingStateManager.getLure()
     if not lure then
-        logger:warn("Lure not found")
+        logger:warn("pickTargetPosition(): Lure not found")
         return
     end
 
@@ -199,7 +199,7 @@ end
 function FightManager:getLineDistance()
     local lure = FishingStateManager.getLure()
     if not lure then
-        logger:warn("Lure not found")
+        logger:warn("getLineDistance(): Lure not found")
         self:fail()
         return 0
     end

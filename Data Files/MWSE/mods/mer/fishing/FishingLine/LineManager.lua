@@ -31,7 +31,7 @@ function LineManager.attachLines(lure)
 
     local function cancel()
         logger:debug("Cancelling fishing line")
-        event.unregister("cameraControl", updateFishingLine)
+        event.unregister("simulated", updateFishingLine)
         fishingLine:remove()
         FishingStateManager.endFishing()
     end

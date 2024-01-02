@@ -32,8 +32,10 @@ function FishingLine:attachTo(parent)
 end
 
 function FishingLine:remove()
-    self.sceneNode.parent:detachChild(self.sceneNode)
-    self.sceneNode = nil
+    if self.sceneNode then
+        self.sceneNode.parent:detachChild(self.sceneNode)
+        self.sceneNode = nil
+    end
     self.curveData = nil
 end
 

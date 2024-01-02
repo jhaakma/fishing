@@ -39,7 +39,6 @@ local FishingStateManager = {}
 ---@return Fishing.TempData
 local function tempData()
     if not tes3.player.tempData.fishing then
-        ---@type Fishing.TempData
         tes3.player.tempData.fishing = {}
     end
     return tes3.player.tempData.fishing
@@ -108,7 +107,7 @@ function FishingStateManager.removeLure()
         tempData().lureSafeRef = nil
         return true
     else
-        logger:warn("Lure not found")
+        logger:warn("removeLure(): Lure not found")
         return false
     end
 end
