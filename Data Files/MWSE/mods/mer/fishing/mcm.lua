@@ -7,14 +7,14 @@ local LINKS_LIST = {
         text = "Release history",
         url = "https://github.com/jhaakma/fishing/releases"
     },
-    -- {
-    --     text = "Wiki",
-    --     url = "https://github.com/jhaakma/***/wiki"
-    -- },
-    -- {
-    --     text = "Nexus",
-    --     url = "https://www.nexusmods.com/morrowind/mods/*****"
-    -- },
+    {
+        text = "Wiki",
+        url = "https://github.com/jhaakma/fishing/wiki"
+    },
+    {
+        text = "Nexus",
+        url = "https://www.nexusmods.com/morrowind/mods/52872"
+    },
     {
         text = "Buy me a coffee",
         url = "https://ko-fi.com/merlord"
