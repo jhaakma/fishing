@@ -234,6 +234,13 @@ function FightManager:updateTension()
 
     local effect = math.remap(difference, 0, maxDistance, 0, neutralMaxDiff)
     local tension = config.constants.TENSION_NEUTRAL + effect
+
+    --Line can only snap when reeling
+    local upperLimit = config.constants.FIGHT_TENSION_UPPER_LIMIT * 0.99
+    if self.reeling ~= true and tension > upperLimit then
+        tension = upperLimit
+    end
+
     local fishingLine = FishingStateManager.getFishingLine()
     if fishingLine then
         fishingLine:setTension(tension)
