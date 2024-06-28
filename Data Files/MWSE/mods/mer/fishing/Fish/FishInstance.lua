@@ -1,5 +1,6 @@
 local common = require("mer.fishing.common")
 local logger = common.createLogger("FishInstance")
+local config = require("mer.fishing.config")
 
 ---@class Fishing.FishType.instance
 ---@field fishType Fishing.FishType
@@ -73,15 +74,15 @@ end
 
 function FishInstance:getChaseSpeed()
     local variance = math.random(80, 120) / 100
-    local speed =  self.fishType.speed * variance
-    logger:debug("getSpeed() speed: %s", speed)
+    local speed = variance * math.max(self.fishType.speed, config.constants.MINIMUM_CHASE_SPEED)
+    logger:debug("getChaseSpeed() speed: %s", speed)
     return speed
 end
 
 function FishInstance:getReelSpeed()
     local variance = math.random(80, 120) / 100
     local speed =  self.fishType.speed * variance * 1.5
-    logger:debug("getSpeed() speed: %s", speed)
+    logger:debug("getReelSpeed() speed: %s", speed)
     return speed
 end
 

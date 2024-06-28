@@ -21,6 +21,8 @@ config.constants = {
     MIN_CAST_SPEED = 150,
     MAX_CAST_SPEED = 600,
 
+    MINIMUM_CHASE_SPEED = 150,
+
     --The max distance the lure can be from the player before the line breaks
     FISHING_LINE_MAX_DISTANCE = 5000,
     MIN_DEPTH = 40,
@@ -42,9 +44,9 @@ config.constants = {
     --Base level of fatigue drain for a fish during a fight
     FIGHT_FATIGUE_DRAIN_PER_SECOND = 5,
     ---Minimum distance to next target during fight
-    FIGHT_POSITION_MIN_DISTANCE = 50,
+    FIGHT_POSITION_MIN_DISTANCE = 200,
     ---Maximum distance to next target during fight
-    FIGHT_POSITION_MAX_DISTANCE = 150,
+    FIGHT_POSITION_MAX_DISTANCE = 500,
 
     --player fatigue
     --the amount of fatigue drained per second when the player is reeling

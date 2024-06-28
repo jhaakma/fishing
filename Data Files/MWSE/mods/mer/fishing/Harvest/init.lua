@@ -60,7 +60,7 @@ function Harvest.registerFish(fishType)
             harvestingMenuActivator:registerRecipe{
                 id = "harvest:" .. fishType.baseId,
                 name = fishObj.name,
-                previewMesh = fishType.previewMesh,
+                previewMesh = fishType:getPreviewMesh(),
                 noResult = true,
                 keepMenuOpen = true,
                 description = getHarvestablesDescription(fishType.harvestables),

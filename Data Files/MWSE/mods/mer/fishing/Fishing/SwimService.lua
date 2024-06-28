@@ -69,7 +69,7 @@ local function findNewPosition(startPosition, direction, distance)
         local targetPosition = startPosition + (direction * distance)
         --local rodEnd = FishingRod.getPoleEndPosition()
 
-        local rodEnd = tes3.getCameraPosition()
+        local rodEnd = tes3.getPlayerEyePosition()
         if rodEnd and not hasLineOfSight(targetPosition, rodEnd) then
             logger:debug("Line of sight to rod is blocked")
             return nil
@@ -100,15 +100,19 @@ local m1 = tes3matrix33.new()
 ---@param e SwimService.findTargetPosition.params
 function SwimService.findTargetPosition(e)
     local origin = e.origin
+    local ABSOLUTE_MIN = 100
+    local minDistance = math.max(ABSOLUTE_MIN, e.minDistance)
+    local maxDistance = math.remap(math.random(), 0, 1, e.minDistance, e.maxDistance)
+    maxDistance = math.max(ABSOLUTE_MIN, maxDistance)
 
     logger:debug("Target position: %s", origin)
     logger:debug("Finding start position")
     for i=1, config.constants.FISH_POSITION_ATTEMPTS do
-        --Every failed attempts, reduce the distance, to a minimum of 50
-        local ABSOLUTE_MIN = 50
-        local distanceReductionPerAttempt = e.minDistance / config.constants.FISH_POSITION_ATTEMPTS
-        local min = math.max(ABSOLUTE_MIN, e.minDistance - (distanceReductionPerAttempt * i))
-        local max = math.max(ABSOLUTE_MIN, e.maxDistance - (distanceReductionPerAttempt * i))
+        --Every failed attempts, reduce the distance
+
+        local distanceReductionPerAttempt = (maxDistance - minDistance) / config.constants.FISH_POSITION_ATTEMPTS
+        local min = math.max(ABSOLUTE_MIN, minDistance - (distanceReductionPerAttempt * i))
+        local max = math.max(ABSOLUTE_MIN, maxDistance - (distanceReductionPerAttempt * i))
         local distance = math.random(min, max)
 
         logger:trace("Distance: %s", distance)
@@ -121,14 +125,9 @@ function SwimService.findTargetPosition(e)
             0
         )
 
-        logger:debug("- Direction: %s", direction)
-        if direction.z > 0 then
-            logger:error("Bad direction")
-            return
-        end
-
         local targetPosition = findNewPosition(origin, direction, distance)
         if targetPosition then
+            logger:debug("Found target position %s, distance: %s", targetPosition, distance)
             return targetPosition
         end
     end
@@ -165,6 +164,26 @@ end
 ---@field speed number
 ---@field physics? Fishing.FishPhysics
 ---@field turnSpeed number
+---@field grounded? boolean
+
+
+---@param forward tes3vector3
+local function rotateFishForwards(forward)
+    local lure = FishingStateManager.getLure()
+    if not lure then
+        logger:error("No lure found")
+        return
+    end
+    local fishAttachNode = lure.sceneNode:getObjectByName("ATTACH_FISH")
+    if not fishAttachNode then
+        logger:error("No fish attach node found")
+        return
+    end
+    --Rotate the attach node in the direction of movement
+    local matrix = tes3matrix33.new()
+    matrix:lookAt(forward, tes3vector3.new(0,0,1))
+    fishAttachNode.rotation = matrix
+end
 
 --[[
     Beginning at start position, move towards target position,
@@ -175,8 +194,8 @@ end
 ---@param e Fishing.SwimService.startSwimming.params
 function SwimService.startSwimming(e)
     logger:debug("Starting to swim")
+    logger:debug("Grounded? %s", e.grounded)
     local currentPosition = e.from:copy()
-    local fishTimer
     local currentState = FishingStateManager.getCurrentState()
     local safeLure
     if e.lure then
@@ -199,8 +218,8 @@ function SwimService.startSwimming(e)
             event.unregister("simulate", movementSimulate)
             return
         end
-        local distance = currentPosition:distance(e.to)
-        if distance < 20 then
+        local distance = currentPosition:distance(tes3vector3.new(e.to.x, e.to.y, currentPosition.z))
+        if distance < 30 then
             logger:trace("Reached target position")
             event.unregister("simulate", movementSimulate)
             e.callback()
@@ -256,9 +275,33 @@ function SwimService.startSwimming(e)
         logger:trace("new position: %s", newPosition, distanceTravelled)
         currentPosition = newPosition
 
+        local lurePosition = newPosition
+        if e.grounded then
+            local waterLevel = tes3.player.cell.waterLevel or 0
+            --raytest down to find ocean floor
+            local ray = tes3.rayTest{
+                position = tes3vector3.new(
+                    newPosition.x,
+                    newPosition.y,
+                    waterLevel
+                ),
+                direction = tes3vector3.new(0,0,-1),
+                maxDistance = 2000,
+                ignore = FishingStateManager.getIgnoreRefs()
+            }
+            if ray and ray.intersection then
+                logger:debug("Found ground, lowering grounded fish")
+                lurePosition = tes3vector3.new(
+                    newPosition.x,
+                    newPosition.y,
+                    ray.intersection.z + 15
+                )
+            end
+        end
+
         if safeLure and safeLure:valid() then
-            logger:trace("Updating lure position")
-            safeLure.position = newPosition
+            logger:trace("Updating lure position to: %s", lurePosition)
+            safeLure.position = lurePosition
         end
 
         --check if time to generate ripple
@@ -272,6 +315,9 @@ function SwimService.startSwimming(e)
             }
             timePassed = 0
         end
+
+        --Rotate the fish to face the direction of movement
+        rotateFishForwards(physics.velocity:normalized())
     end
     event.register("simulate", movementSimulate)
 end

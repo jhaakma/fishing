@@ -43,6 +43,7 @@ local CraftingFramework = include("CraftingFramework")
 ---@field isBaitFish? boolean If true, this fish can be used as live bait. Default false
 ---@field totalPopulation? number If set, only this many fish of this type can ever be caught. Default nil
 ---@field namePrefix? string #If defined, will override the prefix before the name. E.g. "a fish", "an amulet" or "the Mesmer Ring"
+---@field grounded? boolean #If true, this fish will crawl along the sea floor during the fishing minigame
 ---@field requirements? fun(self: Fishing.FishType):boolean #If defined, this fish type will only be available if this function returns true
 
 ---@class Fishing.FishType : Fishing.FishType.new.params
@@ -71,8 +72,29 @@ function FishType.new(e)
         logger:assert(tes3.getFileExists(string.format("Meshes\\%s", e.previewMesh)), "Preview mesh does not exist")
     end
 
+    local defaults = {
+        previewMesh = nil,
+        description = nil,
+        speed = 100,
+        size = 1.0,
+        difficulty = 10,
+        class = "medium",
+        rarity = "common",
+        niche = nil,
+        harvestables = nil,
+        isBaitFish = false,
+        totalPopulation = nil,
+        namePrefix = nil,
+        grounded = false,
+        requirements = function() return true end
+    }
+
+    local fishType = table.copy(e, {})
+    table.copymissing(fishType, defaults)
+    fishType.niche = Niche.new(e.niche)
+
     ---@type Fishing.FishType
-    local self = setmetatable({}, { __index = FishType })
+    local self = setmetatable(fishType, { __index = FishType })
     self.baseId = e.baseId:lower()
     if e.variants then
         self.variants = {}
@@ -80,19 +102,6 @@ function FishType.new(e)
             self.variants[variant:lower()] = true
         end
     end
-    self.previewMesh = e.previewMesh
-    self.description = e.description
-    self.speed = e.speed or 100
-    self.size = e.size or 1.0
-    self.difficulty = e.difficulty or 10
-    self.class = e.class or "medium"
-    self.rarity = e.rarity or "common"
-    self.niche = Niche.new(e.niche)
-    self.harvestables = e.harvestables
-    self.isBaitFish = e.isBaitFish
-    self.totalPopulation = e.totalPopulation
-    self.namePrefix = e.namePrefix
-    self.requirements = e.requirements or function() return true end
 
     Harvest.registerFish(self)
     if Ashfall then

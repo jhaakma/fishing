@@ -19,7 +19,7 @@ local loots = {
         defaults = {
             size = 0.5,
             speed = 60,
-            difficulty = 5,
+            difficulty = 1,
             class = "loot",
             niche = {},
         },
@@ -146,7 +146,7 @@ local loots = {
         defaults = {
             size = 0.5,
             speed = 65,
-            difficulty = 10,
+            difficulty = 1,
             class = "loot",
             niche = {},
         },
@@ -214,7 +214,7 @@ local loots = {
         defaults = {
             size = 0.5,
             speed = 70,
-            difficulty = 15,
+            difficulty = 1,
             class = "loot",
             niche = {},
         },
@@ -267,7 +267,7 @@ local loots = {
         defaults = {
             size = 0.5,
             speed = 75,
-            difficulty = 20,
+            difficulty = 1,
             class = "loot",
             niche = {},
             totalPopulation = 1,

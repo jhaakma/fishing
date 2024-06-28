@@ -6,6 +6,7 @@ local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 ---@class Fishing.Animations
 local Animations = {}
 
+---@return nil
 function Animations.playSplashSound()
     logger:debug("Playing splash sound")
     local sound = (math.random() < 0.5)
@@ -13,6 +14,9 @@ function Animations.playSplashSound()
     tes3.playSound{ sound = sound }
 end
 
+---@param position tes3vector3
+---@param size number?
+---@return nil
 function Animations.splash(position, size)
     logger:debug("Generating Splash")
     --Create Splash
@@ -26,6 +30,7 @@ function Animations.splash(position, size)
 end
 
 ---@param lure tes3reference
+---@return nil
 function Animations.lureLand(lure)
     --set lure z to waterLevel
     local waterLevel = lure.cell.waterLevel or 0
@@ -51,6 +56,8 @@ function Animations.lureLand(lure)
     }
 end
 
+---@param lure tes3reference
+---@return nil
 function Animations.lureNibble(lure)
     logger:debug("Playing nibble animation")
     tes3.playAnimation{
@@ -74,30 +81,33 @@ function Animations.lureNibble(lure)
     Animations.playSplashSound()
 end
 
+---@param lure tes3reference
+---@return nil
 function Animations.lureBite(lure)
-        --Animate lure
-        tes3.playAnimation{
-            reference = lure,
-            group = tes3.animationGroup.idle2,
-            startFlag = tes3.animationStartFlag.immediate,
-            loopCount = 0,
-        }
-        tes3.playAnimation{
-            reference = lure,
-            group = tes3.animationGroup.idle,
-            startFlag = tes3.animationStartFlag.normal,
-            loopCount = -1,
-        }
-        Animations.splash(lure.position)
-        RippleGenerator.generateRipple{
-            position = lure.position,
-            scale = 1.5,
-            -- duration = 1.0,
-            -- amount = 20,
-        }
-        Animations.playSplashSound()
+    --Animate lure
+    tes3.playAnimation{
+        reference = lure,
+        group = tes3.animationGroup.idle2,
+        startFlag = tes3.animationStartFlag.immediate,
+        loopCount = 0,
+    }
+    tes3.playAnimation{
+        reference = lure,
+        group = tes3.animationGroup.idle,
+        startFlag = tes3.animationStartFlag.normal,
+        loopCount = -1,
+    }
+    Animations.splash(lure.position)
+    RippleGenerator.generateRipple{
+        position = lure.position,
+        scale = 1.5,
+        -- duration = 1.0,
+        -- amount = 20,
+    }
+    Animations.playSplashSound()
 end
 
+---@return nil
 function Animations.clampWaves()
     if FishingStateManager.getPreviousWaveHeight() then return end
     if mge.render.dynamicRipples then
@@ -125,7 +135,7 @@ function Animations.clampWaves()
     end
 end
 
-
+---@return nil
 function Animations.reverseSwing()
     local previousState = FishingStateManager.getCurrentState()
     logger:debug("Playing snap animation")
@@ -142,6 +152,7 @@ function Animations.reverseSwing()
     }
 end
 
+---@return nil
 function Animations.unclampWaves()
     local previousWaveHeight = FishingStateManager.getPreviousWaveHeight()
     if not previousWaveHeight then return end
@@ -172,6 +183,5 @@ function Animations.unclampWaves()
     }
 end
 event.register("Fishing:UnclampWaves", Animations.unclampWaves)
-
 
 return Animations

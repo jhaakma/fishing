@@ -7,10 +7,13 @@ local FishingRod = require("mer.fishing.FishingRod.FishingRod")
 local FishingNet = require("mer.fishing.FishingNet")
 local FightIndicator = require("mer.fishing.ui.FightIndicator")
 local FishingSkill = require("mer.fishing.FishingSkill")
-
+local LureCamera = require("mer.fishing.Camera.LureCamera")
+local DynamicCamera = require("mer.fishing.Camera.DynamicCamera")
+local Animations = require("mer.fishing.Fish.Animations")
 
 ---@class Fishing.FightManager.new.params
 ---@field fish Fishing.FishType.instance The fish to fight
+---@field lure tes3reference The lure used to catch the fish
 ---@field callback fun(self: Fishing.FightManager, succeeded: boolean, failMessage?: string) The callback to run when the fight is over
 
 ---@class Fishing.FightManager : Fishing.FightManager.new.params
@@ -22,8 +25,14 @@ local FishingSkill = require("mer.fishing.FishingSkill")
 ---@field rodDamage number accumulation of rod damage, when it reaches one, subtract it from the rod
 ---@field fishPhysics table<number, Fishing.FishPhysics> physics for each fish
 ---@field ended boolean whether the fight has ended
-local FightManager = {}
+---@field dynamicCamera Fishing.DynamicCamera
+---@field splashTimer mwseTimer
+local FightManager = {
+    offsetUp = 40,
+    lureOffset = 20
+}
 local simulateFight
+
 
 
 ---@param e Fishing.FightManager.new.params
@@ -32,6 +41,7 @@ function FightManager.new(e)
     ---@type Fishing.FightManager
     local self = setmetatable({}, { __index = FightManager })
     self.fish = e.fish
+    self.lure = e.lure
     self.fightIndicator = FightIndicator:new{
         fightManager = self
     }
@@ -42,10 +52,22 @@ function FightManager.new(e)
     self.rodDamage = 0
     self.fishPhysics = {}
     self.ended = false
+    local lureCamera = LureCamera:new()
+        :setPositionLockTarget(self.lure)
+        :setAngleLockTarget(tes3.player)
+        :setOffsetBack(250)
+        :setOffsetUp(FightManager.offsetUp)
+    self.dynamicCamera = DynamicCamera:new{
+        camera = lureCamera,
+        changeFrequencySeconds = 2,
+        changeVariance = 0.05,
+        startingState = tes3.player.mobile.is3rdPerson and "ThirdPerson" or "FirstPerson"
+    }
     return self
 end
 
 function FightManager:endFight()
+    self.dynamicCamera:stop()
     FishingRod.stopReelSound()
     event.unregister("simulate", simulateFight)
     self.reeling = nil
@@ -54,6 +76,10 @@ function FightManager:endFight()
         self.fightIndicator = nil
     end
     self.ended = true
+    if self.splashTimer then
+        self.splashTimer:cancel()
+        self.splashTimer = nil
+    end
 end
 
 function FightManager:fail(reason, didSnap)
@@ -133,13 +159,16 @@ function FightManager:pickTargetPosition()
         return
     end
 
+    local maxDistance = config.constants.FIGHT_POSITION_MAX_DISTANCE  * (1 + math.log10(self.fish.fishType.size))
+    local waterLevel = lure.cell.waterLevel or 0
+
     local targetPosition = SwimService.findTargetPosition{
-        origin = lure.position,
+        origin = tes3vector3.new(lure.position.x, lure.position.y, waterLevel),
         minDistance = config.constants.FIGHT_POSITION_MIN_DISTANCE,
-        maxDistance = config.constants.FIGHT_POSITION_MAX_DISTANCE,
+        maxDistance = maxDistance,
     }
     if not targetPosition then
-        logger:debug("No target position found")
+        logger:error("No target position found")
         return
     end
 
@@ -265,15 +294,16 @@ function FightManager:updateSwimming()
     if not lure then
         logger:debug("updateSwimming(): Lure not found")
         self:fail()
-        return
+        return false
     end
     local lastSwimFinished = not self.targetPosition
     if lastSwimFinished then
+        logger:debug("Last swim finished, finding a new position")
         self:pickTargetPosition()
         if not self.targetPosition then
             logger:error("updateSwimming(): No target position found")
-            self:fail("Line Snapped!", true)
-            return
+            self:fail("Line Snagged!", true)
+            return false
         end
         SwimService.startSwimming{
             speed = self.fish:getReelSpeed(),
@@ -284,9 +314,11 @@ function FightManager:updateSwimming()
             lure = lure,
             callback = function()
                 self.targetPosition = nil
-            end
+            end,
+            grounded = self.fish.fishType.grounded
         }
     end
+    return true
 end
 
 function FightManager:changeLineLength(change)
@@ -422,10 +454,18 @@ function FightManager:getFishFatigueLimit()
     end
 end
 
+
+function FightManager:updateDynamicCamera()
+    local currentFatigue = self.fish.fatigue
+    local maxFatigue = self.fish.fishType:getStartingFatigue()
+    self.dynamicCamera.changeFrequencySeconds = math.remap(currentFatigue, 0, maxFatigue, 1, 6.0)
+end
+
 ---Simulate the fight
 ---@param e simulateEventData
 function FightManager:fightSimulate(e)
-    self:updateSwimming()
+    self:updateDynamicCamera()
+    if not self:updateSwimming() then return end
     --keybind test for left click
     local inputController = tes3.worldController.inputController
     local leftMouseDown = inputController:isMouseButtonDown(0)
@@ -486,11 +526,28 @@ function FightManager:fightSimulate(e)
     end
 end
 
+function FightManager:startSplashTimer()
+    local interval = math.random(1, 5)
+    self.splashTimer = timer.start{
+        duration = interval,
+        callback = function()
+            logger:debug("Splash timer elapsed")
+            Animations.splash(self.lure.position, self.fish:getSplashSize())
+            Animations.playSplashSound()
+            self:startSplashTimer()
+        end
+    }
+end
+
 ---Start the fight
 function FightManager:start()
+
+    --drop lure down
+    self.lure.position = self.lure.position + tes3vector3.new(0, 0, -FightManager.lureOffset)
+
     FishingRod.playReelSound{ doLoop = true }
     FishingStateManager.setState("REELING")
-    self:updateSwimming()
+    if not self:updateSwimming() then return end
     local fishingLine = FishingStateManager.getFishingLine()
     self.lineLength = self:getLineDistance()
 
@@ -525,6 +582,8 @@ function FightManager:start()
     self.fightIndicator:createMenu()
     common.disablePlayerControls()
 
+    self.dynamicCamera:start()
+
     local doCancel
     doCancel = function()
         if FishingStateManager.isState("REELING") then
@@ -533,6 +592,8 @@ function FightManager:start()
         event.unregister("Fishing:Cancel", doCancel)
     end
     event.register("Fishing:Cancel", doCancel)
+
+    self:startSplashTimer()
 end
 
 

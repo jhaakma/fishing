@@ -25,7 +25,6 @@ end
 
 function common.disablePlayerControls()
     logger:debug("Disabling player controls")
-    --disable everything except vanity\
     tes3.setPlayerControlState{enabled = false }
 end
 

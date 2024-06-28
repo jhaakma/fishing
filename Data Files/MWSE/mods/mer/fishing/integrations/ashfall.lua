@@ -1,7 +1,43 @@
 local FishRack = require("mer.fishing.FishRack")
+local CraftingFramework = include("CraftingFramework")
+local ashfall = include("mer.ashfall.interop")
+
+---@type CraftingFramework.Material.data[]
+local materials = {
+    {
+        id = "crabshell",
+        ids = {
+            "mer_crabshell"
+        },
+        name = "Crab Shell",
+    }
+}
+if CraftingFramework then
+    for _, material in ipairs(materials) do
+        CraftingFramework.Material:new(material)
+    end
+end
+
 
 ---@type CraftingFramework.Recipe.data[]
 local bushcraftingRecipes = {
+
+    {
+        id = "Fishing:mer_crabhat",
+        craftableId = "mer_crabhat",
+        previewMesh = "mer_fishing\\c\\crabhat.NIF",
+        description = "A hat made from the shell of a juvenile mudcrab. Good for keeping the sun out of your eyes while fishing.",
+        materials = {
+            { material = "crabshell", count = 1 },
+            { material = "straw", count = 3 },
+            { material = "rope", count = 1 }
+        },
+        category = "Fishing",
+        soundType = "fabric",
+        skillRequirements = {
+            { skill = "Bushcrafting", requirement = 10 }
+        }
+    },
     {
         id = "Fishing:mer_fishing_pole_01",
         craftableId = "mer_fishing_pole_01",
@@ -89,6 +125,8 @@ local bushcraftingRecipes = {
         }
     }
 }
+
+
 local function registerAshfallRecipes(e)
     ---@type CraftingFramework.MenuActivator
     local bushcraftingActivator = e.menuActivator
@@ -99,3 +137,57 @@ local function registerAshfallRecipes(e)
     end
 end
 event.register("Ashfall:ActivateBushcrafting:Registered", registerAshfallRecipes)
+
+
+local carvingRecipes = {
+    {
+        id = "Fishing:mer_crab_bowl",
+        craftableId = "mer_crab_bowl",
+        description = "A bowl carved from the shell of a juvenile mudcrab.",
+        materials = {
+            { material = "crabshell", count = 1 }
+        },
+        toolRequirements = {
+            {
+                tool = "chisel",
+                conditionPerUse = 4
+            }
+        },
+        skillRequirements = {
+            { skill = "Bushcrafting", requirement = 10 }
+        },
+        category = "Utensils",
+        soundType = "carve"
+    },
+}
+event.register("Ashfall:EquipChisel:Registered", function(e)
+    ---@type CraftingFramework.MenuActivator
+    local carvingActivator = e.menuActivator
+    if carvingActivator then
+        for _, recipe in ipairs(carvingRecipes) do
+            carvingActivator:registerRecipe(recipe)
+        end
+    end
+end)
+
+---@type table<string, Ashfall.waterContainerData>
+local waterContainers = {
+    mer_crab_bowl = {
+        capacity = 80,
+        holdsStew = true,
+        waterMaxScale = 1.15,
+        waterMaxHeight = 6.5,
+        type = "cookingPot",
+    }
+}
+
+
+if ashfall then
+    if ashfall.registerSunshade then
+        ashfall.registerSunshade{
+            id = "mer_crabhat"
+        }
+    end
+
+    ashfall.registerWaterContainers(waterContainers)
+end

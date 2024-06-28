@@ -6,13 +6,41 @@ local config = require("mer.fishing.config")
 local logger = common.createLogger("Integrations - fishTypes")
 local Interop = require("mer.fishing")
 
----@class FIshing.Integration.FishConfigs
+---@class Fishing.Integration.FishConfigs
 ---@field common Fishing.FishType.new.params[]
 ---@field uncommon Fishing.FishType.new.params[]
 ---@field rare Fishing.FishType.new.params[]
 ---@field legendary Fishing.FishType.new.params[]
 local fishConfigs = {
     common = {
+        {
+            baseId = "mer_fish_mudcrab",
+            previewMesh = "mer_fishing\\f\\mudcrab.nif",
+            description = "The mudcrab is a common species of crab capable of camouflaging itself as a small rock. While adult mudcrabs are too large to be caught by anglers, juveniles are abundant in shallow waters.",
+            speed = 50,
+            grounded = true,
+            size = 1.4,
+            difficulty = 15,
+            class = "medium",
+            niche = {
+                interiors = true,
+                exteriors = true,
+                maxDepth = 300,
+            },
+            harvestables = {
+                {
+                    id = "ingred_crab_meat_01",
+                    min = 1,
+                    max = 3,
+                    isMeat = true,
+                },
+                {
+                    id = "mer_crabshell",
+                    min = 1,
+                    max = 1,
+                }
+            }
+        },
         {
             baseId = "mer_fish_bass",
             previewMesh = "mer_fishing\\f\\bass.nif",
@@ -22,7 +50,8 @@ local fishConfigs = {
             difficulty = 30,
             class = "medium",
             niche = {
-                minDepth = 200,
+                exteriors = true,
+                minDepth = 100,
             },
             harvestables = {
                 {
@@ -59,6 +88,7 @@ local fishConfigs = {
                     "Ascadian Isles Region",
                 },
                 times = { "day" },
+                minDepth = 100,
             },
             harvestables = {
                 {
@@ -172,8 +202,8 @@ local fishConfigs = {
                 }
             },
             niche = {
-                minDepth = 200,
                 times = { "day" },
+                minDepth = 100,
             },
         },
         {
@@ -193,7 +223,6 @@ local fishConfigs = {
                 }
             },
             niche = {
-                minDepth = 200,
                 times = {
                     "night"
                 }
@@ -225,12 +254,12 @@ local fishConfigs = {
             difficulty = 43,
             class = "medium",
             niche = {
-                minDepth = 200,
                 regions = {
                     "Grazelands Region",
                     "Azura's Coast Region",
                     "Molag Mar Region",
-                }
+                },
+                minDepth = 100,
             },
             harvestables = {
                 {
@@ -357,7 +386,7 @@ local fishConfigs = {
             difficulty = 18,
             class = "medium",
             niche = {
-                minDepth = 350,
+                minDepth = 200,
                 times = {
                     "night"
                 }
@@ -373,7 +402,6 @@ local fishConfigs = {
             difficulty = 65,
             class = "medium",
             niche = {
-                minDepth = 200,
                 interiors = true,
                 exterios = true,
                 regions = {
@@ -398,7 +426,7 @@ local fishConfigs = {
             baseId = "mer_fish_marlin",
             previewMesh = "mer_fishing\\f\\marlin.nif",
             description = "To engage in a battle of wills with a blue marlin is a testament to one's angling prowess. These powerful and determined creatures, found in the deep seawaters surrounding Vvardenfell, exhibit strength, speed, and an indomitable spirit. Catching a blue marlin requires both skill and physical fortitude, with live baitfish serving as the key to success.",
-            speed = 230,
+            speed = 270,
             size = 4.4,
             difficulty = 75,
             class = "large",
@@ -421,7 +449,7 @@ local fishConfigs = {
             baseId = "mer_fish_shadowfin",
             previewMesh = "mer_fishing\\f\\shadowfin.nif",
             description = "The shadowfin is a mysterious and elusive fish with a translucent body that effortlessly blends into its surroundings. Found in the enigmatic waters of the West Gash, this species ventures out exclusively under the cover of darkness, providing an alluring challenge for nocturnal anglers.",
-            speed = 210,
+            speed = 240,
             size = 1.8,
             difficulty = 77,
             class = "large",
@@ -452,7 +480,7 @@ local fishConfigs = {
             baseId = "mer_fish_ashclaw",
             previewMesh = "mer_fishing\\f\\ashclaw.nif",
             description = "The ashclaw is a large and intimidating fish with claw-like fins, residing in Lake Nabia and other waters within the Molag Amur Region. Its formidable appearance and predatory nature create an aura of fear, intriguing those who dare to seek it within its inhospitable habitat.",
-            speed = 200,
+            speed = 230,
             size = 3.4,
             difficulty = 80,
             class = "large",
@@ -485,7 +513,7 @@ local fishConfigs = {
             baseId = "mer_fish_iskal",
             previewMesh = "mer_fishing\\f\\iskal.nif",
             description = "Iskal, a majestic fish adorned with icy blue scales and razor-sharp spines, calls the frigid waters of Sheogorad its home. Surviving in these harsh conditions showcases the Iskal's resilience, capturing the attention of anglers seeking a unique and chilling adventure.",
-            speed = 230,
+            speed = 260,
             size = 2.8,
             difficulty = 75,
             class = "large",
@@ -507,7 +535,7 @@ local fishConfigs = {
             baseId = "mer_fish_swampmaw",
             previewMesh = "mer_fishing\\f\\swampmaw.nif",
             description = "The swampmaw is a colossal eel lurking within the murky swamps of the Bitter Coast. Armed with sharp teeth and an insatiable appetite, this predatory fish preys upon smaller fish and unwary travelers venturing too close to the water's edge. Its sheer size and fearsome reputation make it a formidable adversary for daring anglers.",
-            speed = 200,
+            speed = 240,
             size = 3.7,
             difficulty = 90,
             class = "large",
@@ -536,7 +564,7 @@ local fishConfigs = {
             baseId = "mer_fish_void",
             previewMesh = "mer_fishing\\f\\void.nif",
             description = "The Void Thresher, a large black fish with four fiery red eyes, dwells deep within Vvardenfell's underground caves. Its shadowy coloration, reminiscent of the Dark Elves, earned it the nickname \"Azura's Curse.\" This elusive predator feeds on cave-dwelling creatures and awaits unsuspecting prey in the darkest corners of its subterranean realm. Its enigmatic presence beckons adventurers to explore the depths and confront the mysteries that lie within.",
-            speed = 200,
+            speed = 220,
             size = 3.5,
             difficulty = 85,
             class = "large",
@@ -557,7 +585,7 @@ local fishConfigs = {
             baseId = "mer_fish_mega",
             previewMesh = "mer_fishing\\f\\megamax.nif",
             description = "The megamaxilla, known colloquially as the \"Mega Jaw,\" is a fearsome oceanic beast that instills awe in all who witness it. Possessing an enormous, hinge-like jaw, this formidable predator is capable of hunting down even large predator fish. It prefers to feed during the twilight hours of dawn and dusk in Azura's Coast, where its scarlet glow provides a striking camouflage. The pursuit of a megamaxilla demands the utmost strength and skill from anglers, as they strive to conquer one of the ocean's most formidable creatures.",
-            speed = 210,
+            speed = 260,
             size = 4.5,
             difficulty = 95,
             class = "large",

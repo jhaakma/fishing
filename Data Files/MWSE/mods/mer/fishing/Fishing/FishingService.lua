@@ -94,6 +94,47 @@ local function launchLure(lure, landCallback)
     event.register("simulate", updateLurePosition)
 end
 
+---@param lure tes3reference
+local function attachFishMesh(lure)
+    logger:debug("Attaching fish mesh")
+    if not lure.sceneNode then
+        logger:error("No scene node on lure")
+        return
+    end
+    local attachNode = lure.sceneNode:getObjectByName("ATTACH_FISH")
+    if not attachNode then
+        logger:error("No attach node on lure")
+        return
+    end
+    local fish = FishingStateManager.getCurrentFish()
+    if not fish then
+        logger:error("No fish to attach")
+        return
+    end
+    local fishMesh = fish:getPreviewMesh()
+
+    local fishNode = tes3.loadMesh(fishMesh)
+    if not fishNode then
+        logger:error("Could not load fish mesh")
+        return
+    end
+
+    local mouthNode = fishNode:getObjectByName("ATTACH_MOUTH")
+    if mouthNode then
+        logger:debug("Aligning mouth with lure")
+        --set position to opposite of mouthNode position
+        fishNode.translation = mouthNode.translation * -1
+    end
+
+    attachNode:attachChild(fishNode)
+
+    ---@type niSwitchNode
+    local switch = lure.sceneNode:getObjectByName("LURE_SWITCH")
+    if switch then
+        switch.switchIndex = 1
+    end
+end
+
 local function spawnLure(lurePosition)
     logger:debug("Spawning lure")
     if not lurePosition then
@@ -207,8 +248,13 @@ local function startFish()
 
     local to = lure.position
     local min, max = fish.fishType:getStartDistance()
+    local waterLevel = lure.cell.waterLevel or 0
     local from = SwimService.findTargetPosition{
-        origin = to,
+        origin = tes3vector3.new(
+            to.x,
+            to.y,
+            waterLevel
+        ),
         minDistance = min,
         maxDistance = max,
     }
@@ -355,8 +401,10 @@ local function startFight()
         return
     end
     Animations.splash(lure.position, fish:getSplashSize())
+    attachFishMesh(lure)
     FightManager.new{
         fish = fish,
+        lure = lure,
         callback = function(_fightManager, successful, failMessage)
             event.trigger("Fishing:FightEnd", {
                 fish = fish,

@@ -1,5 +1,6 @@
 local ControllerGroups = require("mer.fishing.PlayerAnimations.ControllerGroups")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
+local LureCamera = require("mer.fishing.Camera.LureCamera")
 
 ---@type ControllerGroups
 local controllers1stPerson = ControllerGroups.new("mer_fishing\\playerAnimations1st.nif")
@@ -75,6 +76,10 @@ end
 ---@param wc tes3worldController
 ---@param lure tes3reference
 local function updateDirection(wc, lure)
+    if LureCamera.isActive() then
+        --Don't update when lure camera is active.
+        return
+    end
     local camera = wc.worldCamera.cameraData.camera
     local lurePos = lure.sceneNode.worldTransform.translation
     local screenPoint = camera:worldPointToScreenPoint(lurePos)

@@ -139,6 +139,7 @@ end
 
 -- Play the reel sound
 function FishingRod.playReelSound(e)
+    logger:debug("Playing reel sound")
     FishingRod.stopReelSound()
     tes3.playSound{
         reference = tes3.player,
@@ -150,6 +151,7 @@ end
 
 -- Stop the reel sound from playing
 function FishingRod.stopReelSound()
+    logger:debug("Stopping reel sound")
     tes3.removeSound{
         reference = tes3.player,
         sound = "mer_fish_reel"

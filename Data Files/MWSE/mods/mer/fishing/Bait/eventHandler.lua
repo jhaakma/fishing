@@ -24,10 +24,11 @@ local function onEquip(e)
     local bait = Bait.get(itemId)
     if bait then
         local isCooked = e.itemData and Bait.isCooked(e.itemData.data)
-        if e.itemData and Bait.isCooked(e.itemData.data) then
+        if isCooked then
             logger:debug("Bait %s is cooked, skipping Bait menu", itemId)
             return
         end
+        logger:debug("Equipping bait %s", itemId)
 
         local fishingRod = FishingRod.getEquipped()
         local baitObject = tes3.getObject(itemId)
@@ -73,7 +74,6 @@ local function onEquip(e)
                         --     item = baitObject,
                         -- }---@diagnostic enable
 
-                        ---@type equipEventData
                         local eventData = {
                             item = e.item,
                             itemData = e.itemData,

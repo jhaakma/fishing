@@ -3,6 +3,7 @@ local logger = common.createLogger("LineManager")
 local config = require("mer.fishing.config")
 local FishingLine = require("mer.fishing.FishingLine.FishingLine")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
+local LureCamera= require("mer.fishing.Camera.LureCamera")
 
 ---@class Fishing.LineManager
 local LineManager = {}
@@ -87,7 +88,13 @@ function LineManager.attachLines(lure)
         end
 
         -- Update the fishing line.
-        fishingLine:updateEndPoints(attachPosition, lurePosition)
+        -- The fishing line more accurately follows the first position,
+        -- so when reeling in, we want it to be more accurate to the lure.
+        if LureCamera.isActive() then
+            fishingLine:updateEndPoints(lurePosition, attachPosition)
+        else
+            fishingLine:updateEndPoints(attachPosition, lurePosition)
+        end
     end
     event.register("simulated", updateFishingLine, { priority = -9000 })
     return fishingLine
