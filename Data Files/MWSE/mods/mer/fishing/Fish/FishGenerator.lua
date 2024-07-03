@@ -82,6 +82,11 @@ function FishGenerator.getValidFish(depth)
     return validFishTypes
 end
 
+function FishGenerator.getFishById(id)
+    return FishType.registeredFishTypes[id]
+end
+
+
 ---Check the bait against the fish and roll for it
 ---@param fish Fishing.FishType
 ---@param frequencyMultipler number
@@ -226,6 +231,7 @@ function FishGenerator.generate(e)
     if tes3.player and tes3.player.data.merDebugEnabled then
         tes3.messageBox("Picked %s", instance:getName())
     end
+
     return instance
 end
 

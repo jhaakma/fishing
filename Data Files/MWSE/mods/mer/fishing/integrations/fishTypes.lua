@@ -474,7 +474,8 @@ local fishConfigs = {
                     max = 1,
                     isTrophy = true,
                 }
-            }
+            },
+            alphaSwitch = true,
         },
         {
             baseId = "mer_fish_ashclaw",

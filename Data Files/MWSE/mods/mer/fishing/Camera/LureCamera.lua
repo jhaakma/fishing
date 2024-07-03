@@ -9,6 +9,7 @@ local logger = common.createLogger("LureCamera")
 ---@field offsetBack number The distance to keep the camera from the positionLockTarget
 ---@field offsetUp number The distance to keep the camera above the positionLockTarget
 ---@field allowUnderwater boolean? Whether to allow the camera to go underwater
+---@field grounded boolean? Whether the fish crawls on the sea floor
 
 
 -- Allows the camera to lock onto an object and follow it
@@ -124,7 +125,7 @@ function LureCamera:updateCamera(e)
 
     local angleTargetPos = angleLockTargetObject.position
     local targetPos = positionLockTargetObject.position
-    local cameraPos = e.cameraTransform.translation
+    local cameraPos = positionLockTargetObject.position
 
     -- Calculate direction vector from camera to target
     local direction = angleTargetPos - cameraPos
@@ -132,13 +133,15 @@ function LureCamera:updateCamera(e)
 
     -- Step 3: Calculate new position for camera
     local back = normalizedDirection * self.offsetBack
-    local newPos = targetPos + back
+    local newPos = targetPos - back
 
     local waterHeight = positionLockTargetObject.cell.waterLevel or 0
     if not self.allowUnderwater then
         newPos.z = waterHeight + self.offsetUp
-    else
+    elseif self.grounded then
         newPos.z = positionLockTargetObject.position.z + self.offsetUp
+    else
+        newPos.z = positionLockTargetObject.position.z - self.offsetUp
     end
 
     e.cameraTransform.translation = newPos
@@ -149,6 +152,7 @@ function LureCamera:updateCamera(e)
     local lookAtNormalized = lookAt:normalized()
     local lookatMatrix = tes3matrix33.new()
     lookatMatrix:lookAt(lookAtNormalized, tes3vector3.new(0, 0, 1))
+
     e.cameraTransform.rotation = lookatMatrix
 
 end

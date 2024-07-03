@@ -153,6 +153,7 @@ end
 
 ---@class Fishing.FishPhysics
 ---@field heading number
+---@field bodyHeading number
 ---@field velocity tes3vector3
 
 
@@ -167,8 +168,9 @@ end
 ---@field grounded? boolean
 
 
----@param forward tes3vector3
-local function rotateFishForwards(forward)
+
+---@param heading number
+local function rotateFishForwards(heading)
     local lure = FishingStateManager.getLure()
     if not lure then
         logger:error("No lure found")
@@ -181,7 +183,9 @@ local function rotateFishForwards(forward)
     end
     --Rotate the attach node in the direction of movement
     local matrix = tes3matrix33.new()
-    matrix:lookAt(forward, tes3vector3.new(0,0,1))
+    local radians = -heading
+    matrix:toRotationZ(radians)
+
     fishAttachNode.rotation = matrix
 end
 
@@ -209,9 +213,11 @@ function SwimService.startSwimming(e)
     if not physics.heading then
         physics.heading = math.atan2(e.to.y - currentPosition.y, e.to.x - currentPosition.x)
     end
+    physics.bodyHeading = physics.bodyHeading or physics.heading
     if not physics.velocity then physics.velocity = tes3vector3.new() end
 
-    movementSimulate = function(e2)
+    ---@param simulateEventData simulateEventData
+    movementSimulate = function(simulateEventData)
         logger:trace("targetPosition: %s", e.to)
         if not FishingStateManager.isState(currentState) then
             logger:trace("State changed, cancelling")
@@ -233,7 +239,7 @@ function SwimService.startSwimming(e)
         if turnLeft < 0 then turnLeft = turnLeft + two_pi end
         if turnRight < 0 then turnRight = turnRight + two_pi end
         --Increase turn rate when near the destination, to avoid getting stuck circling the destination point
-        local turn = e.turnSpeed * (1 + math.max(0, 0.02 * (200 - distance))) * e2.delta
+        local turn = e.turnSpeed * (1 + math.max(0, 0.02 * (200 - distance))) * simulateEventData.delta
         if turnLeft < turnRight then
             --Turn left
             local newHeading = physics.heading + turn
@@ -259,6 +265,7 @@ function SwimService.startSwimming(e)
                 physics.heading = newHeading
             end
         end
+
         --Update velocity
         ---@diagnostic disable
         physics.velocity.x = math.cos(physics.heading) * e.speed
@@ -267,7 +274,7 @@ function SwimService.startSwimming(e)
         physics.velocity.z = 0
         --Update position
         ---@type tes3vector3
-        local deltaPos = physics.velocity * e2.delta
+        local deltaPos = physics.velocity * simulateEventData.delta
         logger:trace("delta: %s", deltaPos)
         local distanceTravelled = deltaPos:length()
         logger:trace("distanceTravelled: %s", distanceTravelled)
@@ -305,7 +312,7 @@ function SwimService.startSwimming(e)
         end
 
         --check if time to generate ripple
-        timePassed = timePassed + e2.delta
+        timePassed = timePassed + simulateEventData.delta
         if timePassed > config.constants.FISH_RIPPLE_INTERVAL then
             RippleGenerator.generateRipple{
                 position = newPosition,
@@ -317,7 +324,21 @@ function SwimService.startSwimming(e)
         end
 
         --Rotate the fish to face the direction of movement
-        rotateFishForwards(physics.velocity:normalized())
+        local offset = (math.pi / 2) --to account for fish mesh orientation
+        local bodyTurn = physics.heading - physics.bodyHeading - offset
+        if bodyTurn < -math.pi then bodyTurn = bodyTurn + two_pi end
+        if bodyTurn > math.pi then bodyTurn = bodyTurn - two_pi end
+        local bodyTurnSpeed = e.speed / 100
+        physics.bodyHeading = physics.bodyHeading + bodyTurn * bodyTurnSpeed * simulateEventData.delta
+        --double wrap so it always rotates around the shortest way
+        if physics.bodyHeading > math.pi then
+            physics.bodyHeading = physics.bodyHeading - two_pi
+        end
+        if physics.bodyHeading < -math.pi then
+            physics.bodyHeading = physics.bodyHeading + two_pi
+        end
+
+        rotateFishForwards(physics.bodyHeading)
     end
     event.register("simulate", movementSimulate)
 end

@@ -1,4 +1,5 @@
 local FishInstance = require("mer.fishing.Fish.FishInstance")
+local AlphaBlendController = require("mer.fishing.Camera.AlphaBlendController")
 local Niche = require("mer.fishing.Fish.Niche")
 local common = require("mer.fishing.common")
 local logger = common.createLogger("FishType")
@@ -45,6 +46,7 @@ local CraftingFramework = include("CraftingFramework")
 ---@field namePrefix? string #If defined, will override the prefix before the name. E.g. "a fish", "an amulet" or "the Mesmer Ring"
 ---@field grounded? boolean #If true, this fish will crawl along the sea floor during the fishing minigame
 ---@field requirements? fun(self: Fishing.FishType):boolean #If defined, this fish type will only be available if this function returns true
+---@field alphaSwitch? boolean #If true, the fish has a switch node for turning off alpha blending while looking through water
 
 ---@class Fishing.FishType : Fishing.FishType.new.params
 ---@field niche Fishing.FishType.Niche
@@ -142,6 +144,10 @@ function FishType.new(e)
             end
         end
     end
+    if self.alphaSwitch then
+        AlphaBlendController.register(self.baseId)
+    end
+
     return self
 end
 

@@ -29,7 +29,7 @@ local Animations = require("mer.fishing.Fish.Animations")
 ---@field splashTimer mwseTimer
 local FightManager = {
     offsetUp = 40,
-    lureOffset = 20
+    lureOffset = 30
 }
 local simulateFight
 
@@ -52,7 +52,13 @@ function FightManager.new(e)
     self.rodDamage = 0
     self.fishPhysics = {}
     self.ended = false
-    local lureCamera = LureCamera:new()
+    local lureCamera = LureCamera:new({
+        positionLockTarget = self.lure,
+        angleLockTarget = tes3.player,
+        offsetBack = 250,
+        offsetUp = FightManager.offsetUp,
+        grounded = self.fish.fishType.grounded
+    })
         :setPositionLockTarget(self.lure)
         :setAngleLockTarget(tes3.player)
         :setOffsetBack(250)
@@ -107,6 +113,7 @@ function FightManager:success()
     if self.ended then return end
     logger:debug("Fight succeeded")
     self:endFight()
+    self:splash(1.5)
     self:callback(true)
 end
 
@@ -266,8 +273,14 @@ function FightManager:updateTension()
 
     --Line can only snap when reeling
     local upperLimit = config.constants.FIGHT_TENSION_UPPER_LIMIT * 0.99
-    if self.reeling ~= true and tension > upperLimit then
+    if (self.reeling ~= true) and (tension > upperLimit) then
         tension = upperLimit
+    end
+
+    --Line can only go loose when not reeling
+    local lowerLimit = config.constants.FIGHT_TENSION_LOWER_LIMIT * 1.01
+    if (self.reeling == true) and (tension < lowerLimit) then
+        tension = lowerLimit
     end
 
     local fishingLine = FishingStateManager.getFishingLine()
@@ -317,6 +330,7 @@ function FightManager:updateSwimming()
             end,
             grounded = self.fish.fishType.grounded
         }
+        self:splash()
     end
     return true
 end
@@ -458,13 +472,14 @@ end
 function FightManager:updateDynamicCamera()
     local currentFatigue = self.fish.fatigue
     local maxFatigue = self.fish.fishType:getStartingFatigue()
-    self.dynamicCamera.changeFrequencySeconds = math.remap(currentFatigue, 0, maxFatigue, 1, 6.0)
+    self.dynamicCamera.changeFrequencySeconds = math.remap(currentFatigue, 0, maxFatigue, 3.0, 6.0)
 end
 
 ---Simulate the fight
 ---@param e simulateEventData
 function FightManager:fightSimulate(e)
     self:updateDynamicCamera()
+    self:updateTension()
     if not self:updateSwimming() then return end
     --keybind test for left click
     local inputController = tes3.worldController.inputController
@@ -494,7 +509,7 @@ function FightManager:fightSimulate(e)
     self:tirePlayer(e.delta)
     self:damageRod(e.delta)
     self:updateLineLength(e.delta)
-    self:updateTension()
+
 
     local fishingLine = FishingStateManager.getFishingLine()
     local tension = fishingLine and fishingLine:getTension() or 0
@@ -523,25 +538,34 @@ function FightManager:fightSimulate(e)
             current = -5
         }
         self:fail("You are exhausted!")
+        return
     end
+
+    tes3.mobilePlayer:overrideHeadTrackingThisFrame(self.lure)
 end
 
 function FightManager:startSplashTimer()
-    local interval = math.random(1, 5)
+    local interval = math.random(3, 5)
     self.splashTimer = timer.start{
         duration = interval,
         callback = function()
             logger:debug("Splash timer elapsed")
-            Animations.splash(self.lure.position, self.fish:getSplashSize())
-            Animations.playSplashSound()
+            self:splash()
             self:startSplashTimer()
         end
     }
 end
 
+function FightManager:splash(sizeMulti)
+    sizeMulti = sizeMulti or 1
+    Animations.splash(self.lure.position, self.fish:getSplashSize() * sizeMulti)
+    Animations.playSplashSound{
+        volume = sizeMulti
+    }
+end
+
 ---Start the fight
 function FightManager:start()
-
     --drop lure down
     self.lure.position = self.lure.position + tes3vector3.new(0, 0, -FightManager.lureOffset)
 

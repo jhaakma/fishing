@@ -6,12 +6,18 @@ local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 ---@class Fishing.Animations
 local Animations = {}
 
+---@param e? { ref: tes3reference, volume: number }
 ---@return nil
-function Animations.playSplashSound()
+function Animations.playSplashSound(e)
+    e = e or {}
     logger:debug("Playing splash sound")
     local sound = (math.random() < 0.5)
         and "Swim Left" or "Swim Right"
-    tes3.playSound{ sound = sound }
+    tes3.playSound{
+        sound = sound,
+        reference = e.ref or tes3.player,
+        volume = e.volume or 1
+    }
 end
 
 ---@param position tes3vector3

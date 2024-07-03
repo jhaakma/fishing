@@ -1,5 +1,7 @@
 local common = require("mer.fishing.common")
 local logger = common.createLogger("DynamicCamera")
+local AlphaBlendController = require("mer.fishing.Camera.AlphaBlendController")
+local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 
 ---@class Fishing.DynamicCamera.constructorParams
 ---@field camera Fishing.LureCamera The camera to use for the dynamic camera
@@ -28,9 +30,21 @@ local DynamicCamera = {}
 ---@type table<Fishing.DynamicCamera.StateType, Fishing.DynamicCamera.State>
 DynamicCamera.states = {}
 
+local function setBlendState(state)
+    local fish = FishingStateManager.getCurrentFish()
+    if fish and AlphaBlendController.registeredFish[fish.fishType.baseId] then
+        local lure = FishingStateManager.getLure()
+        if lure then
+            AlphaBlendController.setSwitch(lure, state)
+
+        end
+    end
+end
+
 DynamicCamera.states.ThirdPerson = {
     enterState = function(_)
         tes3.force3rdPerson()
+        setBlendState("CLIP")
     end,
     exitState = function(_)
         --NO OP
@@ -40,6 +54,7 @@ DynamicCamera.states.ThirdPerson = {
 DynamicCamera.states.FirstPerson = {
     enterState = function(_)
         tes3.force1stPerson()
+        setBlendState("CLIP")
     end,
     exitState = function(_)
         --NO OP
@@ -50,6 +65,7 @@ DynamicCamera.states.Locked = {
     enterState = function(self)
         self.camera.allowUnderwater = false
         self.camera:start()
+        setBlendState("CLIP")
     end,
     exitState = function(self)
         self.camera:stop{ returnToFirstPersion = false}
@@ -61,6 +77,7 @@ DynamicCamera.states.Underwater = {
     enterState = function(self)
         self.camera.allowUnderwater = true
         self.camera:start()
+        setBlendState("BLEND")
     end,
     exitState = function(self)
         self.camera:stop{ returnToFirstPersion = false}

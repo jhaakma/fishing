@@ -133,6 +133,11 @@ local function attachFishMesh(lure)
     if switch then
         switch.switchIndex = 1
     end
+
+    tes3.playAnimation{
+        reference = lure,
+        group = tes3.animationGroup.idle,
+    }
 end
 
 local function spawnLure(lurePosition)
@@ -400,7 +405,9 @@ local function startFight()
         logger:warn("No lure found")
         return
     end
+
     Animations.splash(lure.position, fish:getSplashSize())
+
     attachFishMesh(lure)
     FightManager.new{
         fish = fish,
@@ -427,15 +434,14 @@ function FishingService.startSwing()
     if (state == "WAITING") then
         Animations.reverseSwing()
     end
-
+    local lure = FishingStateManager.getLure()
+    if not lure then
+        logger:warn("No lure found")
+        return
+    end
     if (state == "WAITING") or (state == "CHASING") then
         logger:debug("%s cancel fishing", state)
         tes3.messageBox("You fail to catch anything.")
-        local lure = FishingStateManager.getLure()
-        if not lure then
-            logger:warn("No lure found")
-            return
-        end
         Animations.splash(lure.position, 1.5)
         if rod then rod:useBait() end
         FishingStateManager.endFishing()

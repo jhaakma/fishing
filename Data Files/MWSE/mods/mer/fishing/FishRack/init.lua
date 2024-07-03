@@ -20,7 +20,7 @@ local StaticActivator = require("CraftingFramework.components.StaticActivator")
 ---@class Fishing.FishRack
 ---@field reference tes3reference
 ---@field data Fishing.FishRack.Data
----@field hangableFishTypesCache Fishing.FishType[]
+---@field hangableFishTypesCache Fishing.FishType[]?
 local FishRack = {
     ATTACH_NODES = {
         ATTACH_FISH_01 = true,
@@ -68,34 +68,32 @@ function FishRack:new(reference)
         logger:debug("Not a fish rack")
         return nil
     end
-
     ---@type Fishing.FishRack
-    local this = {}
+    local this = {
+        reference = reference,
+        data = setmetatable({}, {
+            __index = function(_, k)
+                if not reference.data.fishRack then
+                    ---@type Fishing.FishRack.Data
+                    reference.data.fishRack = {
+                        hookDatas = {}
+                    }
+                end
+                return reference.data.fishRack[k]
+            end,
+            __newindex = function(_, k, v)
+                if not reference.data.fishRack then
+                    ---@type Fishing.FishRack.Data
+                    reference.data.fishRack = {
+                        hookDatas = {}
+                    }
+                end
+                reference.data.fishRack[k] = v
+            end
+        })
+    }
     setmetatable(this, self)
     self.__index = self
-    this.reference = reference
-
-    --initialise and get from reference.data.fishing table
-    this.data = setmetatable({}, {
-        __index = function(_, k)
-            if not this.reference.data.fishRack then
-                ---@type Fishing.FishRack.Data
-                this.reference.data.fishRack = {
-                    hookDatas = {}
-                }
-            end
-            return this.reference.data.fishRack[k]
-        end,
-        __newindex = function(_, k, v)
-            if not this.reference.data.fishRack then
-                ---@type Fishing.FishRack.Data
-                this.reference.data.fishRack = {
-                    hookDatas = {}
-                }
-            end
-            this.reference.data.fishRack[k] = v
-        end
-    })
     return this
 end
 
@@ -201,6 +199,7 @@ function FishRack:updateFishNode(nodeId)
             local hangNode = fishNode:getObjectByName(FishType.HANG_NODE):clone() --[[@as niNode]]
             hookNode:attachChild(hangNode)
             hangNode:attachChild(fishNode)
+            fishNode.flags = 0
             self.reference.sceneNode:update()
             self.reference.sceneNode:updateEffects()
             logger:debug("- Finished attaching fish node")
