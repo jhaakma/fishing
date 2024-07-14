@@ -86,13 +86,19 @@ function FishInstance:getReelSpeed()
     return speed
 end
 
+function FishInstance:getTurnSpeed()
+    local min = 3
+    local max = 5
+    return math.clamp(math.remap(self.fishType.size, 1, 4, max, min), min, max)
+end
+
 function FishInstance:getDistanceModifier()
     local currentFatigue = self.fatigue
     local maxFatigue = self.fishType:getStartingFatigue()
     local difficulty = self.fishType.difficulty
     local difficultyModifier = math.remap(difficulty,
         0, 100,
-        50, 150
+        90, 110
     )
     local fatigueEffect = math.remap(currentFatigue,
         0, maxFatigue,

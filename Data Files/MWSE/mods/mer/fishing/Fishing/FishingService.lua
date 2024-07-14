@@ -7,11 +7,11 @@ local FishingRod = require("mer.fishing.FishingRod.FishingRod")
 local SwimService = require("mer.fishing.Fishing.SwimService")
 local FishGenerator = require("mer.fishing.Fish.FishGenerator")
 local TrophyMenu = require("mer.fishing.ui.TrophyMenu")
-local LineManager = require("mer.fishing.FishingLine.LineManager")
 local Animations = require("mer.fishing.Fish.Animations")
 local FightManager = require("mer.fishing.Fishing.FightManager")
 local Bait = require("mer.fishing.Bait.Bait")
 local FishingSkill = require("mer.fishing.FishingSkill")
+local Habitat = require("mer.fishing.Habitat.Habitat")
 
 ---@class Fishing.FishingService
 local FishingService = {}
@@ -81,7 +81,7 @@ local function launchLure(lure, landCallback)
         if lure.position.z < lure.cell.waterLevel then
             local pos = tes3vector3.new(lure.position.x, lure.position.y, lure.cell.waterLevel)
 
-            if FishingSpot.getDepth(pos, {lure, vfx.effectNode}) < config.constants.MIN_DEPTH then
+            if FishingSpot.getDepth(pos, {tes3.player, lure, vfx.effectNode}) < config.constants.MIN_DEPTH then
                 logger:debug("Lure is not deep enough, stopping updateLurePosition")
                 finish(false)
                 tes3.messageBox("Not deep enough.")
@@ -93,6 +93,7 @@ local function launchLure(lure, landCallback)
     end
     event.register("simulate", updateLurePosition)
 end
+
 
 ---@param lure tes3reference
 local function attachFishMesh(lure)
@@ -119,14 +120,14 @@ local function attachFishMesh(lure)
         return
     end
 
+    attachNode:attachChild(fishNode)
+
     local mouthNode = fishNode:getObjectByName("ATTACH_MOUTH")
     if mouthNode then
         logger:debug("Aligning mouth with lure")
-        --set position to opposite of mouthNode position
-        fishNode.translation = mouthNode.translation * -1
+        FishingRod.setLineAttachNode(mouthNode)
     end
 
-    attachNode:attachChild(fishNode)
 
     ---@type niSwitchNode
     local switch = lure.sceneNode:getObjectByName("LURE_SWITCH")
@@ -138,6 +139,7 @@ local function attachFishMesh(lure)
         reference = lure,
         group = tes3.animationGroup.idle,
     }
+
 end
 
 local function spawnLure(lurePosition)
@@ -169,6 +171,7 @@ local function spawnLure(lurePosition)
     })
     bait:attachToAnim(lure)
     FishingStateManager.setLure(lure)
+    FishingRod.setLineAttachNode(lure.sceneNode:getObjectByName("AttachAnimLure"))
     return lure
 end
 
@@ -185,18 +188,17 @@ local function startCasting()
         -- common.disablePlayerControls()
         FishingStateManager.setState("CASTING")
         launchLure(lure, function()
+            FishingStateManager.lerpTension(0, 0.5)
             Animations.lureLand(lure)
             logger:debug("Finished casting")
             FishingStateManager.setState("WAITING")
             FishingSkill.landLure()
+            Habitat.showHabitatMessage(lure.position)
         end)
         timer.start{
             duration = 0.05,
             callback = function()
-                lure = FishingStateManager.getLure()
-                if lure then
-                    FishingStateManager.setFishingLine(LineManager.attachLines(lure))
-                end
+                FishingRod.startAnimation()
             end
         }
     else
@@ -267,7 +269,7 @@ local function startFish()
         FishingStateManager.setState("CHASING")
         SwimService.startSwimming{
             speed = fish:getChaseSpeed(),
-            turnSpeed = 5.0,
+            turnSpeed = 3.0,
             from = from,
             to = to,
             callback = function()
@@ -341,17 +343,13 @@ local function catchFish()
     timer.start{
         duration = 0.75,
         callback = function()
-            if fish.fishType.class == "loot" then
-                logger:debug("Caught loot, checking if drippable")
-                --Dripifiy catch if it's drippable loot
-                local drip = include("mer.drip")
-                if drip and drip.dripify then
-                    logger:debug("Drip installed, attempting to dripify")
-                    local loot = drip.dripify(fish:getInstanceObject())
-                    if loot then
-                        fish.objectId = loot.object.id
-                        logger:debug("Dripified loot %s", loot.baseObject.id)
-                    end
+            local drip = include("mer.drip")
+            if drip and drip.rollDrip then
+                logger:trace("Drip installed, attempting to dripify")
+                local loot = drip.rollDrip(fish:getInstanceObject())
+                if loot then
+                    fish.objectId = loot.object.id
+                    logger:debug("Dripified loot %s", loot.baseObject.id)
                 end
             end
             local verbs = fish.fishType:getVerbs()

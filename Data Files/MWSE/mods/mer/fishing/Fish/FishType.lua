@@ -1,6 +1,6 @@
 local FishInstance = require("mer.fishing.Fish.FishInstance")
 local AlphaBlendController = require("mer.fishing.Camera.AlphaBlendController")
-local Niche = require("mer.fishing.Fish.Niche")
+local Habitat = require("mer.fishing.Habitat.Habitat")
 local common = require("mer.fishing.common")
 local logger = common.createLogger("FishType")
 local config = require("mer.fishing.config")
@@ -39,17 +39,17 @@ local CraftingFramework = include("CraftingFramework")
 ---@field difficulty? number The difficulty of catching the fish, out of 100. Default 10 (easy)
 ---@field class? Fishing.FishType.class The class of the fish. Default "medium"
 ---@field rarity? Fishing.FishType.rarity The rarity of the fish. Default "common"
----@field niche? Fishing.FishType.Niche.new.params The niche where the fish can be found
+---@field habitat? Fishing.Habitat.new.params The habitat where the fish can be found
 ---@field harvestables? Fishing.FishType.Harvestable[] The item that can be harvested from the fish
 ---@field isBaitFish? boolean If true, this fish can be used as live bait. Default false
 ---@field totalPopulation? number If set, only this many fish of this type can ever be caught. Default nil
 ---@field namePrefix? string #If defined, will override the prefix before the name. E.g. "a fish", "an amulet" or "the Mesmer Ring"
----@field grounded? boolean #If true, this fish will crawl along the sea floor during the fishing minigame
+---@field heightAboveGround? number #If set, this fish will crawl along the sea floor during the fishing minigame
 ---@field requirements? fun(self: Fishing.FishType):boolean #If defined, this fish type will only be available if this function returns true
 ---@field alphaSwitch? boolean #If true, the fish has a switch node for turning off alpha blending while looking through water
 
 ---@class Fishing.FishType : Fishing.FishType.new.params
----@field niche Fishing.FishType.Niche
+---@field habitat Fishing.Habitat
 ---@field variants table<string, boolean> A set of variant ids that can be selected when instancing this fish
 local FishType = {
     HANG_NODE = "HANG_FISH",
@@ -70,8 +70,9 @@ local FishType = {
 function FishType.new(e)
     logger:assert(type(e.baseId) == "string", "FishType must have a baseId")
     logger:assert(type(e.speed) == "number", "FishType must have a speed")
-    if e.previewMesh then
-        logger:assert(tes3.getFileExists(string.format("Meshes\\%s", e.previewMesh)), "Preview mesh does not exist")
+    if e.previewMesh and not tes3.getFileExists(string.format("Meshes\\%s", e.previewMesh)) then
+        logger:error("Mesh %s does not exist", e.previewMesh)
+        e.previewMesh = nil
     end
 
     local defaults = {
@@ -82,18 +83,18 @@ function FishType.new(e)
         difficulty = 10,
         class = "medium",
         rarity = "common",
-        niche = nil,
+        habitat = nil,
         harvestables = nil,
         isBaitFish = false,
         totalPopulation = nil,
         namePrefix = nil,
-        grounded = false,
+        heightAboveGround = nil,
         requirements = function() return true end
     }
 
     local fishType = table.copy(e, {})
     table.copymissing(fishType, defaults)
-    fishType.niche = Niche.new(e.niche)
+    fishType.habitat = Habitat.new(e.habitat)
 
     ---@type Fishing.FishType
     local self = setmetatable(fishType, { __index = FishType })
@@ -300,10 +301,11 @@ function FishType:isExtinct()
     return isExtinct
 end
 
+---@param depth number?
 ---@return boolean #Whether this fish is active at the given depth
 function FishType:isActive(depth)
     return self:requirements()
-    and self.niche:isActive(depth)
+    and self.habitat:isActive(depth)
        and self:isExtinct() == false
 end
 

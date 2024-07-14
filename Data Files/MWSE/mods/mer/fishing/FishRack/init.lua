@@ -200,7 +200,8 @@ function FishRack:updateFishNode(nodeId)
             hookNode:attachChild(hangNode)
             hangNode:attachChild(fishNode)
             fishNode.flags = 0
-            self.reference.sceneNode:update()
+            fishNode:removeAllControllers()
+            self.reference.sceneNode:update{ controllers = true }
             self.reference.sceneNode:updateEffects()
             logger:debug("- Finished attaching fish node")
         else

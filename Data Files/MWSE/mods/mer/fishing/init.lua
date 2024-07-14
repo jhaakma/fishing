@@ -10,6 +10,7 @@ local UF = {
     FishingNet = require("mer.fishing.FishingNet"),
     Supplies = require("mer.fishing.Merchant.Supplies"),
     Merchant = require("mer.fishing.Merchant.Merchant"),
+    LocationManager = require("mer.fishing.Habitat.LocationManager"),
     ---Register the current target NPC as a fishing merchant
     registerMerchant = function()
         logger:info("Registering fishing merchant")
@@ -25,7 +26,8 @@ local UF = {
         config.save()
         event.trigger("Fishing:McmUpdated")
         logger:info("Set %s as a fishing merchant", target.baseObject.id)
-    end
+    end,
+
 }
 event.register("UIEXP:sandboxConsole", function(e)
     e.sandbox.fishing = UF
@@ -41,5 +43,18 @@ Interop.registerFishingRod = UF.FishingRod.register
 Interop.registerFishingNet = UF.FishingNet.register
 Interop.registerFishingSupply = UF.Supplies.register
 Interop.registerFishingMerchant = UF.Merchant.register
+Interop.registerLocation = UF.LocationManager.registerLocation
+
+Interop.registerLocationCategory = UF.LocationManager.registerCategory
+Interop.registerLocationType = UF.LocationManager.registerLocationType
+Interop.registerLocation = UF.LocationManager.registerLocation
+
+Interop.getWaterType = function()
+    local locationTypes = UF.LocationManager.getLocations("water")
+    for _, locationType in pairs(locationTypes) do
+        mwse.log(locationType.name)
+    end
+end
+
 
 return Interop

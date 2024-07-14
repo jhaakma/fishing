@@ -30,6 +30,7 @@ local FishGenerator = {}
 ---@field loot Fishing.FishGenerator.validFishTypes.rarities @Loot that is active at this depth
 
 ---Generate a fish
+---@param depth number? If not provided, depth check is skipped
 ---@return Fishing.FishGenerator.validFishTypes
 function FishGenerator.getValidFish(depth)
     ---@type Fishing.FishGenerator.validFishTypes
@@ -76,7 +77,7 @@ function FishGenerator.getValidFish(depth)
                 table.insert(validFishTypes[class].all, fishType)
             end
         else
-            logger:trace("%s object does not exist")
+            logger:trace("%s object does not exist", id)
         end
     end
     return validFishTypes
@@ -148,38 +149,33 @@ end
 ---@param validFishTypes Fishing.FishGenerator.validFishTypes
 ---@param classCatchChances Fishing.BaitType.classCatchChances
 ---@return string|nil
-function FishGenerator.pickClass(validFishTypes, classCatchChances)
+local function pickClass(validFishTypes, classCatchChances)
     logger:debug("Picking class using class catch chances: %s", require("inspect").inspect(classCatchChances))
     -- Calculate the total chance by summing up all the chances in the classCatchChances table
     local totalChance = 0
     for class, chance in pairs(classCatchChances) do
-        --if validFishTypes[class] and #validFishTypes[class].all > 0 then
-            logger:debug("- %s: %s", class, chance)
-            totalChance = totalChance + chance
-        --end
+        logger:debug("- %s: %s", class, chance)
+        totalChance = totalChance + chance
     end
     logger:debug("- Total chance: %s", totalChance)
 
-    -- Generate a random number between 0 and 1
     local roll = math.random()
     logger:debug("- Roll: %s", roll)
 
     -- Calculate the class based on the random value and the chances
     local cumulativeChance = 0
     for class, chance in pairs(classCatchChances) do
-       -- if validFishTypes[class] and #validFishTypes[class].all > 0 then
-            cumulativeChance = cumulativeChance + chance / totalChance
-            if roll <= cumulativeChance then
-                logger:debug("- Picked class %s", class)
-                -- log fish in this class
-                for _, fish in ipairs(validFishTypes[class].all) do
-                    logger:debug("- %s", fish.baseId)
-                end
-                return class
-            else
-                logger:trace("- Did not pick class %s. Roll: %s, cumulativeChance: %s", class, roll, cumulativeChance)
+        cumulativeChance = cumulativeChance + chance / totalChance
+        if roll <= cumulativeChance then
+            logger:debug("- Picked class %s", class)
+            -- log fish in this class
+            for _, fish in ipairs(validFishTypes[class].all) do
+                logger:debug("- %s", fish.baseId)
             end
-        --end
+            return class
+        else
+            logger:trace("- Did not pick class %s. Roll: %s, cumulativeChance: %s", class, roll, cumulativeChance)
+        end
     end
     logger:error("No class picked")
 end
@@ -199,7 +195,7 @@ function FishGenerator.generate(e)
     end
 
     local validFishTypes = FishGenerator.getValidFish(e.depth)
-    local class = FishGenerator.pickClass(validFishTypes, bait:getType().classCatchChances)
+    local class = pickClass(validFishTypes, bait:getType().classCatchChances)
     ---@type Fishing.FishGenerator.validFishTypes.rarities
     local classList = validFishTypes[class]
     if classList == nil or #classList.all == 0 then
@@ -210,7 +206,13 @@ function FishGenerator.generate(e)
     ---A multiplier that increases with each attempt until a fish is caught
     local frequencyMultipler = 1.0
     local instance --[[@as Fishing.FishType.instance]]
-    while #classList.all > 0 and not instance do
+
+    local override = tes3.player.tempData.mer_fish_override
+    if override and FishType.registeredFishTypes[override] then
+        instance = FishType.registeredFishTypes[override]:instance()
+    end
+
+    while (#classList.all > 0) and (instance == nil) do
         local pick = table.choice(classList.all) --[[@as Fishing.FishType]]
         local proportionEffect = FishGenerator.getProportionEffect(classList, pick)
         if FishGenerator.attemptSnag(pick, frequencyMultipler, proportionEffect) then
@@ -223,6 +225,7 @@ function FishGenerator.generate(e)
         end
         frequencyMultipler = frequencyMultipler + 0.05
     end
+
     if not instance then
         logger:warn("No valid fish types available")
         return nil

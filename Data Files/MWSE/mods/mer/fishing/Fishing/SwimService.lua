@@ -7,7 +7,7 @@ local logger = common.createLogger("SwimService")
 local config = require("mer.fishing.config")
 local RippleGenerator = require("mer.fishing.Fishing.RippleGenerator")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
-local FishingRod = require("mer.fishing.FishingRod.FishingRod")
+local Orienter = require("CraftingFramework").Orienter
 
 function SwimService.deepEnough(location)
     local ray = tes3.rayTest{
@@ -67,7 +67,6 @@ local function findNewPosition(startPosition, direction, distance)
     local hitSomething = ray ~= nil
     if not hitSomething then
         local targetPosition = startPosition + (direction * distance)
-        --local rodEnd = FishingRod.getPoleEndPosition()
 
         local rodEnd = tes3.getPlayerEyePosition()
         if rodEnd and not hasLineOfSight(targetPosition, rodEnd) then
@@ -165,7 +164,7 @@ end
 ---@field speed number
 ---@field physics? Fishing.FishPhysics
 ---@field turnSpeed number
----@field grounded? boolean
+---@field heightAboveGround number?
 
 
 
@@ -189,6 +188,65 @@ local function rotateFishForwards(heading)
     fishAttachNode.rotation = matrix
 end
 
+---@param reference tes3reference
+local function isFlora(reference)
+    if reference == nil then return false end
+    local container =  reference.object.objectType == tes3.objectType.container
+    local organic = reference.object.organic
+    local isPlant = container and organic
+    local kelp = {
+        flora_kelp_01 = true,
+        flora_kelp_02 = true,
+        flora_kelp_03 = true,
+        flora_kelp_04 = true,
+    }
+    return isPlant or kelp[reference.object.id:lower()]
+end
+
+--Sets the lure on the ground
+function SwimService.groundFish(lure, heightAboveGround, delta)
+    local transitionSpeed = 4
+    delta = delta or 1
+    local maxSteepness = 45
+    local waterLevel = tes3.player.cell.waterLevel or 0
+    --raytest down to find ocean floor
+    local results = tes3.rayTest{
+        position = tes3vector3.new(
+            lure.position.x,
+            lure.position.y,
+            waterLevel
+        ),
+        direction = tes3vector3.new(0,0,-1),
+        maxDistance = 2000,
+        ignore = FishingStateManager.getIgnoreRefs(),
+        returnNormal = true,
+        findAll = true
+    }
+
+    if results and #results > 0 then
+        for _, ray in ipairs(results) do
+            if not isFlora(ray.reference) then
+                logger:trace("Found ground, lowering grounded fish")
+                lure.position = tes3vector3.new(
+                    lure.position.x,
+                    lure.position.y,
+                    ray.intersection.z + heightAboveGround
+                )
+
+                --Orient to ground
+                local UP = tes3vector3.new(0, 0, 1)
+                local newOrientation = Orienter.rotationDifference(UP, ray.normal)
+                newOrientation.x = math.clamp(newOrientation.x, (0 - maxSteepness), maxSteepness)
+                newOrientation.y = math.clamp(newOrientation.y, (0 - maxSteepness), maxSteepness)
+
+                --lerp to new orientation
+                lure.orientation = tes3vector3.lerp(lure.orientation, newOrientation, delta * transitionSpeed)
+                return
+            end
+        end
+    end
+end
+
 --[[
     Beginning at start position, move towards target position,
     generating ripples along the way at a rate of 0.05 seconds
@@ -198,7 +256,7 @@ end
 ---@param e Fishing.SwimService.startSwimming.params
 function SwimService.startSwimming(e)
     logger:debug("Starting to swim")
-    logger:debug("Grounded? %s", e.grounded)
+    logger:debug("Grounded? %s", e.heightAboveGround)
     local currentPosition = e.from:copy()
     local currentState = FishingStateManager.getCurrentState()
     local safeLure
@@ -218,6 +276,9 @@ function SwimService.startSwimming(e)
 
     ---@param simulateEventData simulateEventData
     movementSimulate = function(simulateEventData)
+        local lure = FishingStateManager.getLure()
+
+
         logger:trace("targetPosition: %s", e.to)
         if not FishingStateManager.isState(currentState) then
             logger:trace("State changed, cancelling")
@@ -234,12 +295,23 @@ function SwimService.startSwimming(e)
 
         --Simulate limited turning rate
         local targetHeading = math.atan2(e.to.y - currentPosition.y, e.to.x - currentPosition.x)
+
+        --add a swaying effect to physics.heading
+        local swayAmplitude = 0.5 -- Adjust this value to increase/decrease the sway magnitude
+        local swayFrequency = 0.2 -- Adjust this value to make the sway faster/slower
+        local hoursPassed = tes3.getSimulationTimestamp()
+        local secondsPassed = hoursPassed * 60 * 60
+        local swayOffset = math.sin(secondsPassed * swayFrequency) * swayAmplitude
+
+
+        targetHeading = targetHeading + swayOffset
+
         local turnLeft = targetHeading - physics.heading
         local turnRight = -turnLeft
         if turnLeft < 0 then turnLeft = turnLeft + two_pi end
         if turnRight < 0 then turnRight = turnRight + two_pi end
         --Increase turn rate when near the destination, to avoid getting stuck circling the destination point
-        local turn = e.turnSpeed * (1 + math.max(0, 0.02 * (200 - distance))) * simulateEventData.delta
+        local turn = 3 * (1 + math.max(0, 0.04 * (200 - distance))) * simulateEventData.delta
         if turnLeft < turnRight then
             --Turn left
             local newHeading = physics.heading + turn
@@ -267,10 +339,9 @@ function SwimService.startSwimming(e)
         end
 
         --Update velocity
-        ---@diagnostic disable
         physics.velocity.x = math.cos(physics.heading) * e.speed
         physics.velocity.y = math.sin(physics.heading) * e.speed
-        ---@diagnostic enable
+
         physics.velocity.z = 0
         --Update position
         ---@type tes3vector3
@@ -283,43 +354,27 @@ function SwimService.startSwimming(e)
         currentPosition = newPosition
 
         local lurePosition = newPosition
-        if e.grounded then
-            local waterLevel = tes3.player.cell.waterLevel or 0
-            --raytest down to find ocean floor
-            local ray = tes3.rayTest{
-                position = tes3vector3.new(
-                    newPosition.x,
-                    newPosition.y,
-                    waterLevel
-                ),
-                direction = tes3vector3.new(0,0,-1),
-                maxDistance = 2000,
-                ignore = FishingStateManager.getIgnoreRefs()
-            }
-            if ray and ray.intersection then
-                logger:debug("Found ground, lowering grounded fish")
-                lurePosition = tes3vector3.new(
-                    newPosition.x,
-                    newPosition.y,
-                    ray.intersection.z + 15
-                )
-            end
-        end
 
         if safeLure and safeLure:valid() then
+            local lure = safeLure:getObject()
             logger:trace("Updating lure position to: %s", lurePosition)
-            safeLure.position = lurePosition
+            lure.position = lurePosition
+            if e.heightAboveGround then
+                SwimService.groundFish(lure, e.heightAboveGround, simulateEventData.delta)
+            end
         end
 
         --check if time to generate ripple
         timePassed = timePassed + simulateEventData.delta
         if timePassed > config.constants.FISH_RIPPLE_INTERVAL then
-            RippleGenerator.generateRipple{
-                position = newPosition,
-                scale = SwimService.rippleScale(),
-                -- duration = 1.0,
-                -- amount = 20,
-            }
+            if not e.heightAboveGround then
+                RippleGenerator.generateRipple{
+                    position = newPosition,
+                    scale = SwimService.rippleScale(),
+                    -- duration = 1.0,
+                    -- amount = 20,
+                }
+            end
             timePassed = 0
         end
 
@@ -328,8 +383,7 @@ function SwimService.startSwimming(e)
         local bodyTurn = physics.heading - physics.bodyHeading - offset
         if bodyTurn < -math.pi then bodyTurn = bodyTurn + two_pi end
         if bodyTurn > math.pi then bodyTurn = bodyTurn - two_pi end
-        local bodyTurnSpeed = e.speed / 100
-        physics.bodyHeading = physics.bodyHeading + bodyTurn * bodyTurnSpeed * simulateEventData.delta
+        physics.bodyHeading = physics.bodyHeading + bodyTurn * e.turnSpeed * simulateEventData.delta
         --double wrap so it always rotates around the shortest way
         if physics.bodyHeading > math.pi then
             physics.bodyHeading = physics.bodyHeading - two_pi

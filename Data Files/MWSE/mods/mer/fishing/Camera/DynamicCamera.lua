@@ -1,4 +1,5 @@
 local common = require("mer.fishing.common")
+local config = require("mer.fishing.config")
 local logger = common.createLogger("DynamicCamera")
 local AlphaBlendController = require("mer.fishing.Camera.AlphaBlendController")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
@@ -36,7 +37,6 @@ local function setBlendState(state)
         local lure = FishingStateManager.getLure()
         if lure then
             AlphaBlendController.setSwitch(lure, state)
-
         end
     end
 end
@@ -113,6 +113,10 @@ end
 
 
 function DynamicCamera:start()
+    if not config.mcm.dynamicCamera then
+        logger:debug("DynamicCamera disabled in MCM")
+        return
+    end
     self.wasInFirstPerson = not tes3.player.mobile.is3rdPerson
     logger:debug("Starting DynamicCamera")
     self:changeState(self.currentState)
@@ -154,6 +158,10 @@ function DynamicCamera:startTimer()
 end
 
 function DynamicCamera:stop()
+    if not config.mcm.dynamicCamera then
+        logger:debug("DynamicCamera disabled in MCM")
+        return
+    end
     if self.changeTimer then
         self.changeTimer:cancel()
     end

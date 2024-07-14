@@ -21,7 +21,7 @@ local loots = {
             speed = 10,
             difficulty = 1,
             class = "loot",
-            niche = {},
+            habitat = {},
         },
         types = {
             {
@@ -148,7 +148,7 @@ local loots = {
             speed = 10,
             difficulty = 1,
             class = "loot",
-            niche = {},
+            habitat = {},
         },
         types = {
             { baseId = "AB_Misc_HairBrush" },
@@ -183,7 +183,7 @@ local loots = {
             { baseId = "steel dagger" },
             {
                 baseId = "gondolier_helm",
-                niche = {
+                habitat = {
                     cells = { "Vivec" }
                 }
             },
@@ -216,7 +216,7 @@ local loots = {
             speed = 70,
             difficulty = 1,
             class = "loot",
-            niche = {},
+            habitat = {},
         },
         types = {
             { baseId = "ashfall_crabpot_01_m" },
@@ -269,7 +269,7 @@ local loots = {
             speed = 10,
             difficulty = 1,
             class = "loot",
-            niche = {},
+            habitat = {},
             totalPopulation = 1,
         },
         types = {

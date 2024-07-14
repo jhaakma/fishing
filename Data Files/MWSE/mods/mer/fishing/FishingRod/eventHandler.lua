@@ -14,7 +14,6 @@ event.register("equip", function(e)
         if not pole then
             logger:warn("mer_fishing_pole_01 not found")
         else
-
             --Add new fishing pole
             tes3.addItem{
                 reference = e.reference,
@@ -40,6 +39,7 @@ event.register("equip", function(e)
         end
     end
 end)
+
 
 ---@param e objectCreatedEventData
 event.register("objectCreated", function(e)

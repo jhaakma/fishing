@@ -80,7 +80,7 @@ function Harvest.registerFish(fishType)
                                 item = obj,
                                 count = count,
                                 playSound = false
-                            }--[[@as tes3misc]]
+                            }
                             harvested[harvestable.id] = count
                         end
                     end

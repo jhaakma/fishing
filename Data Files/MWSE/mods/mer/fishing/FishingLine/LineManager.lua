@@ -4,9 +4,14 @@ local config = require("mer.fishing.config")
 local FishingLine = require("mer.fishing.FishingLine.FishingLine")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 local LureCamera= require("mer.fishing.Camera.LureCamera")
+local FishingRod = require("mer.fishing.FishingRod.FishingRod")
 
 ---@class Fishing.LineManager
-local LineManager = {}
+local LineManager = {
+    ---@type niNode
+    lureAttachPoint = nil
+}
+
 
 function LineManager.attachLines(lure)
     logger:debug("Spawning fishing line")
@@ -35,10 +40,11 @@ function LineManager.attachLines(lure)
         event.unregister("simulated", updateFishingLine)
         fishingLine:remove()
         FishingStateManager.endFishing()
+        FishingRod.setTension(0)
     end
 
-    local lureAttachPoint = lure.sceneNode:getObjectByName("AttachAnimLure") --[[@as niNode]]
-    if not lureAttachPoint then
+    LineManager.lureAttachPoint = lure.sceneNode:getObjectByName("AttachAnimLure")
+    if not LineManager.lureAttachPoint then
         logger:error("Could not find AttachAnimLure node on lure")
         cancel()
         return
@@ -58,9 +64,11 @@ function LineManager.attachLines(lure)
             return
         end
 
+        FishingRod.setTension(fishingLine.tension)
+
         -- Get the appropriate 1st/3rd person pole position.
-        lureAttachPoint:update({ controllers = true })
-        local lurePosition = lureAttachPoint.worldTransform.translation
+        LineManager.lureAttachPoint:update({ controllers = true })
+        local lurePosition = LineManager.lureAttachPoint.worldTransform.translation
 
         -- Get the appropriate 1st/3rd person pole position.
         local attachFishingLine = tes3.is3rdPerson() and attachFishingLine3rd or attachFishingLine1st
@@ -74,8 +82,9 @@ function LineManager.attachLines(lure)
         end
 
         -- Ensure the fishing line is attached to the lure.
-        if fishingLine.sceneNode.parent ~= lureAttachPoint then
-            fishingLine:attachTo(lureAttachPoint)
+        LineManager.lureAttachPoint:update()
+        if fishingLine.sceneNode.parent ~= LineManager.lureAttachPoint then
+            fishingLine:attachTo(LineManager.lureAttachPoint)
         end
 
         if FishingStateManager.isState("WAITING") then
@@ -90,11 +99,13 @@ function LineManager.attachLines(lure)
         -- Update the fishing line.
         -- The fishing line more accurately follows the first position,
         -- so when reeling in, we want it to be more accurate to the lure.
-        if LureCamera.isActive() then
-            fishingLine:updateEndPoints(lurePosition, attachPosition)
-        else
-            fishingLine:updateEndPoints(attachPosition, lurePosition)
-        end
+        -- if LureCamera.isActive() then
+        --     fishingLine:updateEndPoints(lurePosition, attachPosition)
+        -- else
+        --     fishingLine:updateEndPoints(attachPosition, lurePosition)
+        -- end
+
+        fishingLine:updateEndPoints(lurePosition, attachPosition)
     end
     event.register("simulated", updateFishingLine, { priority = -9000 })
     return fishingLine

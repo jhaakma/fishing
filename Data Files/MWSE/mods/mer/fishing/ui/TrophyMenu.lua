@@ -70,11 +70,13 @@ local function createPreviewPane(parent, meshID)
     end
 
     local mesh = tes3.loadMesh(meshID, false)
+
     if not mesh then
         logger:error("Mesh not found: %s", meshID)
         return
     end
     logger:trace("Mesh: %s", mesh)
+
     menu:updateLayout()
 
     local rootNode = rootNif.sceneNode --[[@as niNode]]
@@ -96,20 +98,31 @@ local function createPreviewPane(parent, meshID)
         rootNode:attachProperty(zBufferProperty)
     end
 
-    local maxDimension
-    local bb = rootNode:createBoundingBox(rootNode.scale) ---@diagnostic disable-line
+
+
+    local bb = mesh:createBoundingBox(mesh.scale) ---@diagnostic disable-line
+    --Log bounding box values
+    logger:debug("Bounding box min.x = %s, min.y = %s, min.z = %s", bb.min.x, bb.min.y, bb.min.z)
+    logger:debug("Bounding box max.x = %s, max.y = %s, max.z = %s", bb.max.x, bb.max.y, bb.max.z)
     local height = (bb.max.z - bb.min.z)*2
     local width = bb.max.y - bb.min.y
     local depth = bb.max.x - bb.min.x
-    maxDimension = math.max(width, depth, height)
+    local maxDimension = math.max(width, depth, height)
+    local lowestPoint = bb.max.z * mesh.scale
+
+    -- mesh:update()
+    -- local maxDimension = mesh.worldBoundRadius * 2
+    -- logger:debug("maxDimension: %s", maxDimension)
+    -- local lowestPoint = mesh.worldBoundOrigin.z - mesh.worldBoundRadius
+
     local targetHeight = TrophyMenu.PREVIEW_HEIGHT/2
-    rootNode.scale = (targetHeight / maxDimension) * 1.5
+    mesh.scale = (targetHeight / maxDimension) * 1.5
     do --Apply rotation
         logger:trace("Applying rotation")
         local offset = -20
         m1:toRotationX(math.rad(-15))
         m2:toIdentity()
-        local lowestPoint = bb.max.z * rootNode.scale
+
         offset = offset + lowestPoint
         --m2:toRotationY(math.rad(180))
         rootNode.translation.z = rootNode.translation.z + offset
@@ -119,8 +132,9 @@ local function createPreviewPane(parent, meshID)
     logger:trace("Updating rootNode")
     rootNode.appCulled = false
     rootNode:updateProperties()
-    rootNode:update()
+    rootNode:update{ controllers = true, time = 0 }
     rootNode:updateEffects()
+
     nifPreviewBlock:updateLayout()
     previewBorder:updateLayout()
     return previewBorder

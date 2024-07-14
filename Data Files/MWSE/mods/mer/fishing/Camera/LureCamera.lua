@@ -19,6 +19,7 @@ local logger = common.createLogger("LureCamera")
 ---@field angleLockTarget mwseSafeObjectHandle
 ---@field wasInFirstPerson boolean
 ---@field previousMouseLookDisabled boolean
+---@field maxUpwardsAngle number Default: 30
 local LureCamera = {}
 
 
@@ -76,7 +77,7 @@ function LureCamera:start()
 
     local positionLockTarget = self.positionLockTarget:getObject()
     if not positionLockTarget then
-        logger:error("Position lock target is not valid")
+        logger:debug("Position lock target is not valid")
         return
     end
     logger:debug("Starting LureCamera")
@@ -109,7 +110,7 @@ end
 
 ---@param e cameraControlEventData
 function LureCamera:updateCamera(e)
-    logger:debug("Updating Camera")
+    logger:trace("Updating Camera")
     local angleLockTargetObject = self.angleLockTarget:getObject()
     if not angleLockTargetObject then
         logger:error("Angle lock target is not valid")
@@ -118,7 +119,7 @@ function LureCamera:updateCamera(e)
     end
     local positionLockTargetObject = self.positionLockTarget:getObject()
     if not positionLockTargetObject then
-        logger:error("Position lock target is not valid")
+        logger:debug("Position lock target is not valid")
         self:stop()
         return
     end
@@ -150,6 +151,24 @@ function LureCamera:updateCamera(e)
     -- Point the camera towards the angle lock target
     local lookAt = angleTargetPos - newPos
     local lookAtNormalized = lookAt:normalized()
+
+    local upVector = tes3vector3.new(0, 0, 1)
+    local maxAngleRadians = math.rad(10) -- Convert 10 degrees to radians
+
+    -- Calculate the dot product between lookAtNormalized and the up vector
+    local dotProduct = lookAtNormalized:dot(upVector)
+    -- Calculate the current angle
+    local currentAngle = math.acos(dotProduct)
+
+    if currentAngle > maxAngleRadians then
+        logger:debug("Angle too high, adjusting")
+        -- Calculate the required adjustment
+        local adjustmentFactor = math.tan(maxAngleRadians)
+        -- Adjust the Z component of lookAtNormalized
+        lookAtNormalized.z = adjustmentFactor * math.sqrt(lookAtNormalized.x^2 + lookAtNormalized.y^2)
+        lookAtNormalized = lookAtNormalized:normalized()
+    end
+
     local lookatMatrix = tes3matrix33.new()
     lookatMatrix:lookAt(lookAtNormalized, tes3vector3.new(0, 0, 1))
 

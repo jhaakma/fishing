@@ -31,9 +31,10 @@ local FishingStateManager = {}
 ---@field lureSafeRef mwseSafeObjectHandle?
 ---@field fishingCastStrength number
 ---@field fishingTension number?
----@field fishingLine FishingLine?
 ---@field previousWaveHeight number?
 ---@field particle niNode?
+---@field tension number?
+---@field lerping boolean?
 
 
 ---@return Fishing.TempData
@@ -124,18 +125,35 @@ function FishingStateManager.setCastStrength()
     logger:debug("Cast strength: %s", tes3.player.mobile.actionData.attackSwing)
 end
 
-
---Fishing Line
----@return FishingLine|nil
-function FishingStateManager.getFishingLine()
-    return tempData().fishingLine
+--Tension
+function FishingStateManager.getTension()
+    return tempData().tension or 0
 end
 
----@param line FishingLine|nil
-function FishingStateManager.setFishingLine(line)
-    tempData().fishingLine = line
+function FishingStateManager.setTension(tension)
+    tempData().tension = tension
 end
 
+function FishingStateManager.lerpTension(to, duration)
+    if tempData().lerping then
+        error("already lerping")
+        return
+    end
+
+    local interval = 0.01
+    local iterations = math.floor(duration / interval)
+
+    local from = FishingStateManager.getTension() or 0
+    local totalChange = to - from
+    local delta = totalChange / iterations
+    timer.start{
+        duration = interval,
+        iterations = iterations,
+        callback = function(e)
+            FishingStateManager.setTension(FishingStateManager.getTension() + delta)
+        end
+    }
+end
 
 ---Particle
 function FishingStateManager.getParticle()
@@ -169,11 +187,6 @@ function FishingStateManager.getIgnoreRefs()
     if lure then
         table.insert(ignoreNodes, lure.sceneNode)
     end
-    local fishingLine = FishingStateManager.getFishingLine()
-    if fishingLine then
-        table.insert(ignoreNodes, fishingLine.sceneNode)
-    end
-
     local particle = FishingStateManager.getParticle()
     if particle then
         table.insert(ignoreNodes, particle)
@@ -195,7 +208,6 @@ function FishingStateManager.clearData()
     tempData().lureSafeRef = nil
     tempData().fishingCastStrength = nil
     tempData().fishingTension = nil
-    tempData().fishingLine = nil
     tempData().previousWaveHeight = nil
 end
 

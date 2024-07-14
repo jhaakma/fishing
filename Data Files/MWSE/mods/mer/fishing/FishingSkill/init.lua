@@ -57,15 +57,12 @@ end
 ---@param fishType Fishing.FishType
 function FishingSkill.catchFish(fishType)
     local skill = FishingSkill.get()
-    local classValue = FishingSkill.progressValues.fish[fishType.class]
+    local rarityValue = FishingSkill.progressValues.fish[fishType.rarity]
         or FishingSkill.progressValues.fish["common"]
-    logger:debug("Fish class: %s. Class value: %s", fishType.class, classValue)
-    local difficultyEffect = math.remap(fishType.difficulty,
-        0, 100,
-        1, 5
-    )
+    logger:debug("Rarity: %s. Skill value: %s", fishType.rarity, rarityValue)
+    local difficultyEffect = math.remap(fishType.difficulty, 0, 100, 1, 5)
     logger:debug("Difficulty: %s. Effect: %s", fishType.difficulty, difficultyEffect)
-    local value = classValue * difficultyEffect
+    local value = rarityValue * difficultyEffect
     logger:debug("Progressing Fishing skill by %s", value)
     skill:exercise(value)
 end

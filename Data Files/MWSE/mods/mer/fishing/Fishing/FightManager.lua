@@ -57,7 +57,7 @@ function FightManager.new(e)
         angleLockTarget = tes3.player,
         offsetBack = 250,
         offsetUp = FightManager.offsetUp,
-        grounded = self.fish.fishType.grounded
+        grounded = self.fish.fishType.heightAboveGround ~= nil
     })
         :setPositionLockTarget(self.lure)
         :setAngleLockTarget(tes3.player)
@@ -141,7 +141,7 @@ function FightManager:getDistanceModifier()
     local fishDistanceModifier = fish:getDistanceModifier()
 
     --When tension is high, reduce fish's pull
-    local tensionEffect = math.remap(self:getTension(),
+    local tensionEffect = math.remap(FishingStateManager.getTension(),
         config.constants.TENSION_MINIMUM,
         config.constants.TENSION_MAXIMUM,
         1.0,
@@ -190,42 +190,6 @@ function FightManager:pickTargetPosition()
     end
     logger:debug("Target position: %s", targetPosition)
     self.targetPosition = targetPosition
-end
-
-function FightManager:setTension(newTension)
-    local min = config.constants.TENSION_MINIMUM
-    local max = config.constants.TENSION_MAXIMUM
-    newTension = math.clamp(newTension, min, max)
-    local fishingLine = FishingStateManager.getFishingLine()
-    if not fishingLine then
-        logger:warn("Fishing line not found")
-        return
-    end
-    fishingLine:setTension(newTension)
-end
-
-function FightManager:getTension()
-    local fishingLine = FishingStateManager.getFishingLine()
-    if not fishingLine then
-        logger:warn("Fishing line not found")
-        return 0
-    end
-    return fishingLine:getTension()
-end
-
-function FightManager:increaseTension(delta)
-    local increasePerSecond = 1.0
-    local tension = self:getTension()
-    local newTension = tension + (increasePerSecond * delta)
-    self:setTension(newTension)
-end
-
-function FightManager:restoreNeutralTension(delta)
-    local decreasePerSecond = 0.5
-    local tension = self:getTension()
-    local newTension = tension - (decreasePerSecond * delta)
-    newTension = math.max(newTension, config.constants.TENSION_NEUTRAL)
-    self:setTension(newTension)
 end
 
 
@@ -283,10 +247,8 @@ function FightManager:updateTension()
         tension = lowerLimit
     end
 
-    local fishingLine = FishingStateManager.getFishingLine()
-    if fishingLine then
-        fishingLine:setTension(tension)
-    end
+    FishingStateManager.setTension(tension)
+
     logger:trace([[
         lineLength: %s
         actualLineLength: %s
@@ -320,7 +282,7 @@ function FightManager:updateSwimming()
         end
         SwimService.startSwimming{
             speed = self.fish:getReelSpeed(),
-            turnSpeed = math.random(3, 4),
+            turnSpeed = self.fish:getTurnSpeed(),
             physics = self.fishPhysics,
             from = lure.position,
             to = self.targetPosition,
@@ -328,7 +290,7 @@ function FightManager:updateSwimming()
             callback = function()
                 self.targetPosition = nil
             end,
-            grounded = self.fish.fishType.grounded
+            heightAboveGround = self.fish.fishType.heightAboveGround
         }
         self:splash()
     end
@@ -360,7 +322,7 @@ function FightManager:tireFish(delta)
     local fatigueDrain = config.constants.FIGHT_FATIGUE_DRAIN_PER_SECOND
 
     ---Tension Effect
-    local tension = self:getTension()
+    local tension = FishingStateManager.getTension()
     local maxTension = config.constants.FIGHT_TENSION_UPPER_LIMIT
     local minTension = config.constants.FIGHT_TENSION_LOWER_LIMIT
     local tensionEffect = math.remap(tension, minTension, maxTension, 0.0, 2.0)
@@ -399,7 +361,7 @@ function FightManager:tirePlayer(delta)
         local fishStrengthEffect = math.remap(fishStrength, 0, 100, 0.5, 1.5)
 
         ---Tension Effect
-        local tension = self:getTension()
+        local tension = FishingStateManager.getTension()
         local maxTension = config.constants.FIGHT_TENSION_UPPER_LIMIT
         local minTension = config.constants.FIGHT_TENSION_LOWER_LIMIT
         local tensionEffect  = math.remap(tension, minTension, maxTension, 0.0, 2.0)
@@ -510,9 +472,7 @@ function FightManager:fightSimulate(e)
     self:damageRod(e.delta)
     self:updateLineLength(e.delta)
 
-
-    local fishingLine = FishingStateManager.getFishingLine()
-    local tension = fishingLine and fishingLine:getTension() or 0
+    local tension = FishingStateManager.getTension() or 0
     if tension then
         if tension >= config.constants.FIGHT_TENSION_UPPER_LIMIT then
             logger:trace("Snap Tension: %s", tension)
@@ -540,8 +500,6 @@ function FightManager:fightSimulate(e)
         self:fail("You are exhausted!")
         return
     end
-
-    tes3.mobilePlayer:overrideHeadTrackingThisFrame(self.lure)
 end
 
 function FightManager:startSplashTimer()
@@ -569,15 +527,17 @@ function FightManager:start()
     --drop lure down
     self.lure.position = self.lure.position + tes3vector3.new(0, 0, -FightManager.lureOffset)
 
+    --Ground fish first so tension doesn't suddenly change
+    if self.fish.fishType.heightAboveGround then
+        SwimService.groundFish(self.lure, self.fish.fishType.heightAboveGround)
+    end
+
     FishingRod.playReelSound{ doLoop = true }
     FishingStateManager.setState("REELING")
     if not self:updateSwimming() then return end
-    local fishingLine = FishingStateManager.getFishingLine()
     self.lineLength = self:getLineDistance()
 
-    if fishingLine then
-        fishingLine:lerpTension(0.5, config.constants.TENSION_NEUTRAL)
-    end
+    FishingStateManager.lerpTension(0.5, config.constants.TENSION_NEUTRAL)
 
     tes3.messageBox("You've hooked something!")
     logger:debug([[
@@ -602,6 +562,9 @@ function FightManager:start()
         end
         self:fightSimulate(e)
     end
+
+
+
     event.register("simulate", simulateFight)
     self.fightIndicator:createMenu()
     common.disablePlayerControls()

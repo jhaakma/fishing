@@ -31,7 +31,9 @@ event.register("initialized", function()
     require("mer.fishing.Merchant.eventHandler")
     require("mer.fishing.FishingRod.eventHandler")
     require("mer.fishing.FishingNet.eventHandler")
+    require("mer.fishing.debug")
 
     local version = config.metadata.package.version
     logger:info("initialized %s", version)
 end)
+

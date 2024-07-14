@@ -32,7 +32,7 @@ function FishingLine:attachTo(parent)
 end
 
 function FishingLine:remove()
-    if self.sceneNode then
+    if self.sceneNode and self.sceneNode.parent then
         self.sceneNode.parent:detachChild(self.sceneNode)
         self.sceneNode = nil
     end
@@ -99,9 +99,6 @@ function FishingLine:updateEndPoints(origin, destination)
     endp.value = position * 2
     endp.value.z = 0
     self.curveData:updateDerivedValues()
-    if tes3.is3rdPerson() then
-        self.sceneNode:update()
-    end
 end
 
 return FishingLine

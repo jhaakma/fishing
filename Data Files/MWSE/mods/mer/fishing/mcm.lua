@@ -94,6 +94,12 @@ local function registerMCM()
         restartRequired = true,
     }
 
+    page:createYesNoButton{
+        label = "Enable Dynamic Camera",
+        description = "Enable the dynamic camera during the fishing minigame.",
+        variable = mwse.mcm.createTableVariable{ id = "dynamicCamera", table = config.mcm },
+    }
+
     --cheatMode
     page:createYesNoButton{
         label = "Enable Easy Hook Mode",

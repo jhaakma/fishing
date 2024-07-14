@@ -7,6 +7,7 @@ local common = require("mer.fishing.common")
 local logger = common.createLogger("FightIndicator")
 local config = require("mer.fishing.config")
 local FishingNet = require("mer.fishing.FishingNet")
+local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 
 ---@class Fishing.FightIndicator.new.params
 ---@field fightManager Fishing.FightManager
@@ -158,7 +159,7 @@ function FightIndicator:createFatigueBar(parent)
         id = self.uiids.fatigueBar,
         current = self.fightManager.fish.fatigue,
         max = self.fightManager.fish.fatigue,
-    } --[[@as tes3uiFillBar]]
+    }
     fatigueBar.widthProportional = 1
     fatigueBar.height = 20
 
@@ -182,7 +183,7 @@ function FightIndicator:updateMenu()
      end
     --update tension indicator
     local tensionIndicator = menu:findChild(self.uiids.tensionIndicator)
-    local tension = self.fightManager:getTension() - config.constants.TENSION_MINIMUM
+    local tension = FishingStateManager.getTension() - config.constants.TENSION_MINIMUM
     local totalTension = config.constants.TENSION_MAXIMUM - config.constants.TENSION_MINIMUM
     local tensionProportion = tension / totalTension
     tensionIndicator.absolutePosAlignX = tensionProportion

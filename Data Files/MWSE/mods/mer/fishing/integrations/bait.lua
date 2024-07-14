@@ -59,8 +59,8 @@ local BaitTypes = {
         name = "Spinner",
         description = "Most effective at catching small baitfish.",
         classCatchChances = {
-            small = 0.7,
-            medium = 0.2,
+            small = 0.8,
+            medium = 0.1,
             large = 0,
             loot = 0.1,
         },
@@ -70,10 +70,10 @@ local BaitTypes = {
         name = "Bait",
         description = "Most effective at catching medium sized fish.",
         classCatchChances = {
-            small = 0.3,
-            medium = 0.5,
+            small = 0.05,
+            medium = 0.8,
             large = 0.1,
-            loot = 0.1,
+            loot = 0.05,
         },
     },
     {
@@ -82,9 +82,9 @@ local BaitTypes = {
         description = "Most effective at catching large fish.",
         classCatchChances = {
             small = 0,
-            medium = 0.4,
-            large = 0.5,
-            loot = 0.1,
+            medium = 0.15,
+            large = 0.8,
+            loot = 0.05,
         },
     },
     {
@@ -92,10 +92,10 @@ local BaitTypes = {
         name = "Sinker",
         description = "Increases chance of catching random loot.",
         classCatchChances = {
-            small = 0.3,
-            medium = 0.1,
+            small = 0.25,
+            medium = 0.05,
             large = 0.0,
-            loot = 0.6,
+            loot = 0.7,
         },
     },
 }

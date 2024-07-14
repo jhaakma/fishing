@@ -15,7 +15,7 @@ config.constants = {
     --Fish Speed
     FISH_SPEED = 75,
     --The minimum distance the fish must be away from the shore
-    WATER_POSITION_PADDING = 200,
+    WATER_POSITION_PADDING = 350,
 
     --Fishing line
     MIN_CAST_SPEED = 150,
@@ -93,6 +93,7 @@ local mcmDefault = {
     enableFishTooltips = true,
     easyHook = false,
     cheatMode = false,
+    dynamicCamera = true,
     logLevel = "INFO",
     fishingMerchants = {
         ["arrille"] = true,--seyda neen trader - high elf - 800

@@ -1,0 +1,300 @@
+{
+    "water": {
+        "freshwater": [
+            {
+                "cellX": 9,
+                "cellY": 12,
+                "radius": 3
+            },
+            {
+                "cellX": 2,
+                "cellY": 7,
+                "radius": 9
+            },
+            {
+                "cellX": -4,
+                "cellY": -5.5,
+                "radius": 1.5
+            },
+            {
+                "cellX": 2,
+                "cellY": 0,
+                "radius": 8.5
+            },
+            {
+                "cellX": 4,
+                "cellY": -6,
+                "radius": 3.5
+            },
+            {
+                "cellX": -9.2,
+                "cellY": 12.5,
+                "radius": 3
+            },
+            {
+                "cellX": -6.5,
+                "cellY": 3.5,
+                "radius": 1.6
+            },
+            {
+                "cellX": 10,
+                "cellY": -2,
+                "radius": 5
+            },
+            {
+                "cellX": 15.5,
+                "cellY": -5,
+                "radius": 4
+            },
+            {
+                "cellX": 13.5,
+                "cellY": -8.3,
+                "radius": 1.5
+            },
+            {
+                "cellX": 5.5,
+                "cellY": 21.5,
+                "radius": 2
+            },
+            {
+                "cellX": -2,
+                "cellY": -7.2,
+                "radius": 1
+            },
+            {
+                "cellX": -1.4,
+                "cellY": -8,
+                "radius": 0.7
+            },
+            {
+                "cellX": -2,
+                "cellY": 21,
+                "radius": 0.6
+            },
+            {
+                "cellX": 0.5,
+                "cellY": -9.6,
+                "radius": 0.4
+            },
+            {
+                "cellX": 2.5,
+                "cellY": -8.5,
+                "radius": 1
+            },
+            {
+                "cellX": 1.6,
+                "cellY": -12.4,
+                "radius": 0.4
+            },
+            {
+                "cellX": 2.6,
+                "cellY": -13.4,
+                "radius": 0.4
+            },
+            {
+                "cellX": -2.5,
+                "cellY": 21.5,
+                "radius": 0.4
+            },
+            {
+                "cellX": -3.2,
+                "cellY": 21.5,
+                "radius": 0.5
+            },
+            {
+                "cellX": -34,
+                "cellY": 15,
+                "radius": 6
+            },
+            {
+                "cellX": -26,
+                "cellY": 3,
+                "radius": 11
+            },
+            {
+                "cellX": -18,
+                "cellY": -3,
+                "radius": 5.5
+            },
+            {
+                "cellX": -22,
+                "cellY": -18,
+                "radius": 15
+            },
+            {
+                "cellX": -11,
+                "cellY": -8,
+                "radius": 0.6
+            },
+            {
+                "cellX": -10,
+                "cellY": -29,
+                "radius": 16.5
+            },
+            {
+                "cellX": 5,
+                "cellY": -38,
+                "radius": 21
+            },
+            {
+                "cellX": 32,
+                "cellY": -53,
+                "radius": 5
+            },
+            {
+                "cellX": 37.5,
+                "cellY": 53.2,
+                "radius": 0.5
+            },
+            {
+                "cellX": 18,
+                "cellY": -51,
+                "radius": 15
+            },
+            {
+                "cellX": 26,
+                "cellY": -63,
+                "radius": 4
+            },
+            {
+                "cellX": 28,
+                "cellY": -26,
+                "radius": 10
+            },
+            {
+                "cellX": 32,
+                "cellY": -21,
+                "radius": 7
+            },
+            {
+                "cellX": 15,
+                "cellY": -22,
+                "radius": 4
+            },
+            {
+                "cellX": 30,
+                "cellY": -10,
+                "radius": 7
+            },
+            {
+                "cellX": 35,
+                "cellY": -15,
+                "radius": 5
+            },
+            {
+                "cellX": 33,
+                "cellY": -6,
+                "radius": 5.5
+            },
+            {
+                "cellX": 31,
+                "cellY": 2,
+                "radius": 5
+            },
+            {
+                "cellX": 29,
+                "cellY": 9,
+                "radius": 5.5
+            },
+            {
+                "cellX": 26,
+                "cellY": 14.5,
+                "radius": 4
+            },
+            {
+                "cellX": 21.5,
+                "cellY": 19,
+                "radius": 2.2
+            },
+            {
+                "cellX": -33,
+                "cellY": -34,
+                "radius": 31
+            },
+            {
+                "cellX": -1,
+                "cellY": -53,
+                "radius": 20
+            }
+        ]
+    },
+    "location": {
+        "lakeNabia": [
+            {
+                "cellX": 5,
+                "cellY": -2,
+                "radius": 2
+            }
+        ],
+        "riverSamsi": [
+            {
+                "cellX": -9.2,
+                "cellY": 12.5,
+                "radius": 3
+            }
+        ]
+    },
+    "climate": {
+        "arctic": [
+            {
+                "cellX": -20,
+                "cellY": 36,
+                "radius": 26
+            },
+            {
+                "cellX": 10,
+                "cellY": 36,
+                "radius": 22
+            },
+            {
+                "cellX": 40,
+                "cellY": 36,
+                "radius": 26
+            }
+        ],
+        "swamp": [
+            {
+                "cellX": -23,
+                "cellY": 0,
+                "radius": 5
+            },
+            {
+                "cellX": -18,
+                "cellY": 3,
+                "radius": 4
+            },
+            {
+                "cellX": -7,
+                "cellY": 3,
+                "radius": 3
+            },
+            {
+                "cellX": -6,
+                "cellY": -1,
+                "radius": 3
+            },
+            {
+                "cellX": -6.2,
+                "cellY": -4,
+                "radius": 2
+            },
+            {
+                "cellX": -2,
+                "cellY": -8,
+                "radius": 2
+            }
+        ],
+        "tropical": [
+            {
+                "cellX": 21,
+                "cellY": -15,
+                "radius": 15
+            },
+            {
+                "cellX": 10,
+                "cellY": -27,
+                "radius": 13
+            }
+        ]
+    }
+}
