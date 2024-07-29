@@ -64,7 +64,7 @@ local fishConfigs = {
             difficulty = 30,
             class = "medium",
             habitat = {
-                climates = {"temperate"},
+                climates = {"temperate", "tropical"},
                 waterType = "freshwater",
                 minDepth = 100,
             },
@@ -216,7 +216,7 @@ local fishConfigs = {
         {
             baseId = "mer_fish_catfish",
             previewMesh = "mer_fishing\\f\\catfish.nif",
-            description = "The catfish is named for its prominent barbels, which resemble a cat's whiskers. It can be found in swamps at night.",
+            description = "The catfish is named for its prominent barbels, which resemble a cat's whiskers. It can be found in swamps.",
             speed = 160,
             size = 1.0,
             difficulty = 31,
@@ -225,7 +225,6 @@ local fishConfigs = {
             habitat = {
                 climates = {"swamp"},
                 waterType = "freshwater",
-                times = { "night" },
                 interiors = true,
                 exteriors = true
             },
@@ -261,7 +260,7 @@ local fishConfigs = {
                 }
             },
             habitat = {
-                climates = {"temperate", "arctic"},
+                climates = {"temperate", "arctic", "tropical"},
                 waterType = "saltwater",
                 times = { "day" },
                 minDepth = 200,
@@ -280,7 +279,6 @@ local fishConfigs = {
             habitat = {
                 climates = {"tropical", "swamp"},
                 waterType = "saltwater",
-                times = { "day" },
                 minDepth = 200,
             },
             harvestables = {
@@ -541,7 +539,6 @@ local fishConfigs = {
             class = "large",
             habitat = {
                 times = {
-
                     "night"
                 },
                 locations = { "riverSamsi"}

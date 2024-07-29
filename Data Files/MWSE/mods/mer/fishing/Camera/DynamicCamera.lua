@@ -41,6 +41,7 @@ local function setBlendState(state)
     end
 end
 
+
 DynamicCamera.states.ThirdPerson = {
     enterState = function(_)
         tes3.force3rdPerson()

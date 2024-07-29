@@ -35,6 +35,7 @@ local FishingStateManager = {}
 ---@field particle niNode?
 ---@field tension number?
 ---@field lerping boolean?
+---@field fishingLine FishingLine?
 
 
 ---@return Fishing.TempData
@@ -130,16 +131,32 @@ function FishingStateManager.getTension()
     return tempData().tension or 0
 end
 
+
 function FishingStateManager.setTension(tension)
     tempData().tension = tension
+    logger:debug("Set tension to %s", tension)
+end
+
+
+--Fishing Line
+---@return FishingLine|nil
+function FishingStateManager.getFishingLine()
+    return tempData().fishingLine
+end
+
+---@param line FishingLine
+function FishingStateManager.setFishingLine(line)
+    tempData().fishingLine = line
 end
 
 function FishingStateManager.lerpTension(to, duration)
+
     if tempData().lerping then
-        error("already lerping")
+        logger:debug("Already lerping tension")
         return
     end
 
+    tempData().lerping = true
     local interval = 0.01
     local iterations = math.floor(duration / interval)
 
@@ -150,7 +167,14 @@ function FishingStateManager.lerpTension(to, duration)
         duration = interval,
         iterations = iterations,
         callback = function(e)
-            FishingStateManager.setTension(FishingStateManager.getTension() + delta)
+            local tension = FishingStateManager.getTension()
+            FishingStateManager.setTension(tension + delta)
+        end
+    }
+    timer.start{
+        duration = duration,
+        callback = function()
+            tempData().lerping = false
         end
     }
 end
@@ -212,6 +236,7 @@ function FishingStateManager.clearData()
 end
 
 function FishingStateManager.endFishing()
+    FishingStateManager.setTension(config.constants.TENSION_LINE_ROD_TRANSITION)
 
     logger:debug("Cancelling fishing")
     FishingStateManager.removeLure()

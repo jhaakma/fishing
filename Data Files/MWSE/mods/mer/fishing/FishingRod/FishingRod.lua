@@ -163,10 +163,13 @@ function FishingRod.stopReelSound()
 end
 
 
-local function doSetTension(rootNode, newTension)
+local function updateRodAnimation(rootNode, newTension)
     logger:debug("Setting tension of rod to %s", newTension)
-    local minTension = config.constants.TENSION_MINIMUM
+    local minTension = config.constants.TENSION_LINE_ROD_TRANSITION
     local maxTension = config.constants.TENSION_MAXIMUM
+    local tension = math.clamp(newTension, minTension, maxTension)
+    local t = math.remap(tension, minTension, maxTension, 0, 1)
+
 
     local armature = rootNode:getObjectByName("FISHING_ROD_ARMATURE")
     if not armature then
@@ -184,8 +187,6 @@ local function doSetTension(rootNode, newTension)
     local straightBone = bonePositions:getObjectByName("Straight").children[1]--[[@as niNode]]
     local curvedBone = bonePositions:getObjectByName("Curved").children[1] --[[@as niNode]]
 
-    local tension = math.clamp(newTension, minTension, maxTension)
-    local t = math.remap(tension, minTension, maxTension, 0, 1)
 
     --Go down bone chains and set position/translation
     ---comment
@@ -198,14 +199,15 @@ local function doSetTension(rootNode, newTension)
         local pos2 = bone2.translation
         local newPos = pos1:copy():lerp(pos2, t)
         bone.translation = newPos
-        logger:debug("Lerping bone %s transalation to %s", bone.name, newPos)
+        logger:trace("Lerping bone %s transalation to %s", bone.name, newPos)
 
         local rot1 = bone1.rotation
         local rot2 = bone2.rotation
         local newRot = rot1:toQuaternion():slerp(rot2:toQuaternion(), t):toRotation()
 
         bone.rotation = newRot
-        logger:debug("Lerping bone %s rotation to %s", bone.name, newRot)
+        logger:trace("Lerping bone %s rotation to %s", bone.name, newRot)
+
     end
 
     while targetBone and straightBone and curvedBone do
@@ -220,22 +222,13 @@ end
 
 ---Bends the fishing rod mesh according to tension
 ---Lerp between bone positions/rotations
-function FishingRod.setTension(newTension)
-    doSetTension(tes3.player.sceneNode, newTension)
-    doSetTension(tes3.player1stPerson.sceneNode, newTension)
+function FishingRod.updateRodBend(newTension)
+    updateRodAnimation(tes3.player.sceneNode, newTension)
+    updateRodAnimation(tes3.player1stPerson.sceneNode, newTension)
 end
 
 function FishingRod.setLineAttachNode(node)
     FishingRod.lineAttachNode = node
-end
-
-local function resetLinePosition(root)
-    local fishingLineEnd = root:getObjectByName("FishingLineEnd")
-    if not fishingLineEnd then
-        logger:debug("FishingLineEnd not found, cancelling animation")
-        return
-    end
-    fishingLineEnd.translation = tes3vector3.new(0,0,0)
 end
 
 function FishingRod.removeTransforms()
@@ -268,76 +261,6 @@ function FishingRod.reapplyTransforms()
     rod.rotation = tes3matrix33.new(r.x * scale, r.y * scale, r.z * scale)
 end
 
-
-function FishingRod.startAnimation()
-    logger:debug("Starting fishing line animation")
-    FishingRod.removeTransforms()
-    local cancel
-    local function update()
-        local lure = FishingStateManager.getLure()
-        if not lure then
-            logger:debug("No lure, cancelling animation")
-            cancel()
-            return
-        end
-
-        if not FishingRod.lineAttachNode then
-            logger:debug("No lineAttachNode, cancelling animation")
-            cancel()
-            return
-        end
-
-        local tension = FishingStateManager.getTension()
-        local root = (tes3.is3rdPerson() and tes3.player or tes3.player1stPerson).sceneNode --[[@as niNode]]
-        doSetTension(root, tension)
-
-        local fishingLineEnd = root:getObjectByName("FishingLineEnd")
-        if not fishingLineEnd then
-            logger:debug("FishingLineEnd not found, cancelling animation")
-            cancel()
-            return
-        end
-
-        --Convert FishingRod.lineAttachNode.worldTransform.translation to local space of fishingLineEnd
-        local attachPos = FishingRod.lineAttachNode.worldTransform.translation
-        local lineEndPos = fishingLineEnd.parent.worldTransform:copy()
-
-        local height = tes3.player.object.race.height[tes3.player.object.female and "female" or "male"]
-        local weight = tes3.player.object.race.weight[tes3.player.object.female and "female" or "male"]
-        -- if tes3.is3rdPerson() then
-        --     local scale = tes3vector3.new(weight, height, weight)
-        --     local r = lineEndPos.rotation
-        --     local inverseScale = tes3vector3.new(1/weight, 1/height, 1/weight)
-        --     --lineEndPos.translation = lineEndPos.translation * scale
-        --     --lineEndPos.rotation = tes3matrix33.new(r.x * scale, r.y * scale, r.z * scale)
-        -- end
-
-        local localAttachPos = lineEndPos:invert() * attachPos
-
-
-        --Set position of fishing line end
-        fishingLineEnd.translation = localAttachPos
-        -- if tes3.is3rdPerson() then
-        --     local scale = tes3vector3.new(weight, height, weight)
-        --     local r = fishingLineEnd.rotation
-        --     local inverseScale = tes3vector3.new(1/weight, 1/height, 1/weight)
-        --     fishingLineEnd.translation = fishingLineEnd.translation * inverseScale
-        --     --fishingLineEnd.rotation = tes3matrix33.new(r.x * scale, r.y * scale, r.z * scale)
-        -- end
-        fishingLineEnd:update()
-    end
-
-    cancel = function()
-        FishingRod.reapplyTransforms()
-        resetLinePosition(tes3.player.sceneNode)
-        resetLinePosition(tes3.player1stPerson.sceneNode)
-        FishingRod.setTension(0)
-        FishingRod.lineAttachNode = nil
-        event.unregister("simulated", update)
-    end
-
-    event.register("simulated", update)
-end
 
 
 

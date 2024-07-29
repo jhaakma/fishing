@@ -6,6 +6,8 @@ local LureCamera = require("mer.fishing.Camera.LureCamera")
 local controllers1stPerson = ControllerGroups.new("mer_fishing\\playerAnimations1st.nif")
 local controllers3rdPerson = ControllerGroups.new("mer_fishing\\playerAnimations3rd.nif")
 
+
+
 ---@class PlayerAnimations
 ---@field enabled boolean
 ---@field addedPull number Additional value added to pull.
@@ -15,6 +17,7 @@ local this  = {
     pullSpeed = 1.8,
     addedPull = 0,
     addedDirection = 0,
+    maxPull = 0.7,
 }
 
 --- Private variables that are calculated per frame.
@@ -65,7 +68,7 @@ local function updatePull(wc)
     local delta = wc.deltaTime * this.pullSpeed
 
     if wc.inputController:isMouseButtonDown(0) then
-        pull = math.min(pull + delta, 1.0)
+        pull = math.min(pull + delta, this.maxPull)
     else
         pull = math.max(pull - delta, 0.0)
     end

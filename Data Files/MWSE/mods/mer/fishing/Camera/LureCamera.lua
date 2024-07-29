@@ -20,6 +20,7 @@ local logger = common.createLogger("LureCamera")
 ---@field wasInFirstPerson boolean
 ---@field previousMouseLookDisabled boolean
 ---@field maxUpwardsAngle number Default: 30
+---@field horizontalAngle number Randomly set between -30 and 30
 local LureCamera = {}
 
 
@@ -70,17 +71,18 @@ function LureCamera:setOffsetUp(offset)
 end
 
 function LureCamera:start()
-    self.previousMouseLookDisabled = tes3.player.mobile.mouseLookDisabled
-    tes3.player.mobile.mouseLookDisabled = true
-    --set to 3rd person
-    self.wasInFirstPerson = tes3.force3rdPerson()
-
     local positionLockTarget = self.positionLockTarget:getObject()
     if not positionLockTarget then
         logger:debug("Position lock target is not valid")
         return
     end
-    logger:debug("Starting LureCamera")
+
+    self.horizontalAngle = math.random(-3, 3) * 10
+    logger:debug("Starting LureCamera, set horizontal angle to %s", self.horizontalAngle)
+    self.previousMouseLookDisabled = tes3.player.mobile.mouseLookDisabled
+    tes3.player.mobile.mouseLookDisabled = true
+    --set to 3rd person
+    self.wasInFirstPerson = tes3.force3rdPerson()
 
     local function updateCameraControl(e)
         if not tes3.player.data.fishingLureCameraActive then
@@ -111,6 +113,7 @@ end
 ---@param e cameraControlEventData
 function LureCamera:updateCamera(e)
     logger:trace("Updating Camera")
+
     local angleLockTargetObject = self.angleLockTarget:getObject()
     if not angleLockTargetObject then
         logger:error("Angle lock target is not valid")
@@ -123,6 +126,9 @@ function LureCamera:updateCamera(e)
         self:stop()
         return
     end
+    --Apply horizontal angle offset
+    local offset = tes3matrix33.new()
+    offset:fromEulerXYZ(0, 0, math.rad(self.horizontalAngle))
 
     local angleTargetPos = angleLockTargetObject.position
     local targetPos = positionLockTargetObject.position
@@ -130,6 +136,8 @@ function LureCamera:updateCamera(e)
 
     -- Calculate direction vector from camera to target
     local direction = angleTargetPos - cameraPos
+    direction = offset * direction
+
     local normalizedDirection = direction:normalized()
 
     -- Step 3: Calculate new position for camera
@@ -150,6 +158,8 @@ function LureCamera:updateCamera(e)
     -- Step 4: Calculate new rotation for camera
     -- Point the camera towards the angle lock target
     local lookAt = angleTargetPos - newPos
+    lookAt = offset * lookAt
+
     local lookAtNormalized = lookAt:normalized()
 
     local upVector = tes3vector3.new(0, 0, 1)
@@ -159,6 +169,8 @@ function LureCamera:updateCamera(e)
     local dotProduct = lookAtNormalized:dot(upVector)
     -- Calculate the current angle
     local currentAngle = math.acos(dotProduct)
+
+
 
     if currentAngle > maxAngleRadians then
         logger:debug("Angle too high, adjusting")

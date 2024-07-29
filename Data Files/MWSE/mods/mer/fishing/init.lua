@@ -27,7 +27,7 @@ local UF = {
         event.trigger("Fishing:McmUpdated")
         logger:info("Set %s as a fishing merchant", target.baseObject.id)
     end,
-
+    FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
 }
 event.register("UIEXP:sandboxConsole", function(e)
     e.sandbox.fishing = UF
@@ -36,6 +36,7 @@ end)
 ---A set of APIs for registering fishing related objects
 ---@class Fishing.Interop
 local Interop = {}
+
 Interop.registerBait = UF.Bait.register
 Interop.registerBaitType = UF.BaitType.register
 Interop.registerFishType = UF.FishType.register

@@ -12,6 +12,76 @@ local LineManager = {
     lureAttachPoint = nil
 }
 
+function LineManager.setLureAttachPoint(lureAttachPoint)
+    LineManager.lureAttachPoint = lureAttachPoint
+end
+
+---@param lineEnd niNode
+---@return tes3vector3?
+local function getFixedAttachPos(lineEnd)
+    if not tes3.player.mobile.is3rdPerson then
+        logger:debug("Player is not in 3rd person, returning worldTransform")
+        return lineEnd.worldTransform.translation
+    end
+
+    local sceneNode = tes3.player.sceneNode
+    if not sceneNode then
+        logger:error("Could not find player scene node")
+        return
+    end
+    local weaponBone = sceneNode:getObjectByName("Weapon Bone")
+    if not weaponBone then
+        logger:error("Could not find Weapon Bone node on player")
+        return
+    end
+
+    local armature = weaponBone:getObjectByName("FISHING_ROD_ARMATURE")
+    if not armature then
+        logger:error("Could not find FISHING_ROD_ARMATURE node on Weapon Bone")
+        return
+    end
+
+    local skeletonRootTf = armature.worldTransform
+    local lineEndTf = lineEnd.worldTransform
+
+    -- Skinning assumes uniform scaling, so it uses a cheap transpose instead of a full matrix inverse.
+    -- We need to work around this to get the skinned world position of the line attach point.
+    local badRot = skeletonRootTf.rotation:transpose()
+    local badTr = badRot * skeletonRootTf.translation * -1
+    local worldAttachPos = skeletonRootTf * (badRot * lineEndTf.translation + badTr)
+
+    return worldAttachPos
+end
+
+local function createLine(name, origin, destination)
+    local root = tes3.worldController.vfxManager.worldVFXRoot
+
+    local line = root:getObjectByName(name)
+
+    if line == nil then
+        line = tes3.loadMesh("mwse\\widgets.nif")
+            :getObjectByName("axisLines")
+            :getObjectByName("z")
+            :clone()
+        line.name = name
+        root:attachChild(line, true)
+    end
+
+    do
+        line.data.vertices[1] = origin
+        line.data.vertices[2] = destination
+        line.data:markAsChanged()
+        line.data:updateModelBound()
+    end
+
+    line:update()
+    line:updateEffects()
+    line:updateProperties()
+end
+
+local function doUpdateFishingLine(tension)
+
+end
 
 function LineManager.attachLines(lure)
     logger:debug("Spawning fishing line")
@@ -38,9 +108,10 @@ function LineManager.attachLines(lure)
     local function cancel()
         logger:debug("Cancelling fishing line")
         event.unregister("simulated", updateFishingLine)
+        event.unregister("cameraControl", updateFishingLine)
+        FishingRod.updateRodBend(config.constants.TENSION_LINE_ROD_TRANSITION)
         fishingLine:remove()
         FishingStateManager.endFishing()
-        FishingRod.setTension(0)
     end
 
     LineManager.lureAttachPoint = lure.sceneNode:getObjectByName("AttachAnimLure")
@@ -64,7 +135,8 @@ function LineManager.attachLines(lure)
             return
         end
 
-        FishingRod.setTension(fishingLine.tension)
+        local tension = FishingStateManager.getTension()
+        FishingRod.updateRodBend(tension)
 
         -- Get the appropriate 1st/3rd person pole position.
         LineManager.lureAttachPoint:update({ controllers = true })
@@ -72,8 +144,12 @@ function LineManager.attachLines(lure)
 
         -- Get the appropriate 1st/3rd person pole position.
         local attachFishingLine = tes3.is3rdPerson() and attachFishingLine3rd or attachFishingLine1st
-        attachFishingLine:update({ controllers = true })
-        local attachPosition = attachFishingLine.worldTransform.translation
+        local attachPosition = getFixedAttachPos(attachFishingLine)
+        if not attachPosition then
+            logger:error("Could not get attach position")
+            cancel()
+            return
+        end
 
         if lurePosition:distance(attachPosition) > config.constants.FISHING_LINE_MAX_DISTANCE then
             logger:debug("Player is too far away, stopping fishing line")
@@ -90,24 +166,20 @@ function LineManager.attachLines(lure)
         if FishingStateManager.isState("WAITING") then
             if not landed then
                 logger:debug("Lure has landed, transitioning tension")
-                fishingLine:lerpTension(0.3, 0.75)
+                FishingStateManager.lerpTension(config.constants.TENSION_MINIMUM, 0.75)
                 landed = true
                 return
             end
         end
 
-        -- Update the fishing line.
-        -- The fishing line more accurately follows the first position,
-        -- so when reeling in, we want it to be more accurate to the lure.
-        -- if LureCamera.isActive() then
-        --     fishingLine:updateEndPoints(lurePosition, attachPosition)
-        -- else
-        --     fishingLine:updateEndPoints(attachPosition, lurePosition)
-        -- end
+        fishingLine:updateEndPoints(attachPosition, lurePosition)
+        fishingLine.sceneNode:update{ controllers = true}
 
-        fishingLine:updateEndPoints(lurePosition, attachPosition)
+        --debug fishing line
+        --createLine("fishingLine", attachPosition, lurePosition)
     end
-    event.register("simulated", updateFishingLine, { priority = -9000 })
+    --event.register(tes3.event.simulated, updateFishingLine, { priority = -9000 })
+    event.register(tes3.event.cameraControl, updateFishingLine, { priority = -9000 })
     return fishingLine
 end
 

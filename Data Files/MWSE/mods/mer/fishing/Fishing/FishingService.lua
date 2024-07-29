@@ -12,6 +12,7 @@ local FightManager = require("mer.fishing.Fishing.FightManager")
 local Bait = require("mer.fishing.Bait.Bait")
 local FishingSkill = require("mer.fishing.FishingSkill")
 local Habitat = require("mer.fishing.Habitat.Habitat")
+local LineManager = require("mer.fishing.FishingLine.LineManager")
 
 ---@class Fishing.FishingService
 local FishingService = {}
@@ -125,7 +126,8 @@ local function attachFishMesh(lure)
     local mouthNode = fishNode:getObjectByName("ATTACH_MOUTH")
     if mouthNode then
         logger:debug("Aligning mouth with lure")
-        FishingRod.setLineAttachNode(mouthNode)
+        --FishingRod.setLineAttachNode(mouthNode)
+        LineManager.setLureAttachPoint(mouthNode)
     end
 
 
@@ -171,7 +173,6 @@ local function spawnLure(lurePosition)
     })
     bait:attachToAnim(lure)
     FishingStateManager.setLure(lure)
-    FishingRod.setLineAttachNode(lure.sceneNode:getObjectByName("AttachAnimLure"))
     return lure
 end
 
@@ -187,8 +188,9 @@ local function startCasting()
         Animations.clampWaves()
         -- common.disablePlayerControls()
         FishingStateManager.setState("CASTING")
+        local startingTension = config.constants.TENSION_LINE_ROD_TRANSITION
+        FishingStateManager.setTension(startingTension)
         launchLure(lure, function()
-            FishingStateManager.lerpTension(0, 0.5)
             Animations.lureLand(lure)
             logger:debug("Finished casting")
             FishingStateManager.setState("WAITING")
@@ -198,7 +200,11 @@ local function startCasting()
         timer.start{
             duration = 0.05,
             callback = function()
-                FishingRod.startAnimation()
+                logger:debug("Starting fishing line animation")
+                local lure = FishingStateManager.getLure()
+                if lure then
+                    FishingStateManager.setFishingLine(LineManager.attachLines(lure))
+                end
             end
         }
     else
@@ -315,7 +321,6 @@ function FishingService.release()
             callback = function()
                 logger:debug("IDLE - start casting")
                 startCasting()
-                logger:debug("Activate blocked by state - %s", state)
             end
         }
     end

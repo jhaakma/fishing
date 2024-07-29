@@ -70,9 +70,9 @@ local BaitTypes = {
         name = "Bait",
         description = "Most effective at catching medium sized fish.",
         classCatchChances = {
-            small = 0.05,
-            medium = 0.8,
-            large = 0.1,
+            small = 0.1,
+            medium = 0.7,
+            large = 0.15,
             loot = 0.05,
         },
     },

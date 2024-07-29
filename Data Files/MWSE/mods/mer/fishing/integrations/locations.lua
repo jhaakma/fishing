@@ -8,7 +8,7 @@ local categories = {
         locationTypes = {
             {
                 id = "saltwater",
-                name = "Saltwater"
+                name = "Saltwater",
             },
             {
                 id = "freshwater",
@@ -43,19 +43,16 @@ local categories = {
     }
 }
 
-local solstheimLocations = {
-    vanilla = {
-        cellX = -22,
-        cellY = 23,
-        radius = 4,
-    },
-    modded = {
-        cellX = -15,
-        cellY = 29,
-        radius = 4
-    }
+local vanillaSolstheimRegion = {
+    cellX = -22,
+    cellY = 23,
+    radius = 4,
 }
 
+local vanillaThirsk = {
+    x = -19,
+    y = 23
+}
 
 event.register("initialized", function()
     --Register categories
@@ -63,20 +60,26 @@ event.register("initialized", function()
         Interop.registerLocationCategory(category)
     end
 
-    --Register Solestheim location
     local thirsk = tes3.getCell{ id = "Thirsk" }
-    local inVanillaPosition = thirsk.gridX == -19
-    local solstheimLocation = solstheimLocations[inVanillaPosition and "vanilla" or "modded"]
+    local difference = { x = thirsk.gridX - vanillaThirsk.x, y = thirsk.gridY - vanillaThirsk.y }
+
+    ---@type Fishing.Location.config
+    local solstheimLocation = {
+        cellX = vanillaSolstheimRegion.cellX + difference.x,
+        cellY = vanillaSolstheimRegion.cellY + difference.y,
+        radius = vanillaSolstheimRegion.radius,
+        locationType = "freshwater"
+    }
+
     Interop.registerLocation("water", solstheimLocation)
 
     --Register from JSON config
     local locationConfig = mwse.loadConfig("UltimateFishing_regions")
     for category, locationTypes in pairs(locationConfig) do
-        ---@param locationType string
-        ---@param locations Fishing.Location.config[]
-        for locationType, locations in pairs(locationTypes) do
-            for _, location in ipairs(locations) do
-                location.locationType = locationType
+        ---@param locationTypeId string
+        for locationTypeId, locationType in pairs(locationTypes) do
+            for _, location in ipairs(locationType.locations) do
+                location.locationType = locationTypeId
                 Interop.registerLocation(category, location)
             end
         end

@@ -2,6 +2,23 @@ local common = require("mer.fishing.common")
 local logger = common.createLogger("LocationManager")
 local CELL_SIZE = 8192
 
+
+--[[
+    categoryId: Category{
+        locationTypeId: LocationType{
+            descrtiption: string,
+            color: #rrggbb
+            locations: [
+                Location{
+                    cellX: number,
+                    cellY: number,
+                    radius: number,
+                }
+            ]
+        }
+    }
+]]
+
 ---@class Fishing.Location.Category.config
 ---@field id string
 ---@field defaultType string|nil
@@ -13,6 +30,7 @@ local CELL_SIZE = 8192
 ---@class Fishing.LocationType.config
 ---@field id string
 ---@field name string
+---@field color string? E.g "#ff0000"
 
 ---@class Fishing.LocationType : Fishing.LocationType.config
 ---@field locations Fishing.Location[]
@@ -23,6 +41,7 @@ local CELL_SIZE = 8192
 ---@field radius number The number of cells from the center cell that are included in the location.
 ---@field locationType string The type of location that this location represents.
 ---@field name string? If provided, a custom locationType will be generated for this location.
+---@field color string? E.g "#ff0000"
 
 ---@class Fishing.Location
 ---@field cellX number The X coordinate of the cell that this location is centered on
@@ -105,7 +124,11 @@ function LocationManager.registerLocation(categoryId, location)
     logger:debug("Registering location for category %s", categoryId)
     --Register a custom locationType if a name was provided
     if location.name then
-        LocationManager.registerLocationType(categoryId, {id = location.locationType, name = location.name})
+        LocationManager.registerLocationType(categoryId, {
+            id = location.locationType,
+            name = location.name,
+            color = location.color
+        })
         location.name = nil
     end
     if not category.locationTypes[location.locationType] then

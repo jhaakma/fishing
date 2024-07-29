@@ -34,7 +34,7 @@ function BaitType.new(e)
         for _, chance in pairs(e.classCatchChances) do
             total = total + chance
         end
-        logger:assert(total == 1.0, "BaitType %s classCatchChances must add up to 1.0.", e.id)
+        logger:assert(total - 1 <= math.epsilon, "BaitType %s classCatchChances must add up to 1.0. Got: %s", e.id, total)
     end
     e = e or {}
     setmetatable(e, BaitType)

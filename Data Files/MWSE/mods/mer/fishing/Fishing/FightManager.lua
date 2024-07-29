@@ -247,6 +247,9 @@ function FightManager:updateTension()
         tension = lowerLimit
     end
 
+    if config.mcm.cheatMode then
+        tension = math.clamp(tension, lowerLimit, upperLimit)
+    end
     FishingStateManager.setTension(tension)
 
     logger:trace([[
@@ -537,7 +540,10 @@ function FightManager:start()
     if not self:updateSwimming() then return end
     self.lineLength = self:getLineDistance()
 
-    FishingStateManager.lerpTension(0.5, config.constants.TENSION_NEUTRAL)
+
+    FishingStateManager.lerpTension(
+        FishingStateManager.getTension(),
+        config.constants.TENSION_NEUTRAL)
 
     tes3.messageBox("You've hooked something!")
     logger:debug([[
