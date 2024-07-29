@@ -53,35 +53,6 @@ local function getFixedAttachPos(lineEnd)
     return worldAttachPos
 end
 
-local function createLine(name, origin, destination)
-    local root = tes3.worldController.vfxManager.worldVFXRoot
-
-    local line = root:getObjectByName(name)
-
-    if line == nil then
-        line = tes3.loadMesh("mwse\\widgets.nif")
-            :getObjectByName("axisLines")
-            :getObjectByName("z")
-            :clone()
-        line.name = name
-        root:attachChild(line, true)
-    end
-
-    do
-        line.data.vertices[1] = origin
-        line.data.vertices[2] = destination
-        line.data:markAsChanged()
-        line.data:updateModelBound()
-    end
-
-    line:update()
-    line:updateEffects()
-    line:updateProperties()
-end
-
-local function doUpdateFishingLine(tension)
-
-end
 
 function LineManager.attachLines(lure)
     logger:debug("Spawning fishing line")
@@ -173,13 +144,10 @@ function LineManager.attachLines(lure)
         end
 
         fishingLine:updateEndPoints(attachPosition, lurePosition)
-        fishingLine.sceneNode:update{ controllers = true}
-
-        --debug fishing line
-        --createLine("fishingLine", attachPosition, lurePosition)
+        fishingLine.sceneNode:update()
     end
-    --event.register(tes3.event.simulated, updateFishingLine, { priority = -9000 })
-    event.register(tes3.event.cameraControl, updateFishingLine, { priority = -9000 })
+    event.register(tes3.event.simulated, updateFishingLine, { priority = -9000 })
+
     return fishingLine
 end
 
