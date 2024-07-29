@@ -130,6 +130,6 @@ local function updateControllers()
         controllers1stPerson:update(this.getPull(), this.getDirection())
     end
 end
-event.register(tes3.event.cameraControl, updateControllers, { priority = 1000 })
+event.register(tes3.event.simulated, updateControllers, { priority = 1000 })
 
 return this

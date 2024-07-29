@@ -274,21 +274,20 @@ function SwimService.startSwimming(e)
     physics.bodyHeading = physics.bodyHeading or physics.heading
     if not physics.velocity then physics.velocity = tes3vector3.new() end
 
-    ---@param simulateEventData simulateEventData
-    movementSimulate = function(simulateEventData)
+    movementSimulate = function()
         local lure = FishingStateManager.getLure()
-
+        local delta = tes3.worldController.deltaTime
 
         logger:trace("targetPosition: %s", e.to)
         if not FishingStateManager.isState(currentState) then
             logger:trace("State changed, cancelling")
-            event.unregister("simulate", movementSimulate)
+            event.unregister("simulated", movementSimulate)
             return
         end
         local distance = currentPosition:distance(tes3vector3.new(e.to.x, e.to.y, currentPosition.z))
         if distance < 30 then
             logger:trace("Reached target position")
-            event.unregister("simulate", movementSimulate)
+            event.unregister("simulated", movementSimulate)
             e.callback()
             return
         end
@@ -311,7 +310,7 @@ function SwimService.startSwimming(e)
         if turnLeft < 0 then turnLeft = turnLeft + two_pi end
         if turnRight < 0 then turnRight = turnRight + two_pi end
         --Increase turn rate when near the destination, to avoid getting stuck circling the destination point
-        local turn = 3 * (1 + math.max(0, 0.04 * (200 - distance))) * simulateEventData.delta
+        local turn = 3 * (1 + math.max(0, 0.04 * (200 - distance))) * delta
         if turnLeft < turnRight then
             --Turn left
             local newHeading = physics.heading + turn
@@ -345,7 +344,7 @@ function SwimService.startSwimming(e)
         physics.velocity.z = 0
         --Update position
         ---@type tes3vector3
-        local deltaPos = physics.velocity * simulateEventData.delta
+        local deltaPos = physics.velocity * delta
         logger:trace("delta: %s", deltaPos)
         local distanceTravelled = deltaPos:length()
         logger:trace("distanceTravelled: %s", distanceTravelled)
@@ -360,12 +359,12 @@ function SwimService.startSwimming(e)
             logger:trace("Updating lure position to: %s", lurePosition)
             lure.position = lurePosition
             if e.heightAboveGround then
-                SwimService.groundFish(lure, e.heightAboveGround, simulateEventData.delta)
+                SwimService.groundFish(lure, e.heightAboveGround, delta)
             end
         end
 
         --check if time to generate ripple
-        timePassed = timePassed + simulateEventData.delta
+        timePassed = timePassed + delta
         if timePassed > config.constants.FISH_RIPPLE_INTERVAL then
             if not e.heightAboveGround then
                 RippleGenerator.generateRipple{
@@ -383,7 +382,7 @@ function SwimService.startSwimming(e)
         local bodyTurn = physics.heading - physics.bodyHeading - offset
         if bodyTurn < -math.pi then bodyTurn = bodyTurn + two_pi end
         if bodyTurn > math.pi then bodyTurn = bodyTurn - two_pi end
-        physics.bodyHeading = physics.bodyHeading + bodyTurn * e.turnSpeed * simulateEventData.delta
+        physics.bodyHeading = physics.bodyHeading + bodyTurn * e.turnSpeed * delta
         --double wrap so it always rotates around the shortest way
         if physics.bodyHeading > math.pi then
             physics.bodyHeading = physics.bodyHeading - two_pi
@@ -394,7 +393,7 @@ function SwimService.startSwimming(e)
 
         rotateFishForwards(physics.bodyHeading)
     end
-    event.register("simulate", movementSimulate)
+    event.register("simulated", movementSimulate)
 end
 
 function SwimService.rippleScale()

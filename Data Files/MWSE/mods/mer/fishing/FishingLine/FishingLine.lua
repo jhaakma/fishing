@@ -67,6 +67,11 @@ function FishingLine:updateEndPoints(origin, destination)
     endp.value = position * 2
     endp.value.z = 0
     self.curveData:updateDerivedValues()
+
+    self.sceneNode:update()
+    for node in table.traverse({ self.sceneNode }) do
+        node:update{ controllers = true, time = 0 }
+    end
 end
 
 return FishingLine

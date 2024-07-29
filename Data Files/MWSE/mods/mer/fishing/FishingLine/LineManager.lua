@@ -78,8 +78,7 @@ function LineManager.attachLines(lure)
 
     local function cancel()
         logger:debug("Cancelling fishing line")
-        event.unregister("simulated", updateFishingLine)
-        event.unregister("cameraControl", updateFishingLine)
+        event.unregister(tes3.event.simulated, updateFishingLine)
         FishingRod.updateRodBend(config.constants.TENSION_LINE_ROD_TRANSITION)
         fishingLine:remove()
         FishingStateManager.endFishing()
@@ -110,7 +109,7 @@ function LineManager.attachLines(lure)
         FishingRod.updateRodBend(tension)
 
         -- Get the appropriate 1st/3rd person pole position.
-        LineManager.lureAttachPoint:update({ controllers = true })
+        LineManager.lureAttachPoint:update()
         local lurePosition = LineManager.lureAttachPoint.worldTransform.translation
 
         -- Get the appropriate 1st/3rd person pole position.
@@ -129,9 +128,9 @@ function LineManager.attachLines(lure)
         end
 
         -- Ensure the fishing line is attached to the lure.
-        LineManager.lureAttachPoint:update()
-        if fishingLine.sceneNode.parent ~= LineManager.lureAttachPoint then
-            fishingLine:attachTo(LineManager.lureAttachPoint)
+        local lineAttachNode = LineManager.lureAttachPoint
+        if fishingLine.sceneNode.parent ~= lineAttachNode then
+            fishingLine:attachTo(lineAttachNode)
         end
 
         if FishingStateManager.isState("WAITING") then
@@ -144,7 +143,6 @@ function LineManager.attachLines(lure)
         end
 
         fishingLine:updateEndPoints(attachPosition, lurePosition)
-        fishingLine.sceneNode:update()
     end
     event.register(tes3.event.simulated, updateFishingLine, { priority = -9000 })
 

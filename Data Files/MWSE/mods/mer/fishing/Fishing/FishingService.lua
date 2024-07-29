@@ -41,7 +41,7 @@ local function launchLure(lure, landCallback)
     local updateLurePosition
 
     local function finish(success)
-        event.unregister("simulate", updateLurePosition)
+        event.unregister("simulated", updateLurePosition)
         if success then
             landCallback()
         else
@@ -92,7 +92,7 @@ local function launchLure(lure, landCallback)
             end
         end
     end
-    event.register("simulate", updateLurePosition)
+    event.register("simulated", updateLurePosition)
 end
 
 
