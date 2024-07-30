@@ -1,5 +1,5 @@
-# Fishing
-A Fishing mod for Morrowind
+# Ultimate Fishing
+Adds a new fishing mechanic to Morrowind. See the [wiki](https://github.com/jhaakma/fishing/wiki) for more details. 
 
 ## To do
 - Fishing rods
