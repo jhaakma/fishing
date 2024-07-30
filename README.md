@@ -5,12 +5,10 @@ Adds a new fishing mechanic to Morrowind. See the [wiki](https://github.com/jhaa
 - Fishing rods
 - Fishing "hotspots"
 - Fishing Rod quality affects tension limit
-- Fix fishing line anim sync
 - Add Old Man quest
 - More common fish
 - More night fish
 - More loot
-- Improve loot catch mechanics
 
 ### DONE
 - Fillet mechanic
@@ -33,6 +31,9 @@ Adds a new fishing mechanic to Morrowind. See the [wiki](https://github.com/jhaa
 - Convert vanilla fishing rods to weapon
 - Merchant Manager
 - Lure effect snag chance
+- Fix fishing line anim sync
+- Improve loot catch mechanics
+- Animate bending in fishing rod
 
 ## Fishing Rods
 | Name                 | Description                                                                                                  |
