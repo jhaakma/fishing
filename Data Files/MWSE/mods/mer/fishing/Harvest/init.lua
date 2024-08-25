@@ -1,130 +1,159 @@
 local common = require("mer.fishing.common")
 local logger = common.createLogger("Harvest")
 
+
 local CraftingFramework = include("CraftingFramework")
 logger:assert(CraftingFramework ~= nil, "CraftingFramework is required to use Harvesting mechanics")
 
-
+---@class Fishing.Harvest
 local Harvest = {
-    ---@type CraftingFramework.MenuActivator.data
-    menuActivator = {
-        name = "Filleting Menu",
-        id = "Fishing:Harvest",
-        type = "event",
-        recipes = {},
-        defaultFilter = "materials",
-        showFilterButton = false,
-        showCollapseCategoriesButton = false,
-        showCategoriesButton = false,
-        showSortButton = false,
-    },
+    ---@type table<string, Fishing.FishType>
     harvestableFish = {}
 }
-
-local function getHarvestablesDescription(harvestables)
-    local description = "Harvest the following: \n"
-    for _, harvestable in ipairs(harvestables) do
-        local obj = tes3.getObject(harvestable.id)
-        if not obj then
-            logger:error("Harvestable object %s does not exist", harvestable.id)
-        else
-            description = description .. string.format("- %s (%s-%s)\n", obj.name, harvestable.min, harvestable.max)
-        end
-    end
-    description = description:sub(1, -2)
-    return description
-end
-
-local function getReceivedItemsMessage(harvested)
-    local message = "You received the following: \n"
-    for id, count in pairs(harvested) do
-        local obj = tes3.getObject(id)
-        message = message .. string.format("- %dx %s\n", count, obj.name)
-    end
-    message = message:sub(1, -2)
-    return message
-end
-
 
 ---@param fishType Fishing.FishType
 function Harvest.registerFish(fishType)
     logger:debug("Registering fish %s", fishType.baseId)
-    if CraftingFramework and fishType.harvestables and #fishType.harvestables > 0 then
+    if fishType.harvestables and #fishType.harvestables > 0 then
         logger:debug("- Has %d harvestables", #fishType.harvestables)
-        local menuId = Harvest.menuActivator.id
-        local harvestingMenuActivator = CraftingFramework.MenuActivator.get(menuId)
-        if not harvestingMenuActivator then
-            logger:error("Could not find Harvesting Menu Activator with id %s", menuId)
-        else
-            local fishObj = fishType:getBaseObject()
-            harvestingMenuActivator:registerRecipe{
-                id = "harvest:" .. fishType.baseId,
-                name = fishObj.name,
-                previewMesh = fishType:getPreviewMesh(),
-                noResult = true,
-                keepMenuOpen = true,
-                description = getHarvestablesDescription(fishType.harvestables),
-                toolRequirements  = {
-                    { tool = "knife", conditionPerUse = 1 }
-                },
-                craftCallback = function(_, _)
-                    --add each harvestable to inventory
-                    local item
-                    local harvested = {}
-                    for _, harvestable in ipairs(fishType.harvestables) do
-                        local count = math.random(harvestable.min, harvestable.max)
-                        local obj = tes3.getObject(harvestable.id) --[[@as tes3ingredient]]
-                        if count > 0 and obj then
-                            item = tes3.addItem{
-                                reference = tes3.player,
-                                item = obj,
-                                count = count,
-                                playSound = false
-                            }
-                            harvested[harvestable.id] = count
-                        end
-                    end
-                    if table.size(harvested) == 0 then
-                        tes3.messageBox("You failed to harvest anything.")
-                        return
-                    end
-                    tes3.messageBox(getReceivedItemsMessage(harvested))
-                    tes3.playItemPickupSound{ reference = tes3.player, item = item}
-                end,
-                materials = {
-                    { material = fishObj.id, count = 1}
-                }
-            }
-            Harvest.harvestableFish[fishType.baseId:lower()] = fishType
-        end
+        Harvest.harvestableFish[fishType.baseId:lower()] = fishType
+    else
+        logger:debug("- No harvestables, skipping")
     end
 end
 
-CraftingFramework.MenuActivator:new(Harvest.menuActivator)
 
-CraftingFramework.Tool:new{
-    id = "knife",
-    name = "Knife",
-    requirement = function(itemStack)
-        return itemStack.object.objectType == tes3.objectType.weapon
+local function isChisel(itemStack)
+    local chisel = CraftingFramework.Tool.getTool("chisel")
+    if not chisel then return false end
+    return chisel:itemIsTool(itemStack.object)
+end
+
+local function isKnife(itemStack)
+    return itemStack.object.objectType == tes3.objectType.weapon
         and itemStack.object.type == tes3.weaponType.shortBladeOneHand
-    end,
-}
+        and not isChisel(itemStack)
+end
 
-local requiresKnifeEquipped = false
----@param e equipEventData
-event.register("equip", function(e)
-    logger:debug("Equip event: %s", e.item.id)
-    if Harvest.harvestableFish[e.item.id:lower()] then
-        logger:debug("Equipping harvestable fish")
-        local hasKnife = CraftingFramework.Tool.getTool("knife"):hasInInventory(true)
-        if requiresKnifeEquipped and not hasKnife then
-            tes3.messageBox("Equip a knife to harvest.")
-        else
-            logger:debug("Equipping harvestable fish")
-            event.trigger(Harvest.menuActivator.id)
+local function hasKnife()
+    for _, stack in pairs(tes3.player.object.inventory) do
+        if isKnife(stack) then
+            return true
         end
     end
+    return false
+end
+
+local function getHarvestedItems(fishType)
+    local harvested = {}
+    for _, harvestable in ipairs(fishType.harvestables) do
+        local count = math.random(harvestable.min, harvestable.max)
+        local obj = tes3.getObject(harvestable.id) --[[@as tes3ingredient]]
+        if count > 0 and obj then
+            table.insert(harvested, { item = obj, count = count})
+        end
+    end
+    return harvested
+end
+
+
+
+
+local function startHarvest(fishRef, fishType)
+    --[[
+        Fade out
+        Replace fish with harvested items
+        Fade in
+    ]]
+    common.disablePlayerControls()
+    tes3.playSound{
+        reference = tes3.player,
+        sound = "mer_fish_chop"
+    }
+    tes3.fadeOut{ duration = 2 }
+    timer.start{
+        duration = 2,
+        callback = function()
+            local harvested = getHarvestedItems(fishType)
+            for _, harvestedItem in ipairs(harvested) do
+                local ref = tes3.createReference{
+                    object = harvestedItem.item,
+                    position = fishRef.position:copy(),
+                    orientation = fishRef.orientation:copy(),
+                    cell = fishRef.cell
+                }
+                ref.itemData.count = harvestedItem.count
+            end
+            common.safeDelete(fishRef)
+            tes3.fadeIn{ duration = 1 }
+            timer.start{
+                duration = 1,
+                callback = function()
+                    common.enablePlayerControls()
+                end
+            }
+        end
+    }
+end
+
+---@param ref tes3reference
+---@return boolean
+local function isStack(ref)
+    return (
+        ref.attachments and
+        ref.attachments.variables and
+        ref.attachments.variables.count > 1
+    )
+end
+
+---@param e activateEventData
+event.register("activate", function(e)
+    logger:debug("Activate event: %s", e.target.object.id)
+
+    local fishType = Harvest.harvestableFish[e.target.object.id:lower()]
+    if not fishType then
+        logger:debug("Not a harvestable fish")
+        return
+    end
+
+    if isStack(e.target) then
+        logger:debug("Stacked fish, picking up")
+        return
+    end
+
+    local isModifierKeyPressed = CraftingFramework.Util.isQuickModifierDown()
+    if isModifierKeyPressed then
+        logger:debug("Modifier key pressed, picking up")
+        return
+    end
+
+    logger:debug("Activating harvestable fish")
+    tes3ui.showMessageMenu{
+        message = string.format("%s", e.target.object.name),
+        buttons = {
+            {
+                text = "Harvest",
+                enableRequirements = hasKnife,
+                ---@diagnostic disable-next-line
+                tooltipDisabled = {
+                    text =  "You need a knife to harvest this."
+                },
+                callback = function()
+                    startHarvest(e.target, fishType)
+                end
+            },
+            {
+                text = "Pick Up",
+                callback = function()
+                    common.pickUp(e.target, true)
+                end
+            }
+        },
+        cancels = true,
+        cancelText = "No",
+    }
+    return false
 end)
+
 
 return Harvest

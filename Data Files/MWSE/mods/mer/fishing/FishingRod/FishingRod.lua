@@ -164,7 +164,7 @@ end
 
 
 local function updateRodAnimation(rootNode, newTension)
-    logger:debug("Setting tension of rod to %s", newTension)
+    logger:trace("Setting tension of rod to %s", newTension)
     local minTension = config.constants.TENSION_LINE_ROD_TRANSITION
     local maxTension = config.constants.TENSION_MAXIMUM
     local tension = math.clamp(newTension, minTension, maxTension)
@@ -207,7 +207,6 @@ local function updateRodAnimation(rootNode, newTension)
 
         bone.rotation = newRot
         logger:trace("Lerping bone %s rotation to %s", bone.name, newRot)
-
     end
 
     while targetBone and straightBone and curvedBone do

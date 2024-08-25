@@ -44,4 +44,24 @@ function common.addAOrAnPrefix(name)
     return "a " .. name
 end
 
+---Picks up any item reference, bypassing activate events
+---@param reference tes3reference #The reference to pick up
+---@param playSound boolean Default: false
+function common.pickUp(reference, playSound)
+    tes3.addItem{
+        reference = tes3.player,
+        item = reference.object,
+        itemData = reference.itemData,
+        count = reference.stackSize,
+        playSound = playSound,
+    }
+    common.safeDelete(reference)
+end
+
+function common.safeDelete(reference)
+    reference.itemData = nil
+    reference:disable()
+    reference:delete()
+end
+
 return common

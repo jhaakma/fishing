@@ -1,12 +1,11 @@
+local common = require("mer.fishing.common")
+local logger = common.createLogger("PlayerAnimations")
 local ControllerGroups = require("mer.fishing.PlayerAnimations.ControllerGroups")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
-local LureCamera = require("mer.fishing.Camera.LureCamera")
 
 ---@type ControllerGroups
 local controllers1stPerson = ControllerGroups.new("mer_fishing\\playerAnimations1st.nif")
 local controllers3rdPerson = ControllerGroups.new("mer_fishing\\playerAnimations3rd.nif")
-
-
 
 ---@class PlayerAnimations
 ---@field enabled boolean
@@ -74,21 +73,39 @@ local function updatePull(wc)
     end
 end
 
---- Calculate direction based on the screen position of the lure.
----
+
+--- Shift direction based on the lure's position relative to the player.
+--- Direction: ( -1: right, 0: center, +1: left )
 ---@param wc tes3worldController
 ---@param lure tes3reference
 local function updateDirection(wc, lure)
-    if LureCamera.isActive() then
-        --Don't update when lure camera is active.
-        return
+    local maxAngle = math.rad(30)
+
+    local eyePos = tes3.getPlayerEyePosition()
+    local playerPos = tes3vector3.new(
+        eyePos.x,
+        eyePos.y,
+        0
+    )
+    local playerDirection = tes3.player.forwardDirection
+    local lurePos = tes3vector3.new(
+        lure.sceneNode.worldTransform.translation.x,
+        lure.sceneNode.worldTransform.translation.y,
+        0
+    )
+
+    local lureDirection = (lurePos - playerPos):normalized()
+    local angle = playerDirection:angle(lureDirection)
+    if angle ~= angle then
+        angle = 0
     end
-    local camera = wc.worldCamera.cameraData.camera
-    local lurePos = lure.sceneNode.worldTransform.translation
-    local screenPoint = camera:worldPointToScreenPoint(lurePos)
-    if screenPoint then
-        direction = 2.0 * screenPoint.x / wc.viewWidth
-    end
+    angle = math.clamp(angle, 0, maxAngle)
+
+    local angleRatio = angle / maxAngle
+    local cross = playerDirection:cross(lureDirection)
+    local sign = cross.z > 0 and -1 or 1
+    direction = angleRatio * sign
+
 end
 
 --- Update controllers using the current pull/direction values.

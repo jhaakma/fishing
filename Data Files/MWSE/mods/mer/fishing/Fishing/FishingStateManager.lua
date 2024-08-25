@@ -133,8 +133,8 @@ end
 
 
 function FishingStateManager.setTension(tension)
-    tempData().tension = tension
-    logger:debug("Set tension to %s", tension)
+    tempData().tension = math.clamp(tension, 0, 2)
+    logger:trace("Set tension to %s", tension)
 end
 
 

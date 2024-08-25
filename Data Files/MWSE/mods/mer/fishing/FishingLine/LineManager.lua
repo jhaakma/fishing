@@ -20,7 +20,7 @@ end
 ---@return tes3vector3?
 local function getFixedAttachPos(lineEnd)
     if not tes3.player.mobile.is3rdPerson then
-        logger:debug("Player is not in 3rd person, returning worldTransform")
+        logger:trace("Player is not in 3rd person, returning worldTransform")
         return lineEnd.worldTransform.translation
     end
 

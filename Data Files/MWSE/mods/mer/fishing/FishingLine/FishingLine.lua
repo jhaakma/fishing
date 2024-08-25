@@ -51,7 +51,7 @@ function FishingLine:updateEndPoints(origin, destination)
     local tension = math.remap(FishingStateManager.getTension(), minTension, maxTension, 0, 1)
     tension = math.clamp(tension, 0, 1)
 
-    logger:debug("Fishing line tension: %s", tension)
+    logger:trace("Fishing line tension: %s", tension)
     -- Recenter the fishing line to the origin position.
     self.sceneNode.translation = origin
 

@@ -2,6 +2,8 @@ local common = require("mer.fishing.common")
 local logger = common.createLogger("MCM")
 local config = require("mer.fishing.config")
 local metadata = config.metadata --[[@as MWSE.Metadata]]
+local FishType = require("mer.fishing.Fish.FishType")
+
 local LINKS_LIST = {
     {
         text = "Release history",
@@ -70,22 +72,6 @@ local function registerMCM()
 
     local page = template:createSideBarPage{ label = "Settings"}
     addSideBar(page)
-
-    -- page:createYesNoButton{
-        -- label = string.format("Enable %s", metadata.package.name),
-        -- description = "Enable or disable the mod.",
-    --     variable = mwse.mcm.createTableVariable{ id = "enabled", table = config.mcm },
-    --     callback = function(self)
-    --         if self.variable.value == true then
-    --             logger:info("Enabling mod")
-    --             event.trigger("Fishing:ModEnabled")
-    --             event.trigger("Fishing:McmUpdated")
-    --         else
-    --             logger:info("Disabling mod")
-    --             event.trigger("Fishing:ModDisabled")
-    --         end
-    --     end
-    -- }
 
     page:createYesNoButton{
         label = "Enable Fish Tooltips",
@@ -163,6 +149,5 @@ local function registerMCM()
             table = config.mcm,
         },
     }
-
 end
-event.register("modConfigReady", registerMCM)
+event.register("initialized", registerMCM)
