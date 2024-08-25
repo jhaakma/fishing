@@ -26,6 +26,7 @@ local fishConfigs = {
                 times = { "dawn", "dusk" },
                 waterType = "freshwater",
             },
+            hangable = true,
         },
         {
             baseId = "mer_fish_mudcrab",
@@ -75,7 +76,8 @@ local fishConfigs = {
                     max = 4,
                     isMeat = true,
                 }
-            }
+            },
+            hangable = true,
         },
         {
             baseId = "mer_fish_seabass",
@@ -97,7 +99,8 @@ local fishConfigs = {
                     max = 3,
                     isMeat = true,
                 }
-            }
+            },
+            hangable = true,
         },
         {
             baseId = "mer_fish_tuna",
@@ -156,7 +159,8 @@ local fishConfigs = {
                     max = 3,
                     isMeat = true,
                 }
-            }
+            },
+            hangable = true,
         },
         {
             baseId = "mer_fish_slaughter_l",
@@ -197,6 +201,7 @@ local fishConfigs = {
                 interiors = true,
                 exteriors = true,
             },
+            hangable = true,
         },
         {
             baseId = "mer_fish_trigger",
@@ -212,6 +217,7 @@ local fishConfigs = {
                 waterType = "saltwater",
                 times = { "day" },
             },
+            hangable = true,
         },
         {
             baseId = "mer_fish_catfish",
@@ -228,6 +234,7 @@ local fishConfigs = {
                 interiors = true,
                 exteriors = true
             },
+            hangable = true,
         },
         {
             baseId = "mer_fish_sculpin",
@@ -242,6 +249,7 @@ local fishConfigs = {
                 climates = {"temperate", "arctic"},
                 times = { "day" },
             },
+            hangable = true,
         },
         {
             baseId = "mer_fish_cod",
@@ -265,6 +273,7 @@ local fishConfigs = {
                 times = { "day" },
                 minDepth = 200,
             },
+            hangable = true,
         },
     },
     uncommon = {
@@ -305,7 +314,8 @@ local fishConfigs = {
                 interiors = true,
                 exteriors = true,
                 maxDepth = 300,
-            }
+            },
+            hangable = true,
         },
         {
             baseId = "mer_fish_tambaqui",
@@ -327,7 +337,8 @@ local fishConfigs = {
                     max = 5,
                     isMeat = true,
                 }
-            }
+            },
+            hangable = true,
         },
         {
             baseId = "mer_fish_arowana",
@@ -345,6 +356,7 @@ local fishConfigs = {
                     "day"
                 }
             },
+            hangable = true,
         },
         {
             baseId = "mer_fish_angelshark",
@@ -389,7 +401,8 @@ local fishConfigs = {
                     max = 4,
                     isMeat = true,
                 },
-            }
+            },
+            hangable = true,
         },
     },
     rare = {
@@ -436,6 +449,7 @@ local fishConfigs = {
                 climates = {"tropical"},
                 waterType = "freshwater",
             },
+            hangable = true,
         },
         {
             baseId = "mer_fish_jelly",
@@ -480,7 +494,8 @@ local fishConfigs = {
                     max = 2,
                     isMeat = true,
                 }
-            }
+            },
+            hangable = true,
         },
         {
             baseId = "mer_fish_marlin",
@@ -525,6 +540,7 @@ local fishConfigs = {
                 waterType = "saltwater",
                 times = { "night" }
             },
+            hangable = true,
         },
     },
     legendary = {
@@ -557,6 +573,7 @@ local fishConfigs = {
                     isTrophy = true,
                 }
             },
+            hangable = true,
             alphaSwitch = true,
         },
         {

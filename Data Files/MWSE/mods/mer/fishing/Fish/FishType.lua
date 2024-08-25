@@ -31,6 +31,7 @@ local CraftingFramework = include("CraftingFramework")
 
 ---@class Fishing.FishType.new.params
 ---@field baseId string The id of the base object representation of the fish
+---@field hangable? boolean If true, the fish can be hung from a rack
 ---@field variants? string[] A table of variant ids that can be selected when instancing this fish
 ---@field previewMesh? string The mesh to be displayed in the trophy menu
 ---@field description? string The description to be displayed when the fish is caught
@@ -76,6 +77,7 @@ function FishType.new(e)
     end
 
     local defaults = {
+        hangable = false,
         previewMesh = nil,
         description = nil,
         speed = 100,
@@ -230,11 +232,7 @@ end
 --Check whether this fish can be hung from a rack
 --by checking its mesh for a HANG_FISH node
 function FishType:canHang()
-    local mesh = self:getPreviewMesh()
-    if not mesh then return false end
-    local nif = tes3.loadMesh(mesh, false)
-    local node = nif:getObjectByName(FishType.HANG_NODE)
-    return node ~= nil
+    return self.hangable
 end
 
 
