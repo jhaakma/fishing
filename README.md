@@ -1,16 +1,19 @@
-# Fishing
-A Fishing mod for Morrowind
+# Ultimate Fishing
+Adds a new fishing mechanic to Morrowind. See the [wiki](https://github.com/jhaakma/fishing/wiki) for more details. 
 
 ## To do
-- Fishing rods
+- Improve resting player anim, rod turns towards lure
+- MCM dynamically lists info on fish, bait etc
+- Improve fillet mechanic
+  - Place fish on ground and hack with knife
 - Fishing "hotspots"
-- Fishing Rod quality affects tension limit
-- Fix fishing line anim sync
+  - Large increase in catch chance and fish rarity
+- Fishing rods
+  - Fishing Rod quality affects tension limit
 - Add Old Man quest
 - More common fish
 - More night fish
 - More loot
-- Improve loot catch mechanics
 
 ### DONE
 - Fillet mechanic
@@ -33,6 +36,9 @@ A Fishing mod for Morrowind
 - Convert vanilla fishing rods to weapon
 - Merchant Manager
 - Lure effect snag chance
+- Fix fishing line anim sync
+- Improve loot catch mechanics
+- Animate bending in fishing rod
 
 ## Fishing Rods
 | Name                 | Description                                                                                                  |
