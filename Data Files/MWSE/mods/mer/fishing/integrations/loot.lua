@@ -219,7 +219,7 @@ local loots = {
             habitat = {},
         },
         types = {
-            { baseId = "ashfall_crabpot_01_m" },
+            { baseId = "ashfall_crabpot_02_m" },
             { baseId = "misc_de_muck_shovel_01" },
             { baseId = "misc_6th_ash_statue_01" },
             {
