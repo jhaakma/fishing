@@ -20,6 +20,7 @@ local FishingRod = {
 ---@class Fishing.FishingRod.config
 ---@field id string
 ---@field quality number
+---@field defaultBait? string If set, the rod comes pre-equipped with this bait
 
 ---------------------------------------------------
 -- Static Functions
@@ -233,7 +234,9 @@ end
 function FishingRod.removeTransforms()
     --Find the 3rd person rod and remove the scaling transforms from it
     local root = tes3.player.sceneNode --[[@as niNode]]
-    local rod = root:getObjectByName("FISHING_ROD_ARMATURE").parent
+    local armature = root:getObjectByName("FISHING_ROD_ARMATURE")
+    if not armature then return end
+    local rod = armature.parent
     if not rod then
         logger:error("FISHING_ROD_ARMATURE not found")
         return
@@ -312,6 +315,14 @@ function FishingRod:getEquippedBait()
             return nil
         end
         return bait:getInstance(uses)
+    end
+    if self.config.defaultBait then
+        local defaultBait = Bait.get(self.config.defaultBait)
+        if defaultBait then
+            return defaultBait:getInstance()
+        else
+            logger:warn("Default bait %s not found", self.config.defaultBait)
+        end
     end
 end
 

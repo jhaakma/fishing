@@ -159,6 +159,11 @@ function FishType.get(id)
     return FishType.registeredFishTypes[id:lower()]
 end
 
+---@return table<string, Fishing.FishType>
+function FishType.getAll()
+    return table.copy(FishType.registeredFishTypes)
+end
+
 ---Register a new type of fish
 ---@param e Fishing.FishType.new.params
 function FishType.register(e)

@@ -38,8 +38,43 @@ event.register("equip", function(e)
             return true
         end
     end
+end, { priority = -1000})
+
+---Remove transforms from fishing rod
+---@param e equipEventData
+event.register("equipped" , function(e)
+    if FishingRod.isFishingRod(e.item) then
+        timer.frame.delayOneFrame(function()
+            logger:debug("Removing transforms from fishing rod %s", e.item.id)
+            FishingRod.removeTransforms()
+        end)
+    end
 end)
 
+---Remove transforms on load
+---@param e loadedEventData
+event.register("loaded", function(e)
+    logger:debug("Removing transforms on load")
+    local equippedStack = tes3.getEquippedItem{
+        actor = tes3.player,
+        objectType = tes3.objectType.weapon
+    }
+    if equippedStack and FishingRod.isFishingRod(equippedStack.object) then
+        logger:debug("Removing transforms from fishing rod %s", equippedStack.object.id)
+        FishingRod.removeTransforms()
+    end
+end)
+
+---When readying or unreadying a fishing rod, remove transforms
+---@param e weaponReadiedEventData
+event.register("weaponReadied", function(e)
+    FishingRod.removeTransforms()
+end)
+
+---@param e weaponUnreadiedEventData
+event.register("weaponUnreadied", function(e)
+    FishingRod.removeTransforms()
+end)
 
 ---@param e objectCreatedEventData
 event.register("objectCreated", function(e)

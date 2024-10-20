@@ -1,5 +1,4 @@
-local common = require("mer.fishing.common")
-local logger = common.createLogger("TrophyMenu")
+local PreviewPane = require("mer.fishing.ui.PreviewPane")
 
 ---Creates a ui that displays a caught fish along with a description and stats
 ---@class Fishing.TrophyMenu
@@ -17,142 +16,6 @@ local uiids = {
 
 local function getMenu()
     return tes3ui.findMenu(uiids.menu)
-end
-
-
-local function removeCollision(sceneNode)
-    for node in table.traverse{sceneNode} do
-        if node:isInstanceOfType(tes3.niType.RootCollisionNode) then
-            node.appCulled = true
-        end
-    end
-end
-
-local m1 = tes3matrix33.new()
-local m2 = tes3matrix33.new()
-local function createPreviewPane(parent, meshID)
-    local menu = getMenu()
-
-    logger:debug("Creating preview pane for %s", meshID)
-    local previewBorder = menu:findChild(uiids.previewBorder)
-    if previewBorder then
-        previewBorder:destroy()
-    end
-    previewBorder = parent:createThinBorder{ id = uiids.previewBorder }
-    --previewBorder.width = self.previewWidth
-    previewBorder.flowDirection = "top_to_bottom"
-    previewBorder.autoWidth = true
-    previewBorder.autoHeight = true
-    previewBorder.childAlignX = 0.5
-    previewBorder.borderAllSides = 4
-    --previewBorder.absolutePosAlignX = 0
-
-    local nifPreviewBlock = previewBorder:createBlock{ id = uiids.nifPreviewBlock }
-    --nifPreviewBlock.width = self.previewWidth
-    nifPreviewBlock.width = TrophyMenu.PREVIEW_WIDTH
-    nifPreviewBlock.height = TrophyMenu.PREVIEW_HEIGHT
-
-    nifPreviewBlock.childOffsetX = TrophyMenu.PREVIEW_WIDTH/2
-    nifPreviewBlock.childOffsetY = -TrophyMenu.PREVIEW_HEIGHT/2
-    nifPreviewBlock.paddingAllSides = 2
-
-    local rootNif = nifPreviewBlock:createNif{ id = uiids.nif, path = "craftingFramework\\empty.nif"}
-    if not rootNif then
-        logger:error("Empty nif not found")
-        return
-    end
-    logger:trace("RootNif: %s", rootNif)
-
-    --Avoid popups/CTDs if the mesh is missing.
-    if not tes3.getFileExists(string.format("Meshes\\%s", meshID)) then
-        logger:error("Mesh does not exist: %s", meshID)
-        return
-    end
-
-    local mesh = tes3.loadMesh(meshID, false)
-
-    if not mesh then
-        logger:error("Mesh not found: %s", meshID)
-        return
-    end
-    logger:trace("Mesh: %s", mesh)
-
-    menu:updateLayout()
-
-    local rootNode = rootNif.sceneNode --[[@as niNode]]
-    rootNode:updateProperties()
-    logger:trace("attaching mesh to rootNode")
-    rootNode:attachChild(mesh)
-    removeCollision(rootNode)
-    do --add properties
-        logger:trace("Adding properties")
-        local vertexColorProperty = niVertexColorProperty.new()
-        vertexColorProperty.name = "vcol yo"
-        vertexColorProperty.source = 2
-        rootNode:attachProperty(vertexColorProperty)
-
-        local zBufferProperty = niZBufferProperty.new()
-        zBufferProperty.name = "zbuf yo"
-        zBufferProperty:setFlag(true, 0)
-        zBufferProperty:setFlag(true, 1)
-        rootNode:attachProperty(zBufferProperty)
-    end
-
-
-
-    local bb = mesh:createBoundingBox(mesh.scale) ---@diagnostic disable-line
-    --Log bounding box values
-    logger:debug("Bounding box min.x = %s, min.y = %s, min.z = %s", bb.min.x, bb.min.y, bb.min.z)
-    logger:debug("Bounding box max.x = %s, max.y = %s, max.z = %s", bb.max.x, bb.max.y, bb.max.z)
-    local height = (bb.max.z - bb.min.z)*2
-    local width = bb.max.y - bb.min.y
-    local depth = bb.max.x - bb.min.x
-    local maxDimension = math.max(width, depth, height)
-    local lowestPoint = bb.max.z * mesh.scale
-
-    -- mesh:update()
-    -- local maxDimension = mesh.worldBoundRadius * 2
-    -- logger:debug("maxDimension: %s", maxDimension)
-    -- local lowestPoint = mesh.worldBoundOrigin.z - mesh.worldBoundRadius
-
-    local targetHeight = TrophyMenu.PREVIEW_HEIGHT/2
-    mesh.scale = (targetHeight / maxDimension) * 1.5
-    do --Apply rotation
-        logger:trace("Applying rotation")
-        local offset = -20
-        m1:toRotationX(math.rad(-15))
-        m2:toIdentity()
-
-        offset = offset + lowestPoint
-        --m2:toRotationY(math.rad(180))
-        rootNode.translation.z = rootNode.translation.z + offset
-        rootNode.rotation = rootNode.rotation * m1:copy() * m2:copy()
-    end
-
-    logger:trace("Updating rootNode")
-    rootNode.appCulled = false
-    rootNode:updateProperties()
-    rootNode:update{ controllers = true, time = 0 }
-    rootNode:updateEffects()
-
-    nifPreviewBlock:updateLayout()
-    previewBorder:updateLayout()
-    return previewBorder
-end
-
-local function rotateNif(e)
-    local menu = tes3ui.findMenu(uiids.menu)
-    if not menu then
-        event.unregister("enterFrame", rotateNif)
-        return
-    end
-    local nif = menu:findChild(uiids.nif)
-    if nif and nif.sceneNode then
-        local node = nif.sceneNode
-        m2:toRotationZ(math.rad(15) * e.delta)
-        node.rotation = node.rotation * m2
-        node:update()
-    end
 end
 
 
@@ -232,13 +95,19 @@ function TrophyMenu.createMenu(e)
     menu.minHeight = TrophyMenu.PREVIEW_HEIGHT
     menu.absolutePosAlignX = 0.5
     menu.flowDirection = "top_to_bottom"
-    createPreviewPane(menu, e.previewMesh)
+    PreviewPane.new{
+        meshID = e.previewMesh,
+        parent = menu,
+        previewWidth = TrophyMenu.PREVIEW_WIDTH,
+        previewHeight = TrophyMenu.PREVIEW_HEIGHT
+    }:create()
+
     createDescription(menu, e.header, e.description)
     local buttonsBlock = createButtonsBlock(menu)
     for _, button in ipairs(e.buttons) do
         createButton(buttonsBlock, button)
     end
-    event.register("enterFrame", rotateNif)
+
     menu:updateLayout()
     tes3ui.enterMenuMode(uiids.menu)
 end
