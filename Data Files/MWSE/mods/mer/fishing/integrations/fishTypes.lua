@@ -138,6 +138,7 @@ local fishConfigs = {
                 climates = {"temperate", "tropical"},
                 times = { "day" },
             },
+            hangable = true,
         },
         {
             baseId = "mer_fish_salmon",
@@ -677,7 +678,7 @@ local fishConfigs = {
         {
             baseId = "mer_fish_mega",
             previewMesh = "mer_fishing\\f\\megamax.nif",
-            description = "The megamaxilla, known colloquially as the \"Mega Jaw,\" is a fearsome oceanic beast that instills awe in all who witness it. Possessing an enormous, hinge-like jaw, this formidable predator is capable of hunting down even large predator fish. It prefers to feed during the twilight hours of dawn and dusk in Azura's Coast, where its scarlet glow provides a striking camouflage. The pursuit of a megamaxilla demands the utmost strength and skill from anglers, as they strive to conquer one of the ocean's most formidable creatures.",
+            description = "The Painted Snapjaw is a fearsome oceanic beast that instills awe in all who witness it. Possessing an enormous, hinge-like jaw, this formidable predator is capable of hunting down even large predator fish. It prefers to feed during the twilight hours of dawn and dusk in Azura's Coast, where its scarlet glow provides a striking camouflage. The pursuit of a megamaxilla demands the utmost strength and skill from anglers, as they strive to conquer one of the ocean's most formidable creatures.",
             speed = 260,
             size = 4.5,
             difficulty = 95,
