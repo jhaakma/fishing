@@ -1,5 +1,5 @@
 local ChargenScenarios = include("mer.chargenScenarios")
-
+if not ChargenScenarios then return end
 ---@type ChargenScenarios.ItemListInput[]
 local loadouts = {
     {
