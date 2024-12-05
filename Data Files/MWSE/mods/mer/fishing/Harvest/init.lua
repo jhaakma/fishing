@@ -82,7 +82,7 @@ local function startHarvest(fishRef, fishType)
                     orientation = fishRef.orientation:copy(),
                     cell = fishRef.cell
                 }
-                ref.itemData.count = harvestedItem.count
+                ref.stackSize = harvestedItem.count
             end
             common.safeDelete(fishRef)
             tes3.fadeIn{ duration = 1 }
