@@ -25,6 +25,7 @@ local loadouts = {
                 },
                 count = 3
             },
+            ChargenScenarios.itemPicks.knife
         }
     },
 }
