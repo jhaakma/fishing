@@ -57,6 +57,7 @@ local defaults = {
 ---@param o Fishing.Habitat.new.params
 ---@return Fishing.Habitat
 function Habitat.new(o)
+    o = o or {}
     ---@type Fishing.Habitat
     local self = table.copy(o)
     table.copymissing(self, defaults)
