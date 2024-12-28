@@ -7,12 +7,14 @@ local logger = common.createLogger("BaitType")
 ---@field large number
 ---@field loot number
 
----@class Fishing.BaitType
+---@class Fishing.BaitType.config
 ---@field id Fishing.Bait.type
 ---@field name string
 ---@field description string
 ---@field getHookChance? fun(self:Fishing.BaitType):number Returns a multiplier on the chance that any fish will get hooked
 ---@field classCatchChances Fishing.BaitType.classCatchChances
+
+---@class Fishing.BaitType : Fishing.BaitType.config
 local BaitType = {
     registeredBaitTypes = {},
     classCatchChances = {
@@ -20,11 +22,11 @@ local BaitType = {
         medium = 0.2,
         large = 0.2,
         loot = 0.1,
-    }
+    },
 }
+BaitType.__index = BaitType
 
-
----@param e Fishing.BaitType
+---@param e Fishing.BaitType.config
 ---@return Fishing.BaitType
 function BaitType.new(e)
     logger:assert(type(e.id) == "string", "BaitType must have an id")
@@ -36,14 +38,15 @@ function BaitType.new(e)
         end
         logger:assert(total - 1 <= math.epsilon, "BaitType %s classCatchChances must add up to 1.0. Got: %s", e.id, total)
     end
-    e = e or {}
-    setmetatable(e, BaitType)
-    BaitType.__index = BaitType
-    return e
+    local baitType = e or {}
+    ---@type Fishing.BaitType
+    baitType = table.copy(baitType)
+    setmetatable(baitType, BaitType)
+    return baitType
 end
 
 --- Register a new bait type
----@param e Fishing.BaitType
+---@param e Fishing.BaitType.config
 ---@return Fishing.BaitType
 function BaitType.register(e)
     local baitType = BaitType.new(e)

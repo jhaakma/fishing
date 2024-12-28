@@ -34,9 +34,10 @@ function FishingRod.register(e)
     FishingRod.registeredFishingRods[e.id:lower()] = e
 end
 
+---@param e {reference?: tes3reference, item?: tes3item, itemData?: tes3itemData}
 ---@return Fishing.FishingRod|nil
 function FishingRod.new(e)
-    logger:assert(e.reference or e.item, "FishingRod requires either a reference or an item")
+    logger:assert((e.reference or e.item) ~= nil, "FishingRod requires either a reference or an item")
     local item = e.item or e.reference.object
     local config = FishingRod.getConfig(e.item.id)
     if not config then return nil end

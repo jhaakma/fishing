@@ -12,12 +12,8 @@ local Interop = require("mer.fishing")
 ---| '"glowing"'         # More effective at nighttime.
 ---| '"sinker"'          # Increases chance of catching random loot.
 
----@type Fishing.BaitType[]
+---@type Fishing.BaitType.config[]
 local BaitTypes = {
-    {
-        id = "lure",
-        name = "Lure",
-    },
     {
         id = "glowing",
         name = "Glowing Lure",
@@ -104,7 +100,7 @@ for _, baitType in ipairs(BaitTypes) do
     Interop.registerBaitType(baitType)
 end
 
----@type Fishing.Bait[]
+---@type Fishing.Bait.config[]
 local baits = {
     {
         id = "mer_lure_01",
