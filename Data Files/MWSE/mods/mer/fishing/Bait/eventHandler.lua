@@ -19,7 +19,8 @@ TileDropper.register{
         if not FishingStateManager.isState("IDLE") then return false end
         local bait = Bait.get(e.held.item.id)
         if not bait then return false end
-        if bait:isCooked() then return false end
+        local data = e.held.itemData and e.held.itemData.data or nil
+        if Bait.isCooked(data) then return false end
         return true
     end,
     onDrop = function(e)
