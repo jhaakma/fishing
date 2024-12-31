@@ -3,6 +3,7 @@ local logger = common.createLogger("FishingRod")
 local config = require("mer.fishing.config")
 local Bait = require("mer.fishing.Bait.Bait")
 local FishingStateManager = require("mer.fishing.Fishing.FishingStateManager")
+local CarryableContainer = require("CraftingFramework").CarryableContainer
 
 ---@class Fishing.FishingRod
 ---@field reference? tes3reference Reference to the fishing rod
@@ -273,7 +274,8 @@ end
 
 -- Equip a bait to the fishing rod
 ---@param bait Fishing.Bait
-function FishingRod:equipBait(bait)
+function FishingRod:equipBait(bait, reference)
+    reference = reference or tes3.player
     logger:debug("Equipping bait %s", bait:getName())
     --get existing bait
     local existingBait = self:getEquippedBait()
@@ -282,7 +284,7 @@ function FishingRod:equipBait(bait)
         if existingBait:reusable() then
             logger:debug("Adding currently equipped %s to inventory", existingBait:getName())
             tes3.addItem{
-                reference = tes3.player,
+                reference = reference,
                 item = existingBait.id,
                 playSound = false
             }
@@ -297,8 +299,8 @@ function FishingRod:equipBait(bait)
         id = bait.id,
         uses = bait.uses
     }
-    tes3.removeItem{
-        reference = tes3.player,
+    CarryableContainer.removeItem{
+        reference = reference,
         item = bait.id,
         playSound = true
     }

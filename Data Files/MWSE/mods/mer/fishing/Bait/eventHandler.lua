@@ -45,7 +45,7 @@ TileDropper.register{
                     text = "Attach",
                     callback = function()
                         logger:debug("Attaching bait %s to %s", bait:getName(), fishingRod:getName())
-                        fishingRod:equipBait(bait)
+                        fishingRod:equipBait(bait, e.reference)
                     end
                 },
             },
