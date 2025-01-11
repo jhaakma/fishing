@@ -467,7 +467,7 @@ function FishingService.generateBiteInterval()
         logger:trace("Cheat mode, bite interval is 1")
         return 1
     end
-    local defaultInterval = 5
+    local defaultInterval = 3
     local skill = FishingSkill.getCurrent()
     local skillEffect = math.remap(skill,
         0, 100,
@@ -476,8 +476,8 @@ function FishingService.generateBiteInterval()
     local luckEffect = math.remap(luck,
         0, 100,
         1.0, 0.5)
-    local random = math.random(5)
-    local interval = defaultInterval * skillEffect * luckEffect + random
+    local rand1to3 = 1 + math.random() * 2 -- 1.0 - 3.0
+    local interval = 1 + defaultInterval * skillEffect * luckEffect * rand1to3
     logger:trace("Bite interval: %s", interval)
     return interval
 end
