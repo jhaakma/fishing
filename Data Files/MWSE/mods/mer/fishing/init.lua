@@ -45,7 +45,6 @@ Interop.registerFishingNet = UF.FishingNet.register
 Interop.registerFishingSupply = UF.Supplies.register
 Interop.registerFishingMerchant = UF.Merchant.register
 Interop.registerLocation = UF.LocationManager.registerLocation
-
 Interop.registerLocationCategory = UF.LocationManager.registerCategory
 Interop.registerLocationType = UF.LocationManager.registerLocationType
 Interop.registerLocation = UF.LocationManager.registerLocation

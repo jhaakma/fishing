@@ -38,18 +38,6 @@ TileDropper.register{
             logger:warn("Failed to create fishing rod from %s", e.target.item.id)
             return
         end
-        tes3ui.showMessageMenu{
-            message = string.format("Attach %s?", bait:getName()),
-            buttons = {
-                {
-                    text = "Attach",
-                    callback = function()
-                        logger:debug("Attaching bait %s to %s", bait:getName(), fishingRod:getName())
-                        fishingRod:equipBait(bait, e.reference)
-                    end
-                },
-            },
-            cancels = true,
-        }
+        fishingRod:equipBait(bait, e.reference)
     end
 }
