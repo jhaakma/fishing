@@ -1,7 +1,7 @@
 local FishRack = require("mer.fishing.FishRack")
 local CraftingFramework = include("CraftingFramework")
 local ashfall = include("mer.ashfall.interop")
-
+local FishType = require("mer.fishing.Fish.FishType")
 ---@type CraftingFramework.Material.data[]
 local materials = {
     {
@@ -18,10 +18,28 @@ if CraftingFramework then
     end
 end
 
+---@type CarryableContainers.ItemFilter.new.data[]
+local itemFilters = {
+    {
+        id = "fish",
+        name = "Fish",
+        isValidItem = function(item)
+            mwse.log("Checking if %s is fish", item.id)
+            local fishType = FishType.get(item.id)
+            return fishType and fishType.class ~= "loot"
+        end
+    }
+}
+
+if CraftingFramework then
+    for _, itemFilter in ipairs(itemFilters) do
+        CraftingFramework.ItemFilter.register(itemFilter)
+    end
+end
+
 
 ---@type CraftingFramework.Recipe.data[]
 local bushcraftingRecipes = {
-
     {
         id = "Fishing:mer_crabhat",
         craftableId = "mer_crabhat",
@@ -51,6 +69,26 @@ local bushcraftingRecipes = {
         soundType = "wood",
         skillRequirements = {
             { skill = "Bushcrafting", requirement = 15 }
+        }
+    },
+    {
+        id = "Fishing:mer_fishbasket",
+        craftableId = "mer_fishbasket",
+        description = "A basket for carrying fish.",
+        materials = {
+            { material = "straw", count = 8 },
+            { material = "rope", count = 1 }
+        },
+        category = "Fishing",
+        soundType = "straw",
+        containerConfig = {
+            capacity = 100,
+            weightModifier = 0.6,
+            filter = "fish",
+            hasCollision = true,
+        },
+        skillRequirements = {
+            { skill = "Bushcrafting", requirement = 20 }
         }
     },
     {

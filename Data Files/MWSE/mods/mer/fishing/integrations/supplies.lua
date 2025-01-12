@@ -7,6 +7,7 @@ local supplyList = {
     mer_silver_lure = 1,
     mer_fishing_net = 1,
     misc_de_fishing_pole = 1,
+    mer_fishbasket = 1,
 }
 for id, count in pairs(supplyList) do
     logger:debug("Registering fishing supply %s with count %s", id, count)
