@@ -60,10 +60,10 @@ local FishType = {
     --- A list of multipliers for each rarity
     ---@type table<Fishing.FishType.rarity, number>
     rarityValues = {
-        common = 0.60,
-        uncommon = 0.25,
-        rare = 0.10,
-        legendary = 0.05,
+        common = 0.40,
+        uncommon = 0.30,
+        rare = 0.20,
+        legendary = 0.10,
     }
 }
 
