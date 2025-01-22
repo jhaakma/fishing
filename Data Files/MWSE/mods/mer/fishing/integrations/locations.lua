@@ -75,12 +75,22 @@ event.register("initialized", function()
 
     --Register from JSON config
     local locationConfig = mwse.loadConfig("UltimateFishing_regions")
-    for category, locationTypes in pairs(locationConfig) do
+    for categoryId, locationTypes in pairs(locationConfig) do
         ---@param locationTypeId string
         for locationTypeId, locationType in pairs(locationTypes) do
+
+            mwse.log("id: %s", locationTypeId)
+            mwse.log("name: %s", locationType.name)
+            mwse.log("color: %s", locationType.color)
+
+            Interop.registerLocationType(categoryId, {
+                id = locationTypeId,
+                name = locationType.name,
+                color = locationType.color
+            })
             for _, location in ipairs(locationType.locations) do
                 location.locationType = locationTypeId
-                Interop.registerLocation(category, location)
+                Interop.registerLocation(categoryId, location)
             end
         end
     end

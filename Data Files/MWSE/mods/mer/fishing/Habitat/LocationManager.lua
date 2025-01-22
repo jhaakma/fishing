@@ -122,19 +122,6 @@ function LocationManager.registerLocation(categoryId, location)
         return
     end
     logger:debug("Registering location for category %s", categoryId)
-    --Register a custom locationType if a name was provided
-    if location.name then
-        LocationManager.registerLocationType(categoryId, {
-            id = location.locationType,
-            name = location.name,
-            color = location.color
-        })
-        location.name = nil
-    end
-    if not category.locationTypes[location.locationType] then
-        logger:error("No locationType registered for id %s in category %s", location.locationType, categoryId)
-        return
-    end
     if not location.cellX then
         logger:error("Location must have a cellX")
         return
