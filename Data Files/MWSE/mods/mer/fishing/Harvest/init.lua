@@ -47,7 +47,7 @@ end
 local function getHarvestedItems(fishType)
     local harvested = {}
     for _, harvestable in ipairs(fishType.harvestables) do
-        local count = math.random(harvestable.min, harvestable.max)
+        local count = harvestable.isTrophy and 1 or  math.random(harvestable.min, harvestable.max)
         local obj = tes3.getObject(harvestable.id) --[[@as tes3ingredient]]
         if count > 0 and obj then
             table.insert(harvested, { item = obj, count = count})

@@ -105,7 +105,7 @@ function FishGenerator.attemptSnag(fish, frequencyMultipler, proportionEffect)
     end
     local rarityEffect = fish:getRarityEffect()
     local baitEffect = bait:getType():getFishEffect(fish)
-    logger:trace("\n- Bait effect: %s\n- Rarity effect: %s\n- FrequencyMultipler: %s",
+    logger:debug("\n- Bait effect: %s\n- Rarity effect: %s\n- FrequencyMultipler: %s",
         baitEffect, rarityEffect, frequencyMultipler)
     local needed = 0.5
     * baitEffect
@@ -114,7 +114,7 @@ function FishGenerator.attemptSnag(fish, frequencyMultipler, proportionEffect)
     * frequencyMultipler
     local roll = math.random()
 
-    logger:trace("- Roll: %s, needed: %s", roll, needed)
+    logger:debug("- Roll: %s, needed: %s", roll, needed)
 
     local didSnag = roll < needed
     if didSnag then

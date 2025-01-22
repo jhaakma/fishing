@@ -309,6 +309,13 @@ function Habitat.showHabitatMessage(position)
         end
     end
 
+    local locations = LocationManager.getLocations("location")
+    if table.size(locations) > 0 then
+        for _, location in pairs(locations) do
+            table.insert(values, location.name)
+        end
+    end
+
     for i, value in ipairs(values) do
         values[i] = value:gsub("^%l", string.upper)
     end

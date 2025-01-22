@@ -1,13 +1,18 @@
 local common = require("mer.fishing.common")
 local logger = common.createLogger("Merchant")
 local config = require("mer.fishing.config")
+local TagManager = include("CraftingFramework.components.TagManager")
 
 ---@class Fishing.Merchant
 local Merchant = {}
 
 ---@return table<string, boolean>
 function Merchant.getMerchants()
-    return config.mcm.fishingMerchants
+    local merchants = table.copy(config.mcm.fishingMerchants)
+    if TagManager then
+        table.copy(TagManager.getIds("generalTrader"), merchants)
+    end
+    return merchants
 end
 
 ---Check the active status of a merchant
@@ -27,10 +32,10 @@ end
 ---@param id string
 ---@param isActive boolean|nil
 function Merchant.setMerchant(id, isActive)
-    Merchant.getMerchants()[id:lower()] = isActive
+    config.mcm.fishingMerchants[id:lower()] = isActive
 end
 
----Register an item to be sold by the merchant
+---Register a merchant with the fishing system
 ---
 ---If `active` param is not specified, it will default to true.
 ---
