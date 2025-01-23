@@ -57,6 +57,12 @@ local function getHarvestedItems(fishType)
 end
 
 
+---@param ref tes3reference
+---@return boolean
+local function isStack(ref)
+    return ref.itemData
+        and ref.itemData.count > 1
+end
 
 
 local function startHarvest(fishRef, fishType)
@@ -84,6 +90,15 @@ local function startHarvest(fishRef, fishType)
                 }
                 ref.stackSize = harvestedItem.count
             end
+            --Add excess fish to player inventory
+            if isStack(fishRef) then
+                tes3.addItem{
+                    reference = tes3.player,
+                    item = fishRef.object,
+                    count = fishRef.itemData.count - 1,
+                    showMessage = true
+                }
+            end
             common.safeDelete(fishRef)
             tes3.fadeIn{ duration = 1 }
             timer.start{
@@ -96,15 +111,6 @@ local function startHarvest(fishRef, fishType)
     }
 end
 
----@param ref tes3reference
----@return boolean
-local function isStack(ref)
-    return (
-        ref.attachments and
-        ref.attachments.variables and
-        ref.attachments.variables.count > 1
-    )
-end
 
 ---@param e activateEventData
 event.register("activate", function(e)
@@ -113,11 +119,6 @@ event.register("activate", function(e)
     local fishType = Harvest.harvestableFish[e.target.object.id:lower()]
     if not fishType then
         logger:debug("Not a harvestable fish")
-        return
-    end
-
-    if isStack(e.target) then
-        logger:debug("Stacked fish, picking up")
         return
     end
 
