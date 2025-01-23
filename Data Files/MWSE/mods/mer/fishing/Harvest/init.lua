@@ -153,7 +153,7 @@ event.register("activate", function(e)
         cancelText = "No",
     }
     return false
-end)
+end, { priority = 1000 })
 
 
 return Harvest
