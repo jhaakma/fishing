@@ -53,8 +53,7 @@ local function getFixedAttachPos(lineEnd)
     return worldAttachPos
 end
 
-
-function LineManager.attachLines(lure)
+local function getAttachPoint()
     logger:debug("Spawning fishing line")
     local attachFishingLine1st = tes3.player1stPerson.sceneNode:getObjectByName("AttachFishingLine") --[[@as niNode]]
     local attachFishingLine3rd = tes3.player.sceneNode:getObjectByName("AttachFishingLine") --[[@as niNode]]
@@ -66,6 +65,13 @@ function LineManager.attachLines(lure)
         logger:error("Could not find AttachFishingLine node on player 3rd person")
         return
     end
+
+    return tes3.is3rdPerson() and attachFishingLine3rd or attachFishingLine1st
+end
+
+function LineManager.attachLines(lure)
+    logger:debug("Spawning fishing line")
+
 
     local fishingLine = FishingLine.new()
 
@@ -113,7 +119,7 @@ function LineManager.attachLines(lure)
         local lurePosition = LineManager.lureAttachPoint.worldTransform.translation
 
         -- Get the appropriate 1st/3rd person pole position.
-        local attachFishingLine = tes3.is3rdPerson() and attachFishingLine3rd or attachFishingLine1st
+        local attachFishingLine = getAttachPoint()
         local attachPosition = getFixedAttachPos(attachFishingLine)
         if not attachPosition then
             logger:error("Could not get attach position")
