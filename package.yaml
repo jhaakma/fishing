@@ -1,0 +1,15 @@
+mod_name: Ultimate Fishing
+data_files:
+  - Icons/mer_fishing
+  - Meshes/mer_fishing
+  - Sound/mer_fishing
+  - Textures/mer_fishing
+  - MWSE/mods/mer/fishing
+  - UltimateFishing.esp
+  - UltimateFishing-metadata.toml
+  - MWSE/config/UltimateFishing_regions.json
+metadata_path: Data Files/UltimateFishing-metadata.toml
+repo_path: F:/Games/_RELEASES/Fishing/master
+archive_path: F:/Games/_RELEASES/Fishing/UltimateFishing.7z
+morrowind_path: C:/games/Morrowind installs/Vanilla+/Morrowind
+skip_archive_creation: false

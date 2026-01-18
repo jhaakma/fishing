@@ -22,6 +22,22 @@ local manager = MerchantManager.new{
     containers = containers
 }
 
+manager:registerMerchantContainer{
+    merchantTag = "generalTrader",
+    contents = Supplies.getSupplyList(),
+    enabled = function(e)
+        return config.mcm.enabled == true
+    end
+}
+
+manager:registerMerchantContainer{
+    merchantTag = "fishingTrader",
+    contents = Supplies.getSupplyList(),
+    enabled = function(e)
+        return config.mcm.enabled == true
+    end
+}
+
 manager:registerEvents()
 ---Update the list of registered merchants when the MCM is updated
 event.register("Fishing:McmUpdated", function()

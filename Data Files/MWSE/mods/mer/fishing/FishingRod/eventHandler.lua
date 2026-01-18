@@ -40,6 +40,7 @@ event.register("equip", function(e)
     end
 end, { priority = -1000})
 
+
 ---Remove transforms from fishing rod
 ---@param e equipEventData
 event.register("equipped" , function(e)

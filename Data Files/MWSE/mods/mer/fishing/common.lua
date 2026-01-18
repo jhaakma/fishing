@@ -13,6 +13,7 @@ function common.createLogger(serviceName)
             config.metadata.package.name, serviceName),
         logLevel = config.mcm.logLevel,
         includeTimestamp = true,
+        skipFilePathInHeader = true,
     }
     common.loggers[serviceName] = logger
     return logger
